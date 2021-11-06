@@ -8,9 +8,12 @@ struct StreamBuffer {
 
   size_t buffer_head = 0;
   size_t buffer_size = 0;
+  int cursor_column = 0;
+  int cursor_line = 1;
 
   char buffer[2 * buffer_size_max] = "";
 
+  const char* path = nullptr;
   FILE* file = nullptr;
 
   bool eof = false;
@@ -19,8 +22,9 @@ struct StreamBuffer {
     assert(file == nullptr);
   }
 
-  void load(const char* path) {
-    file = fopen(path, "rb");
+  void load(const char* path_) {
+    file = fopen(path_, "rb");
+    path = path_;
     assert(file);
   }
 
@@ -67,12 +71,19 @@ struct StreamBuffer {
   char get() {
     char c = peek();
     if (c == 0) return 0;
+    cursor_column++;
+    if (c == '\n') {
+      cursor_column = 0;
+      cursor_line++;
+    }
     ++buffer_head;
     --buffer_size;
+
+    return c;
   }
 
   void skip_ws() {
-    for(;;) {
+    for (;;) {
       switch (peek()) {
       case ' ': case '\n': case '\r': case '\t':
         get();
@@ -82,7 +93,15 @@ struct StreamBuffer {
     }
   }
 
+  void skip_line() {
+    for (;;) {
+      char c = get();
+      if (c == '\n' || eof) return;
+    }
+  }
+
   bool test_and_skip(const char * str, size_t len) {
+    skip_ws();
     assert(len < buffer_size_max);
 
     if (buffer_size < len) fetch();
@@ -131,6 +150,46 @@ void printhelp() {
 	puts("TODO: Implement help");
 }
 
+void error(const char* msg, StreamBuffer& buffer) {
+  fprintf(stderr, "%s: %s(%i:%i)\n", msg, buffer.path, buffer.cursor_line, buffer.cursor_column);
+  exit(1);
+}
+
+void parse(StreamBuffer & buffer) {
+  char tmp[64];
+  while (!buffer.eof)
+  {
+    if (buffer.test_and_skip("#")) {
+      //Macro
+      if (buffer.test_and_skip("include")) {
+        buffer.skip_line();
+      }
+      else {
+        error("unknown PP macro.", buffer);
+      }
+    }
+    if (buffer.test_and_skip("struct ")) {
+      buffer.skip_ws();
+      char* p = tmp;
+      char c;
+      for (;;) {
+        assert(p != tmp + sizeof(tmp));
+        c = buffer.peek();
+        
+        if (c == ';' || c == '{' || c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+          *p = 0;
+          break;
+        }
+        *p = buffer.get();
+        ++p;
+      }
+      printf("struct %s", tmp);
+      buffer.skip_ws();
+
+    }
+  }
+}
+
 int main(int argc, char ** argv) {
 	if (argc < 2) {
 		printhelp();
@@ -161,8 +220,7 @@ int main(int argc, char ** argv) {
     StreamBuffer buffer;
     buffer.load(path);
 
-    buffer.skip_ws();
-    bool s = buffer.test_and_skip("struct ");
+    parse(buffer);
 
     buffer.unload();
 
