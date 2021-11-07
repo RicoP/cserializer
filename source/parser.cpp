@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <cassert>
 #include <vector>
-#include "parser.h"
 
 #define WHITESPACE " \t\n\r"
 
@@ -44,9 +43,9 @@ inline bool is_whitespace(char c) {
 struct StreamBuffer {
   static constexpr size_t buffer_size_max = 1024;
 
+  int cursor_line = 1;
   size_t buffer_head = 0;
   size_t buffer_size = 0;
-  int cursor_line = 1;
 
   char buffer[2 * buffer_size_max] = "";
 
