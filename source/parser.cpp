@@ -6,7 +6,7 @@
 
 #define WHITESPACE " \t\n\r"
 
-struct member_info { 
+struct member_info {
   char type[64];
   char name[64];
   int count; //1 = simple variabel, >1 = array, -1 = vector
@@ -17,8 +17,24 @@ struct struct_info {
   std::vector<member_info> members;
 };
 
+struct enum_info {
+  char name[64];
+  char value[64] = "0";
+  enum class value_type_t {
+    Increment = 0,
+    Set
+  } value_type = value_type_t::Increment;
+};
+
+struct enum_class_info {
+  char name[64];
+  char type[64] = "int";
+  std::vector<enum_info> enums;
+};
+
 struct ParseContext {
   std::vector<struct_info> structs;
+  std::vector<enum_class_info> enum_classes;
 };
 
 inline bool is_whitespace(char c) {
@@ -30,7 +46,6 @@ struct StreamBuffer {
 
   size_t buffer_head = 0;
   size_t buffer_size = 0;
-  int cursor_column = 0;
   int cursor_line = 1;
 
   char buffer[2 * buffer_size_max] = "";
@@ -89,13 +104,11 @@ struct StreamBuffer {
     if (eof) return 0;
     return buffer[buffer_head];
   }
-  
+
   char get() {
     char c = peek();
     if (c == 0) return 0;
-    cursor_column++;
     if (c == '\n') {
-      cursor_column = 0;
       cursor_line++;
     }
     ++buffer_head;
@@ -109,19 +122,16 @@ struct StreamBuffer {
       fetch();
     }
     assert(buffer_size >= num);
-    buffer_head += num;
+    for (size_t i = 0; i != num; ++i) {
+      if (buffer[buffer_head] == '\n') cursor_line++;
+      ++buffer_head;
+    }
     buffer_size -= num;
   }
 
   void skip_ws() {
-    for (;;) {
-      switch (peek()) {
-      case ' ': case '\n': case '\r': case '\t':
-        get();
-        break;
-      default: return;
-      }
-    }
+    while (is_whitespace(peek()))
+      skip(1);
   }
 
   char sws_get() {
@@ -141,7 +151,7 @@ struct StreamBuffer {
     }
   }
 
-  bool test_and_skip(const char * str, size_t len) {
+  bool test_and_skip(const char* str, size_t len) {
     skip_ws();
     assert(len < buffer_size_max);
 
@@ -157,8 +167,8 @@ struct StreamBuffer {
   }
 
   template<size_t N>
-  bool test_and_skip(const char (& str)[N]) {
-    return test_and_skip(str, N-1);
+  bool test_and_skip(const char(&str)[N]) {
+    return test_and_skip(str, N - 1);
   }
 
   bool contains(char c, const char* characters) {
@@ -172,14 +182,14 @@ struct StreamBuffer {
   void read_till(char* dst, size_t len, const char* terminator) {
     char* p = dst;
     for (;;) {
-      assert(p != dst + len);
       char c = peek();
       if (contains(c, terminator)) {
         *p = 0;
         break;
       }
-      *p = get();
-      ++p;
+      skip(1);
+      if (p != dst + len - 1)
+        *(p++) = c;
     }
   }
 
@@ -192,7 +202,7 @@ struct StreamBuffer {
   void read_till(char(&dst)[N], const char* terminator) {
     read_till(dst, N, terminator);
   }
-  
+
   template<size_t N>
   void sws_read_till(char(&dst)[N], const char* terminator) {
     sws_read_till(dst, N, terminator);
@@ -225,16 +235,16 @@ constexpr hash_value hash_fnv(const char* string) {
 constexpr hash_value hash(char const* input) { return hash_fnv(input); }
 
 void printhelp() {
-	puts("TODO: Implement help");
+  puts("TODO: Implement help");
 }
 
 void error(const char* msg, StreamBuffer& buffer) {
-  fprintf(stderr, "%s: %s(%i:%i)\n", msg, buffer.path, buffer.cursor_line, buffer.cursor_column);
+  fprintf(stderr, "%s: %s(%i)\n", msg, buffer.path, buffer.cursor_line);
   exit(1);
 }
 
-void parse(ParseContext & ctx, StreamBuffer & buffer) {
-  char tmp[64];
+void parse(ParseContext& ctx, StreamBuffer& buffer) {
+  char tmp[64] = "";
   while (!buffer.eof)
   {
     if (buffer.test_and_skip("#")) {
@@ -246,12 +256,53 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
         error("unknown PP macro.", buffer);
       }
     }
-    if (buffer.test_and_skip("struct ")) {
-      struct_info & structi = ctx.structs.emplace_back();
+    if (buffer.test_and_skip("enum ")) {
+      if (buffer.test_and_skip("class ")) {
+        enum_class_info& enumci = ctx.enum_classes.emplace_back();
+        buffer.sws_read_till(enumci.name, "{:" WHITESPACE);
+        char c = buffer.sws_get();
 
-      buffer.skip_ws();
-      buffer.read_till(structi.name, ";{" WHITESPACE);
+        if (c == ':') {
+          buffer.sws_read_till(enumci.type, "{");
+          c = buffer.sws_get();
+        }
+
+        if (c != '{') error("Expected '{'", buffer);
+        for (;;) {
+          c = buffer.sws_peek();
+          if (c == '}') {
+            buffer.skip(1);
+            c = buffer.sws_get();
+            if (c != ';') error("expect ';'", buffer);
+            break;
+          }
+          
+          enum_info & enumi = enumci.enums.emplace_back();
+          buffer.sws_read_till(enumi.name, ",=}" WHITESPACE);
+          c = buffer.sws_peek();
+          if (c == '=') {
+            buffer.skip(1);
+            enumi.value_type = enum_info::value_type_t::Set;
+            buffer.sws_read_till(enumi.value, ",}");
+            c = buffer.sws_peek();
+          }
+          if (c == ',') buffer.skip(1);
+        }
       
+        if (enumci.enums.size() > 0) {
+          enumci.enums[0].value_type = enum_info::value_type_t::Set;
+        }
+      }
+      else {
+        error("expected 'class' after 'enum'.", buffer);
+      }
+    }
+
+    if (buffer.test_and_skip("struct ")) {
+      struct_info& structi = ctx.structs.emplace_back();
+
+      buffer.sws_read_till(structi.name, ";{" WHITESPACE);
+
       buffer.skip_ws();
 
       char c = buffer.get();
@@ -261,9 +312,9 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
           buffer.sws_read_till(memberi.type, WHITESPACE);
           buffer.sws_read_till(memberi.name, "[;," WHITESPACE);
           c = buffer.sws_get();
-          
+
           memberi.count = 1;
-          
+
           if (c == '[') {
             buffer.sws_read_till(tmp, "]");
             memberi.count = atoi(tmp);
@@ -275,26 +326,43 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
           if (c != ';') error("Expected ';'", buffer);
           if (buffer.sws_peek() == '}') {
             buffer.skip(1);
-            if(buffer.sws_get() != ';') error("Expected ';'", buffer);
+            if (buffer.sws_get() != ';') error("Expected ';'", buffer);
             break;
           }
         }
       }
-      if (buffer.peek() == '\r' || buffer.peek() == '\n') buffer.skip_line();
-
+      c = buffer.peek();
+      if (c == '\r' || c == '\n') buffer.skip_line();
     }
   }
 }
 
-int main(int argc, char ** argv) {
-	if (argc < 2) {
-		printhelp();
-		exit(1);
-	}
+void dump_cpp(ParseContext& c) {
+
+  for (auto& enumci : c.enum_classes) {
+    printf("const char * to_string(%s e) {\n", enumci.name);
+    printf("    switch(e) {\n");
+    for (auto& enumi : enumci.enums) {
+      printf("        case %s::%s: return \"%s\";\n", enumci.name, enumi.name, enumi.name);
+    }
+    printf("        default: retrun \"<UNKNOWN>\";\n");
+    printf("    }\n");
+    printf("}\n");
+  }
+
+}
+
+int main(int argc, char** argv) {
+  if (argc < 2) {
+    printhelp();
+    exit(1);
+  }
 
   hash_value state = hash("NONE");
 
-	for (int i = 1; i < argc; ++i) {
+  const char* output_path = "stdout";
+  
+  for (int i = 1; i < argc; ++i) {
     const char* arg = argv[i];
     hash_value h = hash(arg);
     if (h == hash("--help") || h == hash("-H")) {
@@ -305,12 +373,20 @@ int main(int argc, char ** argv) {
       state = hash("INCLUDE");
       continue;
     }
+    if (h == hash("--output") || h == hash("-O")) {
+      ++i;
+      assert(i != argc);
+      const char* path = argv[i];
+      output_path = path;
+      freopen(output_path, "wb", stdout);
+      continue;
+    }
 
     switch (state) {
     case hash("INCLUDE"): input_files.push_back(arg); break;
     default: printf("Unknown argument %s. \n", arg); exit(1); break;
     }
-	}
+  }
 
   ParseContext c;
 
@@ -320,6 +396,12 @@ int main(int argc, char ** argv) {
     parse(c, buffer);
     buffer.unload();
   }
+  
+  dump_cpp(c);
 
-	return 0;
+  if (hash(output_path) != hash("stdout")) {
+    fclose(stdout);
+  }
+
+  return 0;
 }
