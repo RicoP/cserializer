@@ -2,6 +2,25 @@
 #include <cstdlib>
 #include <cassert>
 #include <vector>
+#include "parser.h"
+
+#define WHITESPACE " \t\n\r"
+
+struct member_info { 
+  char type[64];
+  char name[64];
+};
+
+struct struct_info {
+  char name[64];
+  std::vector<member_info> members;
+};
+
+std::vector<struct_info> structs;
+
+inline bool is_whitespace(char c) {
+  return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
 
 struct StreamBuffer {
   static constexpr size_t buffer_size_max = 1024;
@@ -82,6 +101,15 @@ struct StreamBuffer {
     return c;
   }
 
+  void skip(size_t num) {
+    if (buffer_size < num) {
+      fetch();
+    }
+    assert(buffer_size >= num);
+    buffer_head += num;
+    buffer_size -= num;
+  }
+
   void skip_ws() {
     for (;;) {
       switch (peek()) {
@@ -91,6 +119,16 @@ struct StreamBuffer {
       default: return;
       }
     }
+  }
+
+  char sws_get() {
+    skip_ws();
+    return get();
+  }
+
+  char sws_peek() {
+    skip_ws();
+    return peek();
   }
 
   void skip_line() {
@@ -118,6 +156,43 @@ struct StreamBuffer {
   template<size_t N>
   bool test_and_skip(const char (& str)[N]) {
     return test_and_skip(str, N-1);
+  }
+
+  bool contains(char c, const char* characters) {
+    for (;;) {
+      if (*characters == 0) return false;
+      if (*characters == c) return true;
+      ++characters;
+    }
+  }
+
+  void read_till(char* dst, size_t len, const char* terminator) {
+    char* p = dst;
+    for (;;) {
+      assert(p != dst + len);
+      char c = peek();
+      if (contains(c, terminator)) {
+        *p = 0;
+        break;
+      }
+      *p = get();
+      ++p;
+    }
+  }
+
+  void sws_read_till(char* dst, size_t len, const char* terminator) {
+    skip_ws();
+    read_till(dst, len, terminator);;
+  }
+
+  template<size_t N>
+  void read_till(char(&dst)[N], const char* terminator) {
+    read_till(dst, N, terminator);
+  }
+  
+  template<size_t N>
+  void sws_read_till(char(&dst)[N], const char* terminator) {
+    sws_read_till(dst, N, terminator);
   }
 };
 
@@ -156,7 +231,6 @@ void error(const char* msg, StreamBuffer& buffer) {
 }
 
 void parse(StreamBuffer & buffer) {
-  char tmp[64];
   while (!buffer.eof)
   {
     if (buffer.test_and_skip("#")) {
@@ -169,22 +243,34 @@ void parse(StreamBuffer & buffer) {
       }
     }
     if (buffer.test_and_skip("struct ")) {
+      struct_info & structi = structs.emplace_back();
+
       buffer.skip_ws();
-      char* p = tmp;
-      char c;
-      for (;;) {
-        assert(p != tmp + sizeof(tmp));
-        c = buffer.peek();
-        
-        if (c == ';' || c == '{' || c == ' ' || c == '\t' || c == '\n' || c == '\r') {
-          *p = 0;
-          break;
+      buffer.read_till(structi.name, ";{" WHITESPACE);
+      
+      buffer.skip_ws();
+
+      char c = buffer.get();
+      if (c == '{') {
+        for (;;) {
+          member_info& memberi = structi.members.emplace_back();
+          buffer.skip_ws();
+          buffer.read_till(memberi.type, WHITESPACE);
+          buffer.skip_ws();
+          buffer.read_till(memberi.name, ";," WHITESPACE);
+          buffer.skip_ws();
+          c = buffer.get();
+
+          if (c == ',') error("Can't handle multi variable names", buffer);
+          if (c != ';') error("Expected ';'", buffer);
+          if (buffer.sws_peek() == '}') {
+            buffer.skip(1);
+            if(buffer.sws_get() != ';') error("Expected ';'", buffer);
+            break;
+          }
         }
-        *p = buffer.get();
-        ++p;
       }
-      printf("struct %s", tmp);
-      buffer.skip_ws();
+      if (buffer.peek() == '\r' || buffer.peek() == '\n') buffer.skip_line();
 
     }
   }
@@ -225,7 +311,6 @@ int main(int argc, char ** argv) {
     buffer.unload();
 
   }
-
 
 	return 0;
 }
