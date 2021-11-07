@@ -11,3 +11,6 @@ struct Transform {
 	vector3 position;
 };
 
+struct Scene1 {
+	Camera cameras[16];
+};

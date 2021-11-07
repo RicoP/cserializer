@@ -9,6 +9,7 @@
 struct member_info { 
   char type[64];
   char name[64];
+  int count; //1 = simple variabel, >1 = array, -1 = vector
 };
 
 struct struct_info {
@@ -16,7 +17,9 @@ struct struct_info {
   std::vector<member_info> members;
 };
 
-std::vector<struct_info> structs;
+struct ParseContext {
+  std::vector<struct_info> structs;
+};
 
 inline bool is_whitespace(char c) {
   return c == ' ' || c == '\t' || c == '\n' || c == '\r';
@@ -230,7 +233,8 @@ void error(const char* msg, StreamBuffer& buffer) {
   exit(1);
 }
 
-void parse(StreamBuffer & buffer) {
+void parse(ParseContext & ctx, StreamBuffer & buffer) {
+  char tmp[64];
   while (!buffer.eof)
   {
     if (buffer.test_and_skip("#")) {
@@ -243,7 +247,7 @@ void parse(StreamBuffer & buffer) {
       }
     }
     if (buffer.test_and_skip("struct ")) {
-      struct_info & structi = structs.emplace_back();
+      struct_info & structi = ctx.structs.emplace_back();
 
       buffer.skip_ws();
       buffer.read_till(structi.name, ";{" WHITESPACE);
@@ -254,12 +258,18 @@ void parse(StreamBuffer & buffer) {
       if (c == '{') {
         for (;;) {
           member_info& memberi = structi.members.emplace_back();
-          buffer.skip_ws();
-          buffer.read_till(memberi.type, WHITESPACE);
-          buffer.skip_ws();
-          buffer.read_till(memberi.name, ";," WHITESPACE);
-          buffer.skip_ws();
-          c = buffer.get();
+          buffer.sws_read_till(memberi.type, WHITESPACE);
+          buffer.sws_read_till(memberi.name, "[;," WHITESPACE);
+          c = buffer.sws_get();
+          
+          memberi.count = 1;
+          
+          if (c == '[') {
+            buffer.sws_read_till(tmp, "]");
+            memberi.count = atoi(tmp);
+            buffer.skip(1);
+            c = buffer.sws_get();
+          }
 
           if (c == ',') error("Can't handle multi variable names", buffer);
           if (c != ';') error("Expected ';'", buffer);
@@ -302,14 +312,13 @@ int main(int argc, char ** argv) {
     }
 	}
 
+  ParseContext c;
+
   for (auto path : input_files) {
     StreamBuffer buffer;
     buffer.load(path);
-
-    parse(buffer);
-
+    parse(c, buffer);
     buffer.unload();
-
   }
 
 	return 0;
