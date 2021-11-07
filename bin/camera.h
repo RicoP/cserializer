@@ -10,7 +10,7 @@ enum class enum_test : long long {
 	INVALID = -1
 };
 
-enum class enum_test2 {
+enum struct enum_test2 {
 	NONE,
 	ONE,
 	TWO,

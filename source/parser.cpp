@@ -257,7 +257,7 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
       }
     }
     if (buffer.test_and_skip("enum ")) {
-      if (buffer.test_and_skip("class ")) {
+      if (buffer.test_and_skip("class ") || buffer.test_and_skip("struct ")) {
         enum_class_info& enumci = ctx.enum_classes.emplace_back();
         buffer.sws_read_till(enumci.name, "{:" WHITESPACE);
         char c = buffer.sws_get();
