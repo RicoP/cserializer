@@ -32,23 +32,69 @@ struct enum_class_info {
   std::vector<enum_info> enums;
 };
 
-struct ParseContext {
-  std::vector<struct_info> structs;
-  std::vector<enum_class_info> enum_classes;
+struct function_parameter_info {
+  char name[64];
+  char type[64];
+  char modifier = 0; //0 = none, '*', '&'
+  bool is_const = false;
 };
+
+struct function_info {
+  char name[64];
+  char type[64] = "void";
+  std::vector<function_parameter_info> parameters;
+};
+
+struct ParseContext {
+  std::vector<enum_class_info> enum_classes;
+  std::vector<function_info> functions;
+  std::vector<struct_info> structs;
+};
+
+inline bool is_empty(const char * c) {
+  return *c == 0;
+}
 
 inline bool is_whitespace(char c) {
   return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
+bool contains(char c, const char* characters) {
+  if (c == 0) return true;
+  for (;;) {
+    if (*characters == 0) return false;
+    if (*characters == c) return true;
+    ++characters;
+  }
+}
+
+bool is_c_identifier(char c) {
+  if (c >= '0' && c <= '9') return true;
+  if (c >= 'A' && c <= 'A') return true;
+  if (c >= 'a' && c <= 'z') return true;
+  if (c == '_') return true;
+  if (c == '$') return true;
+  return false;
+}
+
+template<size_t N>
+void copy(char(&dst)[N], const char* src) {
+  for (size_t i = 0; i != N; ++i) {
+    dst[i] = src[i];
+    if (dst[i] == 0) break;
+  }
+}
+
 struct StreamBuffer {
-  static constexpr size_t buffer_size_max = 1024;
+  static constexpr size_t buffer_size_max_default = 1024;
+  size_t buffer_size_max = buffer_size_max_default;
 
   int cursor_line = 1;
   size_t buffer_head = 0;
   size_t buffer_size = 0;
 
-  char buffer[2 * buffer_size_max] = "";
+  char buffer_internal[2 * buffer_size_max_default] = "";
+  char * buffer = buffer_internal;
 
   const char* path = nullptr;
   FILE* file = nullptr;
@@ -63,6 +109,19 @@ struct StreamBuffer {
     file = fopen(path_, "rb");
     path = path_;
     assert(file);
+  }
+
+  void load_mem(char * buf, size_t len) {
+    assert(file == nullptr);
+    buffer_size_max = len;
+    buffer_size = len;
+    buffer = buf;
+    path = "<MEMORY>";
+  }
+
+  template<size_t N>
+  void load_mem(char(&str)[N]) {
+    load_mem(str, N);
   }
 
   void unload() {
@@ -90,11 +149,15 @@ struct StreamBuffer {
     if (buffer_head >= buffer_size_max) {
       shift_buffer();
     }
-    assert(end() < buffer + buffer_size_max);
-    size_t count = fread(end(), 1, buffer_size_max, file);
+    char* current = end();
+    assert(current < buffer + buffer_size_max);
+    size_t count = fread(current, 1, buffer_size_max, file);
     assert(count <= buffer_size_max);
     buffer_size += count;
     eof = count == 0;
+    //replace tabs with spaces
+    for (char* p = current; p != current + count; ++p)
+      if (*p == '\t') *p = ' ';
   }
 
   char peek() {
@@ -158,8 +221,9 @@ struct StreamBuffer {
     if (buffer_size < len) fetch();
     if (buffer_size < len) return false;
 
+    const char* buf = begin();
     for (size_t i = 0; i != len; ++i) {
-      if (begin()[i] != str[i]) return false;
+      if (buf[i] != str[i]) return false;
     }
     buffer_head += len;
     buffer_size -= len;
@@ -169,14 +233,6 @@ struct StreamBuffer {
   template<size_t N>
   bool test_and_skip(const char(&str)[N]) {
     return test_and_skip(str, N - 1);
-  }
-
-  bool contains(char c, const char* characters) {
-    for (;;) {
-      if (*characters == 0) return false;
-      if (*characters == c) return true;
-      ++characters;
-    }
   }
 
   void read_till(char* dst, size_t len, const char* terminator) {
@@ -191,6 +247,45 @@ struct StreamBuffer {
       if (p != dst + len - 1)
         *(p++) = c;
     }
+  }
+
+  void skip_till(const char* terminator) {
+    for (;;) {
+      char c = peek();
+      if (contains(c, terminator)) {
+        break;
+      }
+      skip(1);
+    }
+  }
+
+  void read_c_identifier(char* dst, size_t len) {
+    char* p = dst;
+    for (;;) {
+      char c = peek();
+      if (!is_c_identifier(c)) {
+        *p = 0;
+        break;
+      }
+      skip(1);
+      if (p != dst + len - 1)
+        *(p++) = c;
+    }
+  }
+
+  void sws_read_c_identifier(char* dst, size_t len) {
+    skip_ws();
+    read_c_identifier(dst, len);
+  }
+
+  template<size_t N>
+  void read_c_identifier(char(&dst)[N]) {
+    read_c_identifier(dst, N);
+  }
+
+  template<size_t N>
+  void sws_read_c_identifier(char(&dst)[N]) {
+    sws_read_c_identifier(dst, N);
   }
 
   void sws_read_till(char* dst, size_t len, const char* terminator) {
@@ -334,6 +429,55 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
       c = buffer.peek();
       if (c == '\r' || c == '\n') buffer.skip_line();
     }
+    
+    if (buffer.test_and_skip("void ")) {
+
+      char name[64];
+      buffer.sws_read_c_identifier(name);
+      if (buffer.test_and_skip("(")) {
+        function_info& funci = ctx.functions.emplace_back();
+        copy(funci.name, name);
+
+        while(buffer.sws_peek() != ')')
+        {
+          buffer.sws_read_till(tmp, ",)");
+          if (!is_empty(tmp)) {
+            function_parameter_info& para = funci.parameters.emplace_back();
+
+            StreamBuffer para_buffer;
+            para_buffer.load_mem(tmp);
+
+            para.is_const = para_buffer.test_and_skip("const ");
+
+            para_buffer.sws_read_till(para.type, "*&" WHITESPACE);
+            char c = para_buffer.sws_peek();
+            if (c == '&' || c == '*')
+            {
+              para.modifier = para_buffer.get();
+            }
+            para_buffer.sws_read_till(para.name, WHITESPACE);
+          }
+          buffer.test_and_skip(",");
+        }
+        assert(buffer.peek() == ')');
+        buffer.skip(1);
+        if (buffer.test_and_skip(";")) { /* empty function body */ }
+        else if (buffer.test_and_skip("{")) {
+          //skip body
+          int depth = 1;
+          while (depth) {
+            //TODO: deal with {} in comments
+            buffer.skip_till("{}");
+            char c = buffer.get();
+            depth += c == '{' ? 1 : -1;
+            if (c == 0) break;
+          }
+        }
+        else error("expected either ';' or '{'.", buffer);
+      }
+      else error("Expected '('", buffer);
+
+    }
   }
 }
 
@@ -388,7 +532,7 @@ int main(int argc, char** argv) {
       assert(i != argc);
       const char* path = argv[i];
       output_path = path;
-      freopen(output_path, "wb", stdout);
+      (void)freopen(output_path, "wb", stdout);
       continue;
     }
 
