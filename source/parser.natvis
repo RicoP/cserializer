@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="StreamBuffer">
+    <DisplayString Condition="buffer_size > 80">{buffer+buffer_head,[80]s8b}[...]:{cursor_line}</DisplayString>
+    <DisplayString Condition="80 >= buffer_size">{buffer+buffer_head,[buffer_size]s8b}[EOF]:{cursor_line}</DisplayString>
+  </Type>
+</AutoVisualizer>
