@@ -41,6 +41,23 @@ inline bool is_whitespace(char c) {
   return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
+bool contains(char c, const char* characters) {
+  for (;;) {
+    if (*characters == 0) return false;
+    if (*characters == c) return true;
+    ++characters;
+  }
+}
+
+bool is_c_identifier(char c) {
+  if (c >= '0' && c <= '9') return true;
+  if (c >= 'A' && c <= 'A') return true;
+  if (c >= 'a' && c <= 'a') return true;
+  if (c == '_') return true;
+  if (c == '$') return true;
+  return false;
+}
+
 struct StreamBuffer {
   static constexpr size_t buffer_size_max = 1024;
 
@@ -158,8 +175,9 @@ struct StreamBuffer {
     if (buffer_size < len) fetch();
     if (buffer_size < len) return false;
 
+    const char* buf = begin();
     for (size_t i = 0; i != len; ++i) {
-      if (begin()[i] != str[i]) return false;
+      if (buf[i] != str[i]) return false;
     }
     buffer_head += len;
     buffer_size -= len;
@@ -169,14 +187,6 @@ struct StreamBuffer {
   template<size_t N>
   bool test_and_skip(const char(&str)[N]) {
     return test_and_skip(str, N - 1);
-  }
-
-  bool contains(char c, const char* characters) {
-    for (;;) {
-      if (*characters == 0) return false;
-      if (*characters == c) return true;
-      ++characters;
-    }
   }
 
   void read_till(char* dst, size_t len, const char* terminator) {
@@ -191,6 +201,35 @@ struct StreamBuffer {
       if (p != dst + len - 1)
         *(p++) = c;
     }
+  }
+
+  void read_c_identifier(char* dst, size_t len) {
+    char* p = dst;
+    for (;;) {
+      char c = peek();
+      if (!is_c_identifier(c)) {
+        *p = 0;
+        break;
+      }
+      skip(1);
+      if (p != dst + len - 1)
+        *(p++) = c;
+    }
+  }
+
+  void sws_read_c_identifier(char* dst, size_t len) {
+    skip_ws();
+    read_c_identifier(dst, len);
+  }
+
+  template<size_t N>
+  void read_c_identifier(char(&dst)[N]) {
+    read_c_identifier(dst, N);
+  }
+
+  template<size_t N>
+  void sws_read_c_identifier(char(&dst)[N]) {
+    sws_read_c_identifier(dst, N);
   }
 
   void sws_read_till(char* dst, size_t len, const char* terminator) {
@@ -333,6 +372,12 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
       }
       c = buffer.peek();
       if (c == '\r' || c == '\n') buffer.skip_line();
+    }
+  
+    if (buffer.test_and_skip("void ")) {
+      char name[64];
+      buffer.sws_read_c_identifier(name);
+      for (;;);
     }
   }
 }
