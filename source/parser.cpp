@@ -2,54 +2,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
-#include <vector>
+#include "parser.h"
 
 #define WHITESPACE " \t\n\r"
-
-struct member_info {
-  char type[64];
-  char name[64];
-  int count; //1 = simple variabel, >1 = array, -1 = vector
-};
-
-struct struct_info {
-  char name[64];
-  std::vector<member_info> members;
-};
-
-struct enum_info {
-  char name[64];
-  char value[64] = "0";
-  enum class value_type_t {
-    Increment = 0,
-    Set
-  } value_type = value_type_t::Increment;
-};
-
-struct enum_class_info {
-  char name[64];
-  char type[64] = "int";
-  std::vector<enum_info> enums;
-};
-
-struct function_parameter_info {
-  char name[64];
-  char type[64];
-  char modifier = 0; //0 = none, '*', '&'
-  bool is_const = false;
-};
-
-struct function_info {
-  char name[64];
-  char type[64] = "void";
-  std::vector<function_parameter_info> parameters;
-};
-
-struct ParseContext {
-  std::vector<enum_class_info> enum_classes;
-  std::vector<function_info> functions;
-  std::vector<struct_info> structs;
-};
 
 inline bool is_empty(const char * c) {
   return *c == 0;
@@ -334,7 +289,9 @@ void printhelp() {
 }
 
 void error(const char* msg, StreamBuffer& buffer) {
-  fprintf(stderr, "%s: %s(%i)\n", msg, buffer.path, buffer.cursor_line);
+  char tmp[20] = "";
+  buffer.sws_read_till(tmp, WHITESPACE);
+  fprintf(stderr, "%s: %s(%i) [found '%s']\n", msg, buffer.path, buffer.cursor_line, tmp);
   exit(1);
 }
 
@@ -345,6 +302,9 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
     if (buffer.test_and_skip("#")) {
       //Macro
       if (buffer.test_and_skip("include")) {
+        buffer.skip_line();
+      }
+      else if (buffer.test_and_skip("pragma")) {
         buffer.skip_line();
       }
       else {
@@ -377,7 +337,7 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
           c = buffer.sws_peek();
           if (c == '=') {
             buffer.skip(1);
-            enumi.value_type = enum_info::value_type_t::Set;
+            enumi.value_type = value_type_t::Set;
             buffer.sws_read_till(enumi.value, ",}");
             c = buffer.sws_peek();
           }
@@ -385,7 +345,7 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
         }
       
         if (enumci.enums.size() > 0) {
-          enumci.enums[0].value_type = enum_info::value_type_t::Set;
+          enumci.enums[0].value_type = value_type_t::Set;
         }
       }
       else {
@@ -418,6 +378,11 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
           }
 
           if (c == ',') error("Can't handle multi variable names", buffer);
+          if (c == '=') {
+            buffer.sws_read_till(memberi.default_value, ";");
+            c = buffer.get();
+          }
+          
           if (c != ';') error("Expected ';'", buffer);
           if (buffer.sws_peek() == '}') {
             buffer.skip(1);
@@ -431,7 +396,6 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
     }
     
     if (buffer.test_and_skip("void ")) {
-
       char name[64];
       buffer.sws_read_c_identifier(name);
       if (buffer.test_and_skip("(")) {
@@ -476,13 +440,18 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
         else error("expected either ';' or '{'.", buffer);
       }
       else error("Expected '('", buffer);
-
     }
-  }
+ 
+    //TODO: we need a more flexible way to check for comments
+    if (buffer.test_and_skip("//")) buffer.skip_line();
+ }
 }
 
 void dump_cpp(ParseContext& c) {
+  //dump declaration
 
+
+  //dump implementation
   for (auto& enumci : c.enum_classes) {
     printf("const char * to_string(%s e) {\n", enumci.name);
     printf("    switch(e) {\n");

@@ -70,7 +70,8 @@ project "_root"
 project "app.parser"
   kind "ConsoleApp"
   warnings "Extra"
-  debugargs { "--include", "camera.h" }
+  debugdir "source/"
+  debugargs { "--include", "parser.h" }
   targetname (project_name)
   files { "source/**" }
 
