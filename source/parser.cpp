@@ -491,7 +491,7 @@ void dump_cpp(ParseContext& c) {
     }
     printf("        default: retrun \"<UNKNOWN>\";\n");
     printf("    }\n");
-    printf("}\n");
+    printf("}\n\n");
   }
 
   for (auto& structi : c.structs) {
@@ -502,7 +502,16 @@ void dump_cpp(ParseContext& c) {
       printf("    lhs.%s == rhs.%s%s\n", member.name, member.name, left ? " &&" : ";");
       --left;
     }
-    printf("} \n");
+    printf("} \n\n");
+
+    printf("inline bool operator!=(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
+    printf("  return \n");
+    left = structi.members.size() - 1;
+    for (auto& member : structi.members) {
+      printf("    lhs.%s != rhs.%s%s\n", member.name, member.name, left ? " ||" : ";");
+      --left;
+    }
+    printf("} \n\n");
   }
 }
 
