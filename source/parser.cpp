@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
@@ -349,6 +350,16 @@ void dump_cpp(ParseContext& c) {
     printf("}\n");
   }
 
+  for (auto& structi : c.structs) {
+    printf("inline bool operator==(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
+    printf("  return \n");
+    int left = structi.members.size() - 1;
+    for (auto& member : structi.members) {
+      printf("    lhs.%s == rhs.%s%s\n", member.name, member.name, left ? " &&" : ";");
+      --left;
+    }
+    printf("} \n");
+  }
 }
 
 int main(int argc, char** argv) {
