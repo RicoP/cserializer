@@ -36,11 +36,16 @@ struct ParseContext {
   std::vector<enum_class_info> enum_classes;
 };
 
+inline bool is_empty(const char * c) {
+  return *c == 0;
+}
+
 inline bool is_whitespace(char c) {
   return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
 bool contains(char c, const char* characters) {
+  if (c == 0) return true;
   for (;;) {
     if (*characters == 0) return false;
     if (*characters == c) return true;
@@ -51,20 +56,22 @@ bool contains(char c, const char* characters) {
 bool is_c_identifier(char c) {
   if (c >= '0' && c <= '9') return true;
   if (c >= 'A' && c <= 'A') return true;
-  if (c >= 'a' && c <= 'a') return true;
+  if (c >= 'a' && c <= 'z') return true;
   if (c == '_') return true;
   if (c == '$') return true;
   return false;
 }
 
 struct StreamBuffer {
-  static constexpr size_t buffer_size_max = 1024;
+  static constexpr size_t buffer_size_max_default = 1024;
+  size_t buffer_size_max = buffer_size_max_default;
 
   int cursor_line = 1;
   size_t buffer_head = 0;
   size_t buffer_size = 0;
 
-  char buffer[2 * buffer_size_max] = "";
+  char buffer_internal[2 * buffer_size_max_default] = "";
+  char * buffer = buffer_internal;
 
   const char* path = nullptr;
   FILE* file = nullptr;
@@ -79,6 +86,19 @@ struct StreamBuffer {
     file = fopen(path_, "rb");
     path = path_;
     assert(file);
+  }
+
+  void load_mem(char * buf, size_t len) {
+    assert(file == nullptr);
+    buffer_size_max = len;
+    buffer_size = len;
+    buffer = buf;
+    path = "<MEMORY>";
+  }
+
+  template<size_t N>
+  void load_mem(char(&str)[N]) {
+    load_mem(str, N);
   }
 
   void unload() {
@@ -111,6 +131,7 @@ struct StreamBuffer {
     assert(count <= buffer_size_max);
     buffer_size += count;
     eof = count == 0;
+    //TODO: replace tabs with spaces
   }
 
   char peek() {
@@ -372,11 +393,31 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
       c = buffer.peek();
       if (c == '\r' || c == '\n') buffer.skip_line();
     }
-  
+    
     if (buffer.test_and_skip("void ")) {
       char name[64];
       buffer.sws_read_c_identifier(name);
-      for (;;);
+      if (buffer.test_and_skip("(")) {
+
+        while(buffer.sws_peek() != ')')
+        {
+          buffer.sws_read_till(tmp, ",)");
+          if (!is_empty(tmp)) {
+            StreamBuffer para_buffer;
+            para_buffer.load_mem(tmp);
+            char para_type[64];
+            para_buffer.sws_read_till(para_type, "*&" WHITESPACE);
+            if (para_buffer.sws_peek() == '&' || para_buffer.sws_peek() == '*') para_buffer.skip(1);
+            char para_name[64];
+            para_buffer.sws_read_till(para_name, WHITESPACE);
+          }
+          if(buffer.sws_peek() == ',') buffer.skip(1);
+        }
+        buffer.skip(1);
+        //TODO deal with { ... }
+      }
+      else error("Expected '('", buffer);
+
     }
   }
 }
