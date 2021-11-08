@@ -495,6 +495,11 @@ void dump_cpp(ParseContext& c) {
   }
 
   for (auto& structi : c.structs) {
+    const char* sname = structi.name;
+
+    ///////////////////////////////////////////////////////////////////
+    // == and != operator                                            //
+    ///////////////////////////////////////////////////////////////////
     printf("inline bool operator==(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
     printf("  return \n");
     int left = structi.members.size() - 1;
@@ -512,6 +517,44 @@ void dump_cpp(ParseContext& c) {
       --left;
     }
     printf("} \n\n");
+  
+    ///////////////////////////////////////////////////////////////////
+    // serializer                                                    //
+    // TODO: skip functions that are already declared
+    ///////////////////////////////////////////////////////////////////
+    printf("inline void serialize(%s &o, ISerializer &s) {                      \n", sname);
+    printf("  if(s.node_begin(\"%s\", rose::hash(\"%s\"), &o)) {                \n", sname, sname);
+
+    for (auto& member : structi.members) {
+      const char* mname = member.name;
+      printf("    s.key(\"%s\");                                                \n", mname);
+      printf("    serialize(o.%s, s);                                           \n", mname);
+    }
+    printf("    s.node_end();                                                   \n");
+    printf("  }                                                                 \n");
+    printf("  s.end();                                                          \n");
+    printf("}                                                                   \n\n");
+
+    ///////////////////////////////////////////////////////////////////
+    // deserializer                                                  //
+    // TODO: skip functions that are already declared
+    ///////////////////////////////////////////////////////////////////
+    printf("inline void deserialize(%s &o, IDeserializer &s) {       \n", sname);
+    printf("  construct_defaults(o);                                 \n");
+    printf("                                                         \n");
+    printf("  while (s.next_key()) {                                 \n");
+    printf("    switch (s.hash_key()) {                              \n");
+
+    for (auto& member : structi.members) {
+      const char* mname = member.name;
+      printf("      case rose::hash(\"%s\"):                           \n", mname);
+      printf("        deserialize(o.%s, s);                            \n", mname);
+      printf("        break;                                           \n");
+    }
+    printf("      default: s.skip_key(); break;                      \n");
+    printf("    }                                                    \n");
+    printf("  }                                                      \n");
+    printf("}                                                        \n");
   }
 }
 
