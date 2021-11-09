@@ -4,6 +4,13 @@
 #include <cassert>
 #include "parser.h"
 
+#include <rose/hash.h>
+#include <serializer/serializer.h>
+#include <serializer/jsonserializer.h>
+
+#define IMPL_SERIALIZER
+#include "parser_serializer.h"
+
 #define WHITESPACE " \t\n\r"
 
 bool is_empty(const char * c) {
@@ -261,29 +268,6 @@ struct StreamBuffer {
 
 std::vector<const char*> input_files;
 
-//TODO: use roselib
-typedef unsigned long long hash_value;
-
-constexpr hash_value xor64(hash_value h) {
-  h ^= 88172645463325252ULL;  // xor with a constant so a seed of 0 will not result in a infinite loop
-  h ^= h >> 12;
-  h ^= h << 25;
-  h ^= h >> 27;
-  return h * 0x2545F4914F6CDD1DULL;
-}
-
-// https://de.wikipedia.org/wiki/FNV_(Informatik)
-constexpr hash_value hash_fnv(const char* string) {
-  hash_value MagicPrime = 0x00000100000001b3ULL;
-  hash_value Hash = 0xcbf29ce484222325ULL;
-
-  for (; *string; string++) Hash = (Hash ^ *string) * MagicPrime;
-
-  return Hash;
-}
-
-constexpr hash_value hash(char const* input) { return hash_fnv(input); }
-
 void printhelp() {
   puts("TODO: Implement help");
 }
@@ -450,6 +434,9 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
 void dump_cpp(ParseContext& c) {
   printf("#pragma once\n");
   printf("\n");
+  printf("#include <rose/hash.h>\n");
+  printf("#include <serializer/serializer.h>\n");
+  printf("\n");
   printf("///////////////////////////////////////////////////////////////////\n");
   printf("//  AUTOGEN                                                      //\n");
   printf("///////////////////////////////////////////////////////////////////\n");
@@ -466,11 +453,15 @@ void dump_cpp(ParseContext& c) {
 
     puts("");
     printf("struct                %s;\n", structi.name);
-    printf("bool operator==(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
-    printf("bool operator!=(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
-    printf("void      deserialize(%s &o, IDeserializer &s);\n", sname);
-    printf("void        serialize(%s &o, ISerializer &s);\n", sname);
-    printf("hash_value       hash(%s &o);\n", sname);
+    printf("namespace rose {\n");
+    printf("  namespace ecs {\n");
+    printf("    bool operator==(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
+    printf("    bool operator!=(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
+    printf("    void      deserialize(%s &o, IDeserializer &s);\n", sname);
+    printf("    void        serialize(%s &o, ISerializer &s);\n", sname);
+    printf("  }\n");
+    printf("  hash_value       hash(%s &o);\n", sname);
+    printf("}\n");
     puts("");
   }
 
@@ -482,7 +473,7 @@ void dump_cpp(ParseContext& c) {
     for (auto& enumi : enumci.enums) {
       printf("        case %s::%s: return \"%s\";\n", enumci.name, enumi.name, enumi.name);
     }
-    printf("        default: retrun \"<UNKNOWN>\";\n");
+    printf("        default: return \"<UNKNOWN>\";\n");
     printf("    }\n");
     printf("}\n\n");
   }
@@ -519,7 +510,7 @@ void dump_cpp(ParseContext& c) {
     // serializer                                                    //
     // TODO: skip functions that are already declared
     ///////////////////////////////////////////////////////////////////
-    printf("void serialize(%s &o, ISerializer &s) {                      \n", sname);
+    printf("void rose::ecs::serialize(%s &o, ISerializer &s) {                      \n", sname);
     printf("  if(s.node_begin(\"%s\", rose::hash(\"%s\"), &o)) {                \n", sname, sname);
 
     for (auto& member : structi.members) {
@@ -536,8 +527,9 @@ void dump_cpp(ParseContext& c) {
     // deserializer                                                  //
     // TODO: skip functions that are already declared
     ///////////////////////////////////////////////////////////////////
-    printf("void deserialize(%s &o, IDeserializer &s) {              \n", sname);
-    printf("  construct_defaults(o);                                 \n");
+    printf("void rose::ecs::deserialize(%s &o, IDeserializer &s) {              \n", sname);
+    printf("  //TODO: implement me                                   \n");
+    printf("  //construct_defaults(o);                                 \n");
     printf("                                                         \n");
     printf("  while (s.next_key()) {                                 \n");
     printf("    switch (s.hash_key()) {                              \n");
@@ -556,19 +548,33 @@ void dump_cpp(ParseContext& c) {
     ///////////////////////////////////////////////////////////////////
     // hashing                                                       //
     ///////////////////////////////////////////////////////////////////
-    printf("hash_value hash(%s &o) {              \n", sname);
-    printf("  hash_value h = 0;                   \n");
+    printf("rose::hash_value rose::hash(%s &o) {              \n", sname);
+    printf("  rose::hash_value h = 0;                   \n");
 
     for (auto& member : structi.members) {
       const char* mname = member.name;
-      printf("  h ^= hash(o.%s);                  \n", mname);
-      printf("  h = xor64(h);                     \n");
+      printf("  h ^= rose::hash(o.%s);                  \n", mname);
+      printf("  h = rose::xor64(h);                     \n");
     }
 
     printf("  return h;                           \n");
     printf("}                                     \n");
 
-
+    ///////////////////////////////////////////////////////////////////
+    // Construct Defaults                                            //
+    ///////////////////////////////////////////////////////////////////
+    /*
+      TODO:
+        void construct_defaults(Camera & o) {
+          assign(o.far_plane, 1000);
+          assign(o.fov, 70);
+          assign(o.lookat, identity4());
+          assign(o.near_plane, 0.1f);
+          assign(o.projection, identity4());
+          //Defaults
+          construct_defaults(o.light_list);
+        }
+    */
   }
 
 
@@ -584,22 +590,22 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
-  hash_value state = hash("NONE");
+  rose::hash_value state = rose::hash("NONE");
 
   const char* output_path = "stdout";
-  
+
   for (int i = 1; i < argc; ++i) {
     const char* arg = argv[i];
-    hash_value h = hash(arg);
-    if (h == hash("--help") || h == hash("-H")) {
+    rose::hash_value h = rose::hash(arg);
+    if (h == rose::hash("--help") || h == rose::hash("-H")) {
       printhelp();
       continue;
     }
-    if (h == hash("--include") || h == hash("-I")) {
-      state = hash("INCLUDE");
+    if (h == rose::hash("--include") || h == rose::hash("-I")) {
+      state = rose::hash("INCLUDE");
       continue;
     }
-    if (h == hash("--output") || h == hash("-O")) {
+    if (h == rose::hash("--output") || h == rose::hash("-O")) {
       ++i;
       assert(i != argc);
       const char* path = argv[i];
@@ -607,9 +613,15 @@ int main(int argc, char** argv) {
       (void)freopen(output_path, "wb", stdout);
       continue;
     }
-
+    if (h == rose::hash("--json") || h == rose::hash("-J")) {
+      ++i;
+      assert(i != argc);
+      const char* path = argv[i];
+      continue;
+    }
+    
     switch (state) {
-    case hash("INCLUDE"): input_files.push_back(arg); break;
+    case rose::hash("INCLUDE"): input_files.push_back(arg); break;
     default: printf("Unknown argument %s. \n", arg); exit(1); break;
     }
   }
@@ -625,9 +637,18 @@ int main(int argc, char** argv) {
   
   dump_cpp(c);
 
-  if (hash(output_path) != hash("stdout")) {
+  if (rose::hash(output_path) != rose::hash("stdout")) {
     fclose(stdout);
   }
+
+  //const char * foo = to_string(value_type_t::Increment);
+  //puts(foo);
+
+  //FILE* f = fopen("context.json", "w");
+  //assert(f);
+  //JsonSerializer jsons(f);
+  //serialize(c, jsons);
+  //fclose(f);
 
   return 0;
 }
