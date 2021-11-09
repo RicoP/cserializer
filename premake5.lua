@@ -71,7 +71,10 @@ project "app.parser"
   kind "ConsoleApp"
   warnings "Extra"
   debugdir "source/"
-  debugargs { "--include", "parser.h" }
+  debugargs { "--include parser.h -O parser_serilizer.h" }
+  
   targetname (project_name)
+  includedirs { "externals/roselib/include" }
+  includedirs { "externals/premake-comppp/include" }
   files { "source/**" }
 
