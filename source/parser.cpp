@@ -6,11 +6,11 @@
 
 #define WHITESPACE " \t\n\r"
 
-inline bool is_empty(const char * c) {
+bool is_empty(const char * c) {
   return *c == 0;
 }
 
-inline bool is_whitespace(char c) {
+bool is_whitespace(char c) {
   return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
@@ -448,12 +448,36 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
 }
 
 void dump_cpp(ParseContext& c) {
+  printf("#pragma once\n");
+  printf("\n");
+  printf("///////////////////////////////////////////////////////////////////\n");
+  printf("//  AUTOGEN                                                      //\n");
+  printf("///////////////////////////////////////////////////////////////////\n");
+
+
   //dump declaration
+  for (auto& enumci : c.enum_classes) {
+    printf("enum class                   %s;\n", enumci.name);
+    printf("const char * to_string(const %s &);\n", enumci.name);
+  }
 
+  for (auto& structi : c.structs) {
+    const char* sname = structi.name;
 
+    puts("");
+    printf("struct                %s;\n", structi.name);
+    printf("bool operator==(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
+    printf("bool operator!=(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
+    printf("void      deserialize(%s &o, IDeserializer &s);\n", sname);
+    printf("void        serialize(%s &o, ISerializer &s);\n", sname);
+    printf("hash_value       hash(%s &o);\n", sname);
+    puts("");
+  }
+
+  printf("\n#ifdef IMPL_SERIALIZER\n\n");
   //dump implementation
   for (auto& enumci : c.enum_classes) {
-    printf("const char * to_string(%s e) {\n", enumci.name);
+    printf("const char * to_string(const %s & e) {\n", enumci.name);
     printf("    switch(e) {\n");
     for (auto& enumi : enumci.enums) {
       printf("        case %s::%s: return \"%s\";\n", enumci.name, enumi.name, enumi.name);
@@ -466,10 +490,14 @@ void dump_cpp(ParseContext& c) {
   for (auto& structi : c.structs) {
     const char* sname = structi.name;
 
+    printf("///////////////////////////////////////////////////////////////////\n");
+    printf("//  struct %s\n", sname);
+    printf("///////////////////////////////////////////////////////////////////\n");
+
     ///////////////////////////////////////////////////////////////////
     // == and != operator                                            //
     ///////////////////////////////////////////////////////////////////
-    printf("inline bool operator==(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
+    printf("bool operator==(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
     printf("  return \n");
     int left = structi.members.size() - 1;
     for (auto& member : structi.members) {
@@ -478,7 +506,7 @@ void dump_cpp(ParseContext& c) {
     }
     printf("} \n\n");
 
-    printf("inline bool operator!=(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
+    printf("bool operator!=(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
     printf("  return \n");
     left = structi.members.size() - 1;
     for (auto& member : structi.members) {
@@ -491,7 +519,7 @@ void dump_cpp(ParseContext& c) {
     // serializer                                                    //
     // TODO: skip functions that are already declared
     ///////////////////////////////////////////////////////////////////
-    printf("inline void serialize(%s &o, ISerializer &s) {                      \n", sname);
+    printf("void serialize(%s &o, ISerializer &s) {                      \n", sname);
     printf("  if(s.node_begin(\"%s\", rose::hash(\"%s\"), &o)) {                \n", sname, sname);
 
     for (auto& member : structi.members) {
@@ -508,7 +536,7 @@ void dump_cpp(ParseContext& c) {
     // deserializer                                                  //
     // TODO: skip functions that are already declared
     ///////////////////////////////////////////////////////////////////
-    printf("inline void deserialize(%s &o, IDeserializer &s) {       \n", sname);
+    printf("void deserialize(%s &o, IDeserializer &s) {              \n", sname);
     printf("  construct_defaults(o);                                 \n");
     printf("                                                         \n");
     printf("  while (s.next_key()) {                                 \n");
@@ -516,15 +544,38 @@ void dump_cpp(ParseContext& c) {
 
     for (auto& member : structi.members) {
       const char* mname = member.name;
-      printf("      case rose::hash(\"%s\"):                           \n", mname);
-      printf("        deserialize(o.%s, s);                            \n", mname);
-      printf("        break;                                           \n");
+      printf("      case rose::hash(\"%s\"):                         \n", mname);
+      printf("        deserialize(o.%s, s);                          \n", mname);
+      printf("        break;                                         \n");
     }
     printf("      default: s.skip_key(); break;                      \n");
     printf("    }                                                    \n");
     printf("  }                                                      \n");
-    printf("}                                                        \n");
+    printf("}                                                        \n\n");
+
+    ///////////////////////////////////////////////////////////////////
+    // hashing                                                       //
+    ///////////////////////////////////////////////////////////////////
+    printf("hash_value hash(%s &o) {              \n", sname);
+    printf("  hash_value h = 0;                   \n");
+
+    for (auto& member : structi.members) {
+      const char* mname = member.name;
+      printf("  h ^= hash(o.%s);                  \n", mname);
+      printf("  h = xor64(h);                     \n");
+    }
+
+    printf("  return h;                           \n");
+    printf("}                                     \n");
+
+
   }
+
+
+
+  //end
+  printf("\n#endif\n");
+
 }
 
 int main(int argc, char** argv) {
