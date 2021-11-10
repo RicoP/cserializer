@@ -444,8 +444,18 @@ void dump_cpp(ParseContext& c) {
 
   //dump declaration
   for (auto& enumci : c.enum_classes) {
+    puts("");
     printf("enum class                   %s;\n", enumci.name);
     printf("const char * to_string(const %s &);\n", enumci.name);
+
+    printf("namespace rose {\n");
+    printf("  namespace ecs {\n");
+    printf("    void      deserialize(%s &o, IDeserializer &s);\n", enumci.name);
+    printf("    void        serialize(%s &o, ISerializer &s);\n", enumci.name);
+    printf("  }\n");
+    printf("  hash_value       hash(const %s &o); //TODO: implement me\n", enumci.name);
+    printf("}\n");
+    puts("");
   }
 
   for (auto& structi : c.structs) {
@@ -460,7 +470,7 @@ void dump_cpp(ParseContext& c) {
     printf("    void      deserialize(%s &o, IDeserializer &s);\n", sname);
     printf("    void        serialize(%s &o, ISerializer &s);\n", sname);
     printf("  }\n");
-    printf("  hash_value       hash(%s &o);\n", sname);
+    printf("  hash_value       hash(const %s &o);\n", sname);
     printf("}\n");
     puts("");
   }
@@ -468,14 +478,51 @@ void dump_cpp(ParseContext& c) {
   printf("\n#ifdef IMPL_SERIALIZER\n\n");
   //dump implementation
   for (auto& enumci : c.enum_classes) {
+    const char* ename = enumci.name;
     printf("const char * to_string(const %s & e) {\n", enumci.name);
     printf("    switch(e) {\n");
     for (auto& enumi : enumci.enums) {
-      printf("        case %s::%s: return \"%s\";\n", enumci.name, enumi.name, enumi.name);
+      const char* eval = enumi.name;
+      printf("        case %s::%s: return \"%s\";\n", enumci.name, eval, eval);
     }
     printf("        default: return \"<UNKNOWN>\";\n");
     printf("    }\n");
-    printf("}\n\n");
+    printf("}\n");
+
+
+    printf("void rose::ecs::serialize(%s& o, ISerializer& s) {                   \n", ename);
+    printf("  switch (o) {                                                       \n");
+
+    for (auto& enumi : enumci.enums) {
+      const char* eval = enumi.name;
+      printf("    case %s::%s: {                                                 \n", ename, eval);
+      printf("      char str[] = \"%s\";                                         \n", eval);
+      printf("      serialize(str, s);                                           \n");
+      printf("      break;                                                       \n");
+      printf("    }                                                              \n");
+    }
+
+    printf("    default: /* unknown */ break;                                    \n");
+    printf("  }                                                                  \n");
+    printf("}                                                                    \n");
+
+    printf("void rose::ecs::deserialize(%s& o, IDeserializer& s) {               \n", ename);
+    printf("  char str[64];                                                      \n");
+    printf("  deserialize(str, s);                                               \n");
+    printf("  rose::hash_value h = rose::hash(str);                              \n");
+    printf("  switch (h) {                                                       \n");
+    for (auto& enumi : enumci.enums) {
+      const char* eval = enumi.name;
+      printf("  case rose::hash(\"%s\"): o = %s::%s; break;                      \n", eval, ename, eval);
+    }
+    printf("  default: /*unknown value*/ break;                                  \n");
+    printf("  }                                                                  \n");
+    printf("}                                                                    \n");
+
+    printf("rose::hash_value       rose::hash(const %s& o) {            \n", ename);
+    printf("  return static_cast<rose::hash_value>(o);                  \n");
+    printf("}                                                           \n\n");
+
   }
 
   for (auto& structi : c.structs) {
@@ -548,7 +595,7 @@ void dump_cpp(ParseContext& c) {
     ///////////////////////////////////////////////////////////////////
     // hashing                                                       //
     ///////////////////////////////////////////////////////////////////
-    printf("rose::hash_value rose::hash(%s &o) {              \n", sname);
+    printf("rose::hash_value rose::hash(const %s &o) {              \n", sname);
     printf("  rose::hash_value h = 0;                   \n");
 
     for (auto& member : structi.members) {
@@ -617,6 +664,8 @@ int main(int argc, char** argv) {
       ++i;
       assert(i != argc);
       const char* path = argv[i];
+      //TODO: dump json
+      (void)path;
       continue;
     }
     
