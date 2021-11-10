@@ -447,7 +447,7 @@ void printf_ttws(const char* f, Args... args) {
 
   rose::hash_value state = rose::hash("COPY");
 
-  for (size_t i = 0; i != 1024; ++i) {
+  for (size_t i = 0; i != sizeof(buffer); ++i) {
     char c = *pfrom;
     if (c == 0) {
       *pto = 0;
@@ -701,6 +701,8 @@ int main(int argc, char** argv) {
   rose::hash_value state = rose::hash("NONE");
 
   const char* output_path = "stdout";
+  
+  const char* json_path = nullptr;
 
   for (int i = 1; i < argc; ++i) {
     const char* arg = argv[i];
@@ -725,8 +727,7 @@ int main(int argc, char** argv) {
       ++i;
       assert(i != argc);
       const char* path = argv[i];
-      //TODO: dump json
-      (void)path;
+      json_path = path;
       continue;
     }
     
@@ -751,14 +752,13 @@ int main(int argc, char** argv) {
     fclose(stdout);
   }
 
-  //const char * foo = to_string(value_type_t::Increment);
-  //puts(foo);
-
-  FILE* f = fopen("context.json", "w");
-  assert(f);
-  JsonSerializer jsons(f);
-  rose::ecs::serialize(c, jsons);
-  fclose(f);
+  if (json_path) {
+    FILE* f = fopen(json_path, "w");
+    assert(f);
+    JsonSerializer jsons(f);
+    rose::ecs::serialize(c, jsons);
+    fclose(f);
+  }
 
   return 0;
 }
