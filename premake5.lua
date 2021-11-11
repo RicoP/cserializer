@@ -59,22 +59,29 @@ workspace (project_name)
     optimize "Size"
 
 project "_root"
-  configuration { "windows" }
-  kind "None"
-  files { "**" }
-  removefiles { ".git/**" }
-  removefiles { ".build/**" }
-  removefiles { "externals/**" }
-  removefiles { "**.cpp", "**.h", "**.c" }
+  filter "system:Windows"
+    kind "None"
+    files { "**" }
+    removefiles { ".git/**" }
+    removefiles { ".build/**" }
+    removefiles { "externals/**" }
+    removefiles { "**.cpp", "**.h", "**.c" }
 
 project "app.parser"
+  targetname "rose.parser"
   kind "ConsoleApp"
   warnings "Extra"
-  debugdir "source/"
-  debugargs { "--include parser.h -O parser_serilizer.h" }
-  
-  targetname (project_name)
+  debugdir "bin/"
+  debugargs { "--include camera.h -O camera_serilizer.h -J camera.json" }
   includedirs { "externals/roselib/include" }
   includedirs { "externals/premake-comppp/include" }
   files { "source/**" }
+
+project "test.camera"
+  kind "ConsoleApp"
+  warnings "Extra"
+  debugdir "bin/"
+  includedirs { "externals/roselib/include" }
+  includedirs { "externals/premake-comppp/include" }
+  files { "bin/**" }
 

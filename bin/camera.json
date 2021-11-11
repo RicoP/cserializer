@@ -1,0 +1,146 @@
+{
+  "enum_classes" : [{
+      "name" : "enum_test", 
+      "type" : "long long ", 
+      "enums" : [{
+          "name" : "NONE", 
+          "value" : "0", 
+          "value_type" : "Set"
+        }, {
+          "name" : "ONE", 
+          "value" : "0", 
+          "value_type" : "Increment"
+        }, {
+          "name" : "TWO", 
+          "value" : "0", 
+          "value_type" : "Increment"
+        }, {
+          "name" : "SIXTEEN", 
+          "value" : "1 << 4", 
+          "value_type" : "Set"
+        }, {
+          "name" : "FOURTYTWO", 
+          "value" : "42", 
+          "value_type" : "Set"
+        }, {
+          "name" : "INVALID", 
+          "value" : "-1\r\n", 
+          "value_type" : "Set"
+        }]
+    }, {
+      "name" : "enum_test2", 
+      "type" : "int", 
+      "enums" : [{
+          "name" : "NONE", 
+          "value" : "0", 
+          "value_type" : "Set"
+        }, {
+          "name" : "ONE", 
+          "value" : "0", 
+          "value_type" : "Increment"
+        }, {
+          "name" : "TWO", 
+          "value" : "0", 
+          "value_type" : "Increment"
+        }, {
+          "name" : "SIXTEEN", 
+          "value" : "1<<4", 
+          "value_type" : "Set"
+        }, {
+          "name" : "FOURTYTWO", 
+          "value" : "42      ", 
+          "value_type" : "Set"
+        }, {
+          "name" : "INVALID", 
+          "value" : "0", 
+          "value_type" : "Increment"
+        }]
+    }], 
+  "functions" : [{
+      "name" : "serialize1", 
+      "type" : "void", 
+      "parameters" : [{
+          "name" : "o", 
+          "type" : "Camera", 
+          "modifier" : "&", 
+          "is_const" : false
+        }, {
+          "name" : "s", 
+          "type" : "ISerializer", 
+          "modifier" : "&", 
+          "is_const" : false
+        }]
+    }, {
+      "name" : "serialize2", 
+      "type" : "void", 
+      "parameters" : [{
+          "name" : "o", 
+          "type" : "Camera", 
+          "modifier" : "", 
+          "is_const" : true
+        }, {
+          "name" : "s", 
+          "type" : "ISerializer", 
+          "modifier" : "&", 
+          "is_const" : false
+        }]
+    }], 
+  "structs" : [{
+      "name" : "vector3", 
+      "members" : [{
+          "type" : "float", 
+          "name" : "x", 
+          "default_value" : "", 
+          "count" : 1
+        }, {
+          "type" : "float", 
+          "name" : "y", 
+          "default_value" : "", 
+          "count" : 1
+        }, {
+          "type" : "float", 
+          "name" : "z", 
+          "default_value" : "", 
+          "count" : 1
+        }]
+    }, {
+      "name" : "Camera", 
+      "members" : [{
+          "type" : "int", 
+          "name" : "x", 
+          "default_value" : "", 
+          "count" : 1
+        }, {
+          "type" : "int", 
+          "name" : "y", 
+          "default_value" : "", 
+          "count" : 1
+        }, {
+          "type" : "int", 
+          "name" : "z", 
+          "default_value" : "", 
+          "count" : 1
+        }]
+    }, {
+      "name" : "Transform", 
+      "members" : [{
+          "type" : "Camera", 
+          "name" : "camera", 
+          "default_value" : "", 
+          "count" : 1
+        }, {
+          "type" : "vector3", 
+          "name" : "position", 
+          "default_value" : "", 
+          "count" : 1
+        }]
+    }, {
+      "name" : "Scene1", 
+      "members" : [{
+          "type" : "Camera", 
+          "name" : "cameras", 
+          "default_value" : "", 
+          "count" : 16
+        }]
+    }]
+}

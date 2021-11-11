@@ -20,6 +20,14 @@ enum struct enum_test2 {
 	INVALID
 };
 
+
+struct vector3 {
+	float x;
+	float y;
+	float z;
+};
+
+
 struct Camera {
 	int x;
 	int y;
@@ -37,17 +45,6 @@ struct Scene1 {
 
 void serialize1(Camera & o, ISerializer & s)  ;
 
-
-void serialize(Camera & o, ISerializer & s) {
-	//BLA BLA
-}
-
 void serialize2(const Camera o, ISerializer & s) {
-	if (h == hash("--help") || h == hash("-H")) {
-	printhelp();
-      
-	for (int i = 1; i < argc; ++i) {
-	}
-	continue;
-	}
+	//BLA BLA
 }
