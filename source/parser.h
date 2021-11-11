@@ -32,6 +32,7 @@ struct enum_class_info {
   char type[64] = "int";
   bool custom_type = false;
   std::vector<enum_info> enums;
+  enum_info default_value;
 };
 
 //modifier: 0 = none, '*', '&'

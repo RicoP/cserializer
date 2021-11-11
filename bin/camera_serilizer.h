@@ -5,6 +5,8 @@
 
 ///////////////////////////////////////////////////////////////////
 //  AUTOGEN                                                      //
+//  command:
+//    rose.parser --include camera.h -O camera_serilizer.h -J camera.json
 ///////////////////////////////////////////////////////////////////
 
 enum class                   enum_test : long long ;

@@ -330,6 +330,9 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
         if (enumci.enums.size() > 0) {
           enumci.enums[0].value_type = value_type_t::Set;
         }
+      
+        assert(enumci.enums.size() != 0);
+        enumci.default_value = enumci.enums[0];
       }
       else {
         error("expected 'class' after 'enum'.", buffer);
@@ -489,7 +492,7 @@ void printf_ttws(const char* f, Args... args) {
   printf(buffer);
 }
 
-void dump_cpp(ParseContext& c) {
+void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
   printf_ttws("#pragma once\n");
   printf_ttws("\n");
   printf_ttws("#include <rose/hash.h>\n");
@@ -497,6 +500,15 @@ void dump_cpp(ParseContext& c) {
   printf_ttws("\n");
   printf_ttws("///////////////////////////////////////////////////////////////////\n");
   printf_ttws("//  AUTOGEN                                                      //\n");
+  if (argc && argv) {
+    printf("//  command:\n");
+    printf("//    rose.parser");
+    for (int i = 1; i < argc; ++i) {
+      printf(" ");
+      printf("%s", argv[i]);
+    }
+    printf("\n");
+  }
   printf_ttws("///////////////////////////////////////////////////////////////////\n");
 
 
@@ -515,7 +527,9 @@ void dump_cpp(ParseContext& c) {
     printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", enumci.name);
     printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", enumci.name);
     printf_ttws("  }\n");
-    printf_ttws("  hash_value       hash(const %s &o);\n", enumci.name);
+    printf_ttws("  hash_value         hash(const %s &o);\n", enumci.name);
+    printf_ttws("  void construct_defaults(      %s &o); //TODO: implement me\n", enumci.name);
+    
     printf_ttws("}\n");
     puts("");
   }
@@ -532,12 +546,59 @@ void dump_cpp(ParseContext& c) {
     printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", sname);
     printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", sname);
     printf_ttws("  }\n");
-    printf_ttws("  hash_value       hash(const %s &o);\n", sname);
+    printf_ttws("  hash_value         hash(const %s &o);\n", sname);
+    printf_ttws("  void construct_defaults(      %s &o); //TODO: implement me\n", sname);
     printf_ttws("}\n");
     puts("");
   }
 
-  printf_ttws("\n#ifdef IMPL_SERIALIZER\n\n");
+  printf_ttws("\n#ifdef IMPL_SERIALIZER\n");
+
+  puts(R"MLS(
+    //internal helper methods
+    template<class T>
+    bool rose_parser_equals(const T& lhs, const T& rhs) {
+      return lhs == rhs;
+    }
+
+    template<class T, size_t N>
+    bool rose_parser_equals(const T(&lhs)[N], const T(&rhs)[N]) {
+      for (size_t i = 0; i != N; ++i) {
+        if (lhs[i] != rhs[i]) return false;
+      }
+      return true;
+    }
+
+    template<size_t N>
+    bool rose_parser_equals(const char(&lhs)[N], const char(&rhs)[N]) {
+      for (size_t i = 0; i != N; ++i) {
+        if (lhs[i] != rhs[i]) return false;
+        if (lhs[i] == 0) return false;
+      }
+      return true;
+    }
+
+    template<class T>
+    bool rose_parser_equals(const std::vector<T> &lhs, const std::vector<T> &rhs) {
+      if (lhs.size() != rhs.size()) return false;
+      for (size_t i = 0; i != lhs.size(); ++i) {
+        if (lhs[i] != rhs[i]) return false;
+      }
+      return true;
+    }
+
+    template<class TL, class TR>
+    void assign(TL& lhs, TR&& rhs) {
+      lhs = rhs;
+    }
+
+    template<class T>
+    void construct_default(std::vector<T> & v) {
+      c.clear();
+    }
+  )MLS");
+
+
   //dump implementation
   for (auto& enumci : c.enum_classes) {
     const char* ename = enumci.name;
@@ -601,7 +662,7 @@ void dump_cpp(ParseContext& c) {
     printf_ttws("  return \n");
     int left = structi.members.size() - 1;
     for (auto& member : structi.members) {
-      printf_ttws("    lhs.%s == rhs.%s%s\n", member.name, member.name, left ? " &&" : ";");
+      printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "&&" : ";");
       --left;
     }
     printf_ttws("} \n\n");
@@ -610,7 +671,7 @@ void dump_cpp(ParseContext& c) {
     printf_ttws("  return \n");
     left = structi.members.size() - 1;
     for (auto& member : structi.members) {
-      printf_ttws("    lhs.%s != rhs.%s%s\n", member.name, member.name, left ? " ||" : ";");
+      printf_ttws("    !rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "||" : ";");
       --left;
     }
     printf_ttws("} \n\n");
@@ -727,7 +788,7 @@ int main(int argc, char** argv) {
 
   rose::hash_value state = rose::hash("NONE");
 
-  const char* output_path = "stdout";
+  bool close_stdout = false; //in case we redirect stdout to something else
   
   const char* json_path = nullptr;
 
@@ -748,8 +809,8 @@ int main(int argc, char** argv) {
       ++i;
       assert(i != argc);
       const char* path = argv[i];
-      output_path = path;
-      (void)freopen(output_path, "wb", stdout);
+      (void)freopen(path, "wb", stdout);
+      close_stdout = true;
       continue;
     }
     if (h == rose::hash("--json") || h == rose::hash("-J")) {
@@ -776,9 +837,9 @@ int main(int argc, char** argv) {
     buffer.unload();
   }
   
-  dump_cpp(c);
+  dump_cpp(c, argc, argv);
 
-  if (rose::hash(output_path) != rose::hash("stdout")) {
+  if (close_stdout) {
     fclose(stdout);
   }
 

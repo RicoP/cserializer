@@ -5,6 +5,8 @@
 
 ///////////////////////////////////////////////////////////////////
 //  AUTOGEN                                                      //
+//  command:
+//    rose.parser --include parser.h -O parser_serializer.h
 ///////////////////////////////////////////////////////////////////
 
 enum class                   value_type_t;
@@ -14,7 +16,8 @@ namespace rose {
     void      deserialize(value_type_t &o, IDeserializer &s);
     void        serialize(value_type_t &o, ISerializer &s);
   }
-  hash_value       hash(const value_type_t &o); //TODO: implement me
+  hash_value         hash(const value_type_t &o);
+  void construct_defaults(      value_type_t &o); //TODO: implement me
 }
 
 
@@ -26,7 +29,8 @@ namespace rose {
     void      deserialize(member_info &o, IDeserializer &s);
     void        serialize(member_info &o, ISerializer &s);
   }
-  hash_value       hash(const member_info &o);
+  hash_value         hash(const member_info &o);
+  void construct_defaults(      member_info &o); //TODO: implement me
 }
 
 
@@ -38,7 +42,8 @@ namespace rose {
     void      deserialize(struct_info &o, IDeserializer &s);
     void        serialize(struct_info &o, ISerializer &s);
   }
-  hash_value       hash(const struct_info &o);
+  hash_value         hash(const struct_info &o);
+  void construct_defaults(      struct_info &o); //TODO: implement me
 }
 
 
@@ -50,7 +55,8 @@ namespace rose {
     void      deserialize(enum_info &o, IDeserializer &s);
     void        serialize(enum_info &o, ISerializer &s);
   }
-  hash_value       hash(const enum_info &o);
+  hash_value         hash(const enum_info &o);
+  void construct_defaults(      enum_info &o); //TODO: implement me
 }
 
 
@@ -62,7 +68,8 @@ namespace rose {
     void      deserialize(enum_class_info &o, IDeserializer &s);
     void        serialize(enum_class_info &o, ISerializer &s);
   }
-  hash_value       hash(const enum_class_info &o);
+  hash_value         hash(const enum_class_info &o);
+  void construct_defaults(      enum_class_info &o); //TODO: implement me
 }
 
 
@@ -74,7 +81,8 @@ namespace rose {
     void      deserialize(function_parameter_info &o, IDeserializer &s);
     void        serialize(function_parameter_info &o, ISerializer &s);
   }
-  hash_value       hash(const function_parameter_info &o);
+  hash_value         hash(const function_parameter_info &o);
+  void construct_defaults(      function_parameter_info &o); //TODO: implement me
 }
 
 
@@ -86,7 +94,8 @@ namespace rose {
     void      deserialize(function_info &o, IDeserializer &s);
     void        serialize(function_info &o, ISerializer &s);
   }
-  hash_value       hash(const function_info &o);
+  hash_value         hash(const function_info &o);
+  void construct_defaults(      function_info &o); //TODO: implement me
 }
 
 
@@ -98,12 +107,55 @@ namespace rose {
     void      deserialize(ParseContext &o, IDeserializer &s);
     void        serialize(ParseContext &o, ISerializer &s);
   }
-  hash_value       hash(const ParseContext &o);
+  hash_value         hash(const ParseContext &o);
+  void construct_defaults(      ParseContext &o); //TODO: implement me
 }
 
 
 #ifdef IMPL_SERIALIZER
 
+    //internal helper methods
+    template<class T>
+    bool rose_parser_equals(const T& lhs, const T& rhs) {
+      return lhs == rhs;
+    }
+
+    template<class T, size_t N>
+    bool rose_parser_equals(const T(&lhs)[N], const T(&rhs)[N]) {
+      for (size_t i = 0; i != N; ++i) {
+        if (lhs[i] != rhs[i]) return false;
+      }
+      return true;
+    }
+
+    template<size_t N>
+    bool rose_parser_equals(const char(&lhs)[N], const char(&rhs)[N]) {
+      for (size_t i = 0; i != N; ++i) {
+        if (lhs[i] != rhs[i]) return false;
+        if (lhs[i] == 0) return false;
+      }
+      return true;
+    }
+
+    template<class T>
+    bool rose_parser_equals(const std::vector<T> &lhs, const std::vector<T> &rhs) {
+      if (lhs.size() != rhs.size()) return false;
+      for (size_t i = 0; i != lhs.size(); ++i) {
+        if (lhs[i] != rhs[i]) return false;
+      }
+      return true;
+    }
+
+    template<class TL, class TR>
+    void assign(TL& lhs, TR&& rhs) {
+      lhs = rhs;
+    }
+
+    template<class T>
+    void construct_default(std::vector<T> & v) {
+      c.clear();
+    }
+  
 const char * to_string(const value_type_t & e) {
     switch(e) {
         case value_type_t::Increment: return "Increment";
@@ -145,18 +197,18 @@ rose::hash_value       rose::hash(const value_type_t& o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const member_info &lhs, const member_info &rhs) {
   return
-    lhs.type == rhs.type &&
-    lhs.name == rhs.name &&
-    lhs.default_value == rhs.default_value &&
-    lhs.count == rhs.count;
+    rose_parser_equals(lhs.type, rhs.type) &&
+    rose_parser_equals(lhs.name, rhs.name) &&
+    rose_parser_equals(lhs.default_value, rhs.default_value) &&
+    rose_parser_equals(lhs.count, rhs.count) ;
 }
 
 bool operator!=(const member_info &lhs, const member_info &rhs) {
   return
-    lhs.type != rhs.type ||
-    lhs.name != rhs.name ||
-    lhs.default_value != rhs.default_value ||
-    lhs.count != rhs.count;
+    !rose_parser_equals(lhs.type, rhs.type) ||
+    !rose_parser_equals(lhs.name, rhs.name) ||
+    !rose_parser_equals(lhs.default_value, rhs.default_value) ||
+    !rose_parser_equals(lhs.count, rhs.count) ;
 }
 
 void rose::ecs::serialize(member_info &o, ISerializer &s) {
@@ -214,14 +266,14 @@ rose::hash_value rose::hash(const member_info &o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const struct_info &lhs, const struct_info &rhs) {
   return
-    lhs.name == rhs.name &&
-    lhs.members == rhs.members;
+    rose_parser_equals(lhs.name, rhs.name) &&
+    rose_parser_equals(lhs.members, rhs.members) ;
 }
 
 bool operator!=(const struct_info &lhs, const struct_info &rhs) {
   return
-    lhs.name != rhs.name ||
-    lhs.members != rhs.members;
+    !rose_parser_equals(lhs.name, rhs.name) ||
+    !rose_parser_equals(lhs.members, rhs.members) ;
 }
 
 void rose::ecs::serialize(struct_info &o, ISerializer &s) {
@@ -265,16 +317,16 @@ rose::hash_value rose::hash(const struct_info &o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const enum_info &lhs, const enum_info &rhs) {
   return
-    lhs.name == rhs.name &&
-    lhs.value == rhs.value &&
-    lhs.value_type == rhs.value_type;
+    rose_parser_equals(lhs.name, rhs.name) &&
+    rose_parser_equals(lhs.value, rhs.value) &&
+    rose_parser_equals(lhs.value_type, rhs.value_type) ;
 }
 
 bool operator!=(const enum_info &lhs, const enum_info &rhs) {
   return
-    lhs.name != rhs.name ||
-    lhs.value != rhs.value ||
-    lhs.value_type != rhs.value_type;
+    !rose_parser_equals(lhs.name, rhs.name) ||
+    !rose_parser_equals(lhs.value, rhs.value) ||
+    !rose_parser_equals(lhs.value_type, rhs.value_type) ;
 }
 
 void rose::ecs::serialize(enum_info &o, ISerializer &s) {
@@ -325,16 +377,20 @@ rose::hash_value rose::hash(const enum_info &o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const enum_class_info &lhs, const enum_class_info &rhs) {
   return
-    lhs.name == rhs.name &&
-    lhs.type == rhs.type &&
-    lhs.enums == rhs.enums;
+    rose_parser_equals(lhs.name, rhs.name) &&
+    rose_parser_equals(lhs.type, rhs.type) &&
+    rose_parser_equals(lhs.custom_type, rhs.custom_type) &&
+    rose_parser_equals(lhs.enums, rhs.enums) &&
+    rose_parser_equals(lhs.default_value, rhs.default_value) ;
 }
 
 bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs) {
   return
-    lhs.name != rhs.name ||
-    lhs.type != rhs.type ||
-    lhs.enums != rhs.enums;
+    !rose_parser_equals(lhs.name, rhs.name) ||
+    !rose_parser_equals(lhs.type, rhs.type) ||
+    !rose_parser_equals(lhs.custom_type, rhs.custom_type) ||
+    !rose_parser_equals(lhs.enums, rhs.enums) ||
+    !rose_parser_equals(lhs.default_value, rhs.default_value) ;
 }
 
 void rose::ecs::serialize(enum_class_info &o, ISerializer &s) {
@@ -343,8 +399,12 @@ void rose::ecs::serialize(enum_class_info &o, ISerializer &s) {
     serialize(o.name, s);
     s.key("type");
     serialize(o.type, s);
+    s.key("custom_type");
+    serialize(o.custom_type, s);
     s.key("enums");
     serialize(o.enums, s);
+    s.key("default_value");
+    serialize(o.default_value, s);
     s.node_end();
   }
   s.end();
@@ -362,8 +422,14 @@ void rose::ecs::deserialize(enum_class_info &o, IDeserializer &s) {
       case rose::hash("type"):
         deserialize(o.type, s);
         break;
+      case rose::hash("custom_type"):
+        deserialize(o.custom_type, s);
+        break;
       case rose::hash("enums"):
         deserialize(o.enums, s);
+        break;
+      case rose::hash("default_value"):
+        deserialize(o.default_value, s);
         break;
       default: s.skip_key(); break;
     }
@@ -376,7 +442,11 @@ rose::hash_value rose::hash(const enum_class_info &o) {
   h = rose::xor64(h);
   h ^= rose::hash(o.type);
   h = rose::xor64(h);
+  h ^= rose::hash(o.custom_type);
+  h = rose::xor64(h);
   h ^= rose::hash(o.enums);
+  h = rose::xor64(h);
+  h ^= rose::hash(o.default_value);
   h = rose::xor64(h);
   return h;
 }
@@ -385,18 +455,18 @@ rose::hash_value rose::hash(const enum_class_info &o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const function_parameter_info &lhs, const function_parameter_info &rhs) {
   return
-    lhs.name == rhs.name &&
-    lhs.type == rhs.type &&
-    lhs.modifier == rhs.modifier &&
-    lhs.is_const == rhs.is_const;
+    rose_parser_equals(lhs.name, rhs.name) &&
+    rose_parser_equals(lhs.type, rhs.type) &&
+    rose_parser_equals(lhs.modifier, rhs.modifier) &&
+    rose_parser_equals(lhs.is_const, rhs.is_const) ;
 }
 
 bool operator!=(const function_parameter_info &lhs, const function_parameter_info &rhs) {
   return
-    lhs.name != rhs.name ||
-    lhs.type != rhs.type ||
-    lhs.modifier != rhs.modifier ||
-    lhs.is_const != rhs.is_const;
+    !rose_parser_equals(lhs.name, rhs.name) ||
+    !rose_parser_equals(lhs.type, rhs.type) ||
+    !rose_parser_equals(lhs.modifier, rhs.modifier) ||
+    !rose_parser_equals(lhs.is_const, rhs.is_const) ;
 }
 
 void rose::ecs::serialize(function_parameter_info &o, ISerializer &s) {
@@ -454,16 +524,16 @@ rose::hash_value rose::hash(const function_parameter_info &o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const function_info &lhs, const function_info &rhs) {
   return
-    lhs.name == rhs.name &&
-    lhs.type == rhs.type &&
-    lhs.parameters == rhs.parameters;
+    rose_parser_equals(lhs.name, rhs.name) &&
+    rose_parser_equals(lhs.type, rhs.type) &&
+    rose_parser_equals(lhs.parameters, rhs.parameters) ;
 }
 
 bool operator!=(const function_info &lhs, const function_info &rhs) {
   return
-    lhs.name != rhs.name ||
-    lhs.type != rhs.type ||
-    lhs.parameters != rhs.parameters;
+    !rose_parser_equals(lhs.name, rhs.name) ||
+    !rose_parser_equals(lhs.type, rhs.type) ||
+    !rose_parser_equals(lhs.parameters, rhs.parameters) ;
 }
 
 void rose::ecs::serialize(function_info &o, ISerializer &s) {
@@ -514,16 +584,16 @@ rose::hash_value rose::hash(const function_info &o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const ParseContext &lhs, const ParseContext &rhs) {
   return
-    lhs.enum_classes == rhs.enum_classes &&
-    lhs.functions == rhs.functions &&
-    lhs.structs == rhs.structs;
+    rose_parser_equals(lhs.enum_classes, rhs.enum_classes) &&
+    rose_parser_equals(lhs.functions, rhs.functions) &&
+    rose_parser_equals(lhs.structs, rhs.structs) ;
 }
 
 bool operator!=(const ParseContext &lhs, const ParseContext &rhs) {
   return
-    lhs.enum_classes != rhs.enum_classes ||
-    lhs.functions != rhs.functions ||
-    lhs.structs != rhs.structs;
+    !rose_parser_equals(lhs.enum_classes, rhs.enum_classes) ||
+    !rose_parser_equals(lhs.functions, rhs.functions) ||
+    !rose_parser_equals(lhs.structs, rhs.structs) ;
 }
 
 void rose::ecs::serialize(ParseContext &o, ISerializer &s) {

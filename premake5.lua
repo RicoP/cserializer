@@ -71,8 +71,10 @@ project "app.parser"
   targetname "rose.parser"
   kind "ConsoleApp"
   warnings "Extra"
-  debugdir "bin/"
-  debugargs { "--include camera.h -O camera_serilizer.h -J camera.json" }
+  --debugdir "bin/"
+  --debugargs { "--include camera.h -O camera_serilizer.h -J camera.json" }
+  debugdir "source/"
+  debugargs { "--include parser.h -O parser_serializer.h" }
   includedirs { "externals/roselib/include" }
   includedirs { "externals/premake-comppp/include" }
   files { "source/**" }
