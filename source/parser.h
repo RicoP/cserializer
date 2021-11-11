@@ -30,6 +30,7 @@ struct enum_info {
 struct enum_class_info {
   char name[64];
   char type[64] = "int";
+  bool custom_type = false;
   std::vector<enum_info> enums;
 };
 

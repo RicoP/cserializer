@@ -270,10 +270,6 @@ struct StreamBuffer {
 
 std::vector<const char*> input_files;
 
-void printhelp() {
-  puts("TODO: Implement help");
-}
-
 void error(const char* msg, StreamBuffer& buffer) {
   char tmp[20] = "";
   buffer.sws_read_till(tmp, WHITESPACE);
@@ -304,6 +300,7 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
         char c = buffer.sws_get();
 
         if (c == ':') {
+          enumci.custom_type = true;
           buffer.sws_read_till(enumci.type, "{");
           c = buffer.sws_get();
         }
@@ -506,7 +503,11 @@ void dump_cpp(ParseContext& c) {
   //dump declaration
   for (auto& enumci : c.enum_classes) {
     puts("");
-    printf_ttws("enum class                   %s;\n", enumci.name);
+    char type[64] = "";
+    if (enumci.custom_type) {
+      sprintf(type, " : %s", enumci.type);
+    }
+    printf_ttws("enum class                   %s%s;\n", enumci.name, type);
     printf_ttws("const char * to_string(const %s &);\n", enumci.name);
 
     printf_ttws("namespace rose {\n");
@@ -514,7 +515,7 @@ void dump_cpp(ParseContext& c) {
     printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", enumci.name);
     printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", enumci.name);
     printf_ttws("  }\n");
-    printf_ttws("  hash_value       hash(const %s &o); //TODO: implement me\n", enumci.name);
+    printf_ttws("  hash_value       hash(const %s &o);\n", enumci.name);
     printf_ttws("}\n");
     puts("");
   }
@@ -690,6 +691,32 @@ void dump_cpp(ParseContext& c) {
   //end
   printf("\n#endif\n");
 
+}
+
+void printhelp() {
+  puts(
+    "NAME \n"
+    "       rose.parser - generate serialization code for simple c headers. \n"
+    " \n"
+    "SYNOPSIS \n"
+    "       rose.parser [OPTION] \n"
+    " \n"
+    "DESCRIPTION \n"
+    "       -H, --help \n"
+    "              show this help. \n"
+    " \n"
+    "       -I, --includes \n"
+    "              followed by a list of headers files, that should be parsed. \n"
+    " \n"
+    "       -O, --output \n"
+    "              The output file. [default: stdout] \n"
+    " \n"
+    "       -J, --json \n"
+    "              A optional JSON file containing meta info of the header files. \n"
+    " \n"
+    "AUTHOR \n"
+    "       Written by Rico Possienka. \n"
+  );
 }
 
 int main(int argc, char** argv) {
