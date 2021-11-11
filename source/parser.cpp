@@ -735,6 +735,7 @@ int main(int argc, char** argv) {
     const char* arg = argv[i];
     rose::hash_value h = rose::hash(arg);
     if (h == rose::hash("--help") || h == rose::hash("-H")) {
+      state = rose::hash("NONE");
       printhelp();
       continue;
     }
@@ -743,6 +744,7 @@ int main(int argc, char** argv) {
       continue;
     }
     if (h == rose::hash("--output") || h == rose::hash("-O")) {
+      state = rose::hash("NONE");
       ++i;
       assert(i != argc);
       const char* path = argv[i];
@@ -751,6 +753,7 @@ int main(int argc, char** argv) {
       continue;
     }
     if (h == rose::hash("--json") || h == rose::hash("-J")) {
+      state = rose::hash("NONE");
       ++i;
       assert(i != argc);
       const char* path = argv[i];
