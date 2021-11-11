@@ -9,10 +9,10 @@ SYNOPSIS
 
 DESCRIPTION
        -H, --help
-              show this help.
+              Show this help.
 
        -I, --includes
-              followed by a list of headers files, that should be parsed.
+              Followed by a list of headers files, that should be parsed.
 
        -O, --output
               The output file. [default: stdout]
