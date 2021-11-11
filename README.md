@@ -24,6 +24,16 @@ AUTHOR
        Written by Rico Possienka.
 ```
 
+### How To Build (Windows)
+```
+cd externals
+clone.bat
+cd ..
+create_solution.bat
+build_solution.bat
+```
+
 ### Example:
 
-See bin folder for test cases and example ouput.
+See bin folder for test cases and example output.
+
