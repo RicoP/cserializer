@@ -281,6 +281,18 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
   char tmp[64] = "";
   while (!buffer.eof)
   {
+    ////////////////////////////////////////////////////////
+    // COMMENTS                                           //
+    ////////////////////////////////////////////////////////
+    if (buffer.test_and_skip("//")) {
+      //TODO: we need a more flexible way to check for comments
+      buffer.skip_line();
+      continue;
+    }
+
+    ////////////////////////////////////////////////////////
+    // MACROS                                             //
+    ////////////////////////////////////////////////////////
     if (buffer.test_and_skip("#")) {
       //Macro
       if (buffer.test_and_skip("include")) {
@@ -292,7 +304,12 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
       else {
         error("unknown PP macro.", buffer);
       }
+      continue;
     }
+
+    ////////////////////////////////////////////////////////
+    // ENUMS                                              //
+    ////////////////////////////////////////////////////////
     if (buffer.test_and_skip("enum ")) {
       if (buffer.test_and_skip("class ") || buffer.test_and_skip("struct ")) {
         enum_class_info & enumci = ctx.enum_classes.emplace_back();
@@ -337,8 +354,12 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
       else {
         error("expected 'class' after 'enum'.", buffer);
       }
+      continue;
     }
 
+    ////////////////////////////////////////////////////////
+    // STRUCTS                                            //
+    ////////////////////////////////////////////////////////
     if (buffer.test_and_skip("struct ")) {
       struct_info & structi = ctx.structs.emplace_back();
 
@@ -349,8 +370,12 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
       char c = buffer.get();
       if (c == '{') {
         for (;;) {
-          member_info& memberi = structi.members.emplace_back();
-          buffer.sws_read_till(memberi.type, WHITESPACE);
+          char type[64];
+          buffer.sws_read_till(type, WHITESPACE);
+
+        new_member:
+          member_info & memberi = structi.members.emplace_back();
+          copy(memberi.type, type);
           buffer.sws_read_till(memberi.name, "[;," WHITESPACE);
           c = buffer.sws_get();
 
@@ -363,7 +388,7 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
             c = buffer.sws_get();
           }
 
-          if (c == ',') error("Can't handle multi variable names", buffer);
+          if (c == ',') goto new_member;
           if (c == '=') {
             buffer.sws_read_till(memberi.default_value, ";");
             c = buffer.get();
@@ -379,13 +404,23 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
       }
       c = buffer.peek();
       if (c == '\r' || c == '\n') buffer.skip_line();
+      continue;
     }
-    
-    if (buffer.test_and_skip("void ")) {
+
+    ////////////////////////////////////////////////////////
+    // Assume: GLOBAL FUNCTIONS                           //
+    ////////////////////////////////////////////////////////
+    buffer.skip_ws();
+    if (!buffer.eof)
+    {
+      char type[64];
+      buffer.sws_read_c_identifier(type);
+
       char name[64];
       buffer.sws_read_c_identifier(name);
       if (buffer.test_and_skip("(")) {
-        function_info& funci = ctx.functions.emplace_back();
+        function_info & funci = ctx.functions.emplace_back();
+        copy(funci.type, type);
         copy(funci.name, name);
 
         while (buffer.sws_peek() != ')')
@@ -427,10 +462,7 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
       }
       else error("Expected '('", buffer);
     }
- 
-    //TODO: we need a more flexible way to check for comments
-    if (buffer.test_and_skip("//")) buffer.skip_line();
- }
+  }
 }
 
 //printf trim trailing hitespaces
