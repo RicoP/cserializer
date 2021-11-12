@@ -20,11 +20,8 @@ enum struct enum_test2 {
 	INVALID
 };
 
-
 struct vector3 {
-	float x;
-	float y;
-	float z;
+	float x,  y  ,   z;
 };
 
 
@@ -46,5 +43,10 @@ struct Scene1 {
 void serialize1(Camera & o, ISerializer & s)  ;
 
 void serialize2(const Camera o, ISerializer & s) {
+	//BLA BLA
+}
+
+
+bool compare(const Camera & lhs, const Camera & rhs) {
 	//BLA BLA
 }

@@ -2,6 +2,7 @@
   "enum_classes" : [{
       "name" : "enum_test", 
       "type" : "long long ", 
+      "custom_type" : true, 
       "enums" : [{
           "name" : "NONE", 
           "value" : "0", 
@@ -26,10 +27,16 @@
           "name" : "INVALID", 
           "value" : "-1\r\n", 
           "value_type" : "Set"
-        }]
+        }], 
+      "default_value" : {
+        "name" : "NONE", 
+        "value" : "0", 
+        "value_type" : "Set"
+      }
     }, {
       "name" : "enum_test2", 
       "type" : "int", 
+      "custom_type" : false, 
       "enums" : [{
           "name" : "NONE", 
           "value" : "0", 
@@ -54,7 +61,12 @@
           "name" : "INVALID", 
           "value" : "0", 
           "value_type" : "Increment"
-        }]
+        }], 
+      "default_value" : {
+        "name" : "NONE", 
+        "value" : "0", 
+        "value_type" : "Set"
+      }
     }], 
   "functions" : [{
       "name" : "serialize1", 
@@ -83,6 +95,20 @@
           "type" : "ISerializer", 
           "modifier" : "&", 
           "is_const" : false
+        }]
+    }, {
+      "name" : "compare", 
+      "type" : "bool", 
+      "parameters" : [{
+          "name" : "lhs", 
+          "type" : "Camera", 
+          "modifier" : "&", 
+          "is_const" : true
+        }, {
+          "name" : "rhs", 
+          "type" : "Camera", 
+          "modifier" : "&", 
+          "is_const" : true
         }]
     }], 
   "structs" : [{
