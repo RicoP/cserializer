@@ -4,7 +4,7 @@ print("Building Solution " .. project_name)
 
 workspace (project_name)
   characterset ("MBCS")
-  configurations { "Debug", "DebugConsole", "DebugFast", "Release" }
+  configurations { "Debug", "DebugConsole", "DebugFast", "Release", "ReleaseInstall" }
   startproject "app.parser"
   location ".build/projects"
   targetdir ".build/bin/%{cfg.buildcfg}"
@@ -35,28 +35,23 @@ workspace (project_name)
       "/ignore:4006", -- F already defined in X.lib; second definition ignored
     }
     
-  filter "configurations:Debug"
-    defines { "DEBUG", "EA_DEBUG" }
-    symbols "Full"
-    optimize "Off"
-    targetsuffix "-d"
-
-  filter "configurations:DebugConsole"
+  filter "configurations:Debug*"
     defines { "DEBUG", "EA_DEBUG" }
     symbols "Full"
     optimize "Off"
     targetsuffix "-d"
 
   filter "configurations:DebugFast"
-    defines { "DEBUG", "EA_DEBUG" }
-    symbols "Full"
     optimize "Size"
-    targetsuffix "-df"
 
   filter "configurations:Release*"
     defines { "RELEASE", "NDEBUG" }
     symbols "Off"
     optimize "Size"
+    targetsuffix ""
+
+  filter "configurations:ReleaseInstall"
+    targetdir "../environment/PATH/"
 
 project "_root"
   filter "system:Windows"
