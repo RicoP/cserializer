@@ -23,7 +23,7 @@ bool is_whitespace(char c) {
   return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
-bool contains(char c, const char* characters) {
+bool contains(char c, const char * characters) {
   if (c == 0) return true;
   for (;;) {
     if (*characters == 0) return false;
@@ -42,7 +42,7 @@ bool is_c_identifier(char c) {
 }
 
 template<size_t N>
-void copy(char(&dst)[N], const char* src) {
+void copy(char(&dst)[N], const char * src) {
   for (size_t i = 0; i != N; ++i) {
     dst[i] = src[i];
     if (dst[i] == 0) break;
@@ -60,8 +60,8 @@ struct StreamBuffer {
   char buffer_internal[2 * buffer_size_max_default] = "";
   char * buffer = buffer_internal;
 
-  const char* path = nullptr;
-  FILE* file = nullptr;
+  const char * path = nullptr;
+  FILE * file = nullptr;
 
   bool eof = false;
 
@@ -69,7 +69,7 @@ struct StreamBuffer {
     assert(file == nullptr);
   }
 
-  void load(const char* path_) {
+  void load(const char * path_) {
     file = fopen(path_, "rb");
     path = path_;
     assert(file);
@@ -94,10 +94,10 @@ struct StreamBuffer {
     file = nullptr;
   }
 
-  char* begin() {
+  char * begin() {
     return buffer + buffer_head;
   }
-  char* end() {
+  char * end() {
     return buffer + buffer_head + buffer_size;
   }
 
@@ -113,14 +113,14 @@ struct StreamBuffer {
     if (buffer_head >= buffer_size_max) {
       shift_buffer();
     }
-    char* current = end();
+    char * current = end();
     assert(current < buffer + buffer_size_max);
     size_t count = fread(current, 1, buffer_size_max, file);
     assert(count <= buffer_size_max);
     buffer_size += count;
     eof = count == 0;
     //replace tabs with spaces
-    for (char* p = current; p != current + count; ++p)
+    for (char * p = current; p != current + count; ++p)
       if (*p == '\t') *p = ' ';
   }
 
@@ -178,14 +178,14 @@ struct StreamBuffer {
     }
   }
 
-  bool test_and_skip(const char* str, size_t len) {
+  bool test_and_skip(const char * str, size_t len) {
     skip_ws();
     assert(len < buffer_size_max);
 
     if (buffer_size < len) fetch();
     if (buffer_size < len) return false;
 
-    const char* buf = begin();
+    const char * buf = begin();
     for (size_t i = 0; i != len; ++i) {
       if (buf[i] != str[i]) return false;
     }
@@ -199,8 +199,8 @@ struct StreamBuffer {
     return test_and_skip(str, N - 1);
   }
 
-  void read_till(char* dst, size_t len, const char* terminator) {
-    char* p = dst;
+  void read_till(char * dst, size_t len, const char * terminator) {
+    char * p = dst;
     for (;;) {
       char c = peek();
       if (contains(c, terminator)) {
@@ -213,7 +213,7 @@ struct StreamBuffer {
     }
   }
 
-  void skip_till(const char* terminator) {
+  void skip_till(const char * terminator) {
     for (;;) {
       char c = peek();
       if (contains(c, terminator)) {
@@ -223,8 +223,8 @@ struct StreamBuffer {
     }
   }
 
-  void read_c_identifier(char* dst, size_t len) {
-    char* p = dst;
+  void read_c_identifier(char * dst, size_t len) {
+    char * p = dst;
     for (;;) {
       char c = peek();
       if (!is_c_identifier(c)) {
@@ -237,7 +237,7 @@ struct StreamBuffer {
     }
   }
 
-  void sws_read_c_identifier(char* dst, size_t len) {
+  void sws_read_c_identifier(char * dst, size_t len) {
     skip_ws();
     read_c_identifier(dst, len);
   }
@@ -252,32 +252,32 @@ struct StreamBuffer {
     sws_read_c_identifier(dst, N);
   }
 
-  void sws_read_till(char* dst, size_t len, const char* terminator) {
+  void sws_read_till(char * dst, size_t len, const char * terminator) {
     skip_ws();
     read_till(dst, len, terminator);;
   }
 
   template<size_t N>
-  void read_till(char(&dst)[N], const char* terminator) {
+  void read_till(char(&dst)[N], const char * terminator) {
     read_till(dst, N, terminator);
   }
 
   template<size_t N>
-  void sws_read_till(char(&dst)[N], const char* terminator) {
+  void sws_read_till(char(&dst)[N], const char * terminator) {
     sws_read_till(dst, N, terminator);
   }
 };
 
-std::vector<const char*> input_files;
+std::vector<const char *> input_files;
 
-void error(const char* msg, StreamBuffer& buffer) {
+void error(const char * msg, StreamBuffer & buffer) {
   char tmp[20] = "";
   buffer.sws_read_till(tmp, WHITESPACE);
   fprintf(stderr, "%s: %s(%i) [found '%s']\n", msg, buffer.path, buffer.cursor_line, tmp);
   exit(1);
 }
 
-void parse(ParseContext& ctx, StreamBuffer& buffer) {
+void parse(ParseContext & ctx, StreamBuffer & buffer) {
   char tmp[64] = "";
   while (!buffer.eof)
   {
@@ -295,7 +295,7 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
     }
     if (buffer.test_and_skip("enum ")) {
       if (buffer.test_and_skip("class ") || buffer.test_and_skip("struct ")) {
-        enum_class_info& enumci = ctx.enum_classes.emplace_back();
+        enum_class_info & enumci = ctx.enum_classes.emplace_back();
         buffer.sws_read_till(enumci.name, "{:" WHITESPACE);
         char c = buffer.sws_get();
 
@@ -314,7 +314,7 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
             if (c != ';') error("expect ';'", buffer);
             break;
           }
-          
+
           enum_info & enumi = enumci.enums.emplace_back();
           buffer.sws_read_till(enumi.name, ",=}" WHITESPACE);
           c = buffer.sws_peek();
@@ -326,11 +326,11 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
           }
           if (c == ',') buffer.skip(1);
         }
-      
+
         if (enumci.enums.size() > 0) {
           enumci.enums[0].value_type = value_type_t::Set;
         }
-      
+
         assert(enumci.enums.size() != 0);
         enumci.default_value = enumci.enums[0];
       }
@@ -340,7 +340,7 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
     }
 
     if (buffer.test_and_skip("struct ")) {
-      struct_info& structi = ctx.structs.emplace_back();
+      struct_info & structi = ctx.structs.emplace_back();
 
       buffer.sws_read_till(structi.name, ";{" WHITESPACE);
 
@@ -368,7 +368,7 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
             buffer.sws_read_till(memberi.default_value, ";");
             c = buffer.get();
           }
-          
+
           if (c != ';') error("Expected ';'", buffer);
           if (buffer.sws_peek() == '}') {
             buffer.skip(1);
@@ -388,11 +388,11 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
         function_info& funci = ctx.functions.emplace_back();
         copy(funci.name, name);
 
-        while(buffer.sws_peek() != ')')
+        while (buffer.sws_peek() != ')')
         {
           buffer.sws_read_till(tmp, ",)");
           if (!is_empty(tmp)) {
-            function_parameter_info& para = funci.parameters.emplace_back();
+            function_parameter_info & para = funci.parameters.emplace_back();
 
             StreamBuffer para_buffer;
             para_buffer.load_mem(tmp);
@@ -434,14 +434,14 @@ void parse(ParseContext& ctx, StreamBuffer& buffer) {
 }
 
 //printf trim trailing hitespaces
-template<typename... Args> 
-void printf_ttws(const char* f, Args... args) {
+template<typename... Args>
+void printf_ttws(const char * f, Args... args) {
   char buffer[1024];
 
   sprintf(buffer, f, args...);
 
-  char* pto = buffer;
-  char* pfrom = buffer;
+  char * pto = buffer;
+  char * pfrom = buffer;
 
   size_t spaces = 0;
 
@@ -492,7 +492,7 @@ void printf_ttws(const char* f, Args... args) {
   printf(buffer);
 }
 
-void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
+void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   printf_ttws("#pragma once\n");
   printf_ttws("\n");
   printf_ttws("#include <rose/hash.h>\n");
@@ -513,7 +513,7 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
 
 
   //dump declaration
-  for (auto& enumci : c.enum_classes) {
+  for (auto & enumci : c.enum_classes) {
     puts("");
     char type[64] = "";
     if (enumci.custom_type) {
@@ -529,13 +529,13 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
     printf_ttws("  }\n");
     printf_ttws("  hash_value         hash(const %s &o);\n", enumci.name);
     printf_ttws("  void construct_defaults(      %s &o); //TODO: implement me\n", enumci.name);
-    
+
     printf_ttws("}\n");
     puts("");
   }
 
-  for (auto& structi : c.structs) {
-    const char* sname = structi.name;
+  for (auto & structi : c.structs) {
+    const char * sname = structi.name;
 
     puts("");
     printf_ttws("struct                %s;\n", structi.name);
@@ -600,12 +600,12 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
 
 
   //dump implementation
-  for (auto& enumci : c.enum_classes) {
-    const char* ename = enumci.name;
+  for (auto & enumci : c.enum_classes) {
+    const char * ename = enumci.name;
     printf_ttws("const char * to_string(const %s & e) {\n", enumci.name);
     printf_ttws("    switch(e) {\n");
-    for (auto& enumi : enumci.enums) {
-      const char* eval = enumi.name;
+    for (auto & enumi : enumci.enums) {
+      const char * eval = enumi.name;
       printf_ttws("        case %s::%s: return \"%s\";\n", enumci.name, eval, eval);
     }
     printf_ttws("        default: return \"<UNKNOWN>\";\n");
@@ -616,8 +616,8 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
     printf_ttws("void rose::ecs::serialize(%s& o, ISerializer& s) {                   \n", ename);
     printf_ttws("  switch (o) {                                                       \n");
 
-    for (auto& enumi : enumci.enums) {
-      const char* eval = enumi.name;
+    for (auto & enumi : enumci.enums) {
+      const char * eval = enumi.name;
       printf_ttws("    case %s::%s: {                                                 \n", ename, eval);
       printf_ttws("      char str[] = \"%s\";                                         \n", eval);
       printf_ttws("      serialize(str, s);                                           \n");
@@ -634,8 +634,8 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
     printf_ttws("  deserialize(str, s);                                               \n");
     printf_ttws("  rose::hash_value h = rose::hash(str);                              \n");
     printf_ttws("  switch (h) {                                                       \n");
-    for (auto& enumi : enumci.enums) {
-      const char* eval = enumi.name;
+    for (auto & enumi : enumci.enums) {
+      const char * eval = enumi.name;
       printf_ttws("  case rose::hash(\"%s\"): o = %s::%s; break;                      \n", eval, ename, eval);
     }
     printf_ttws("  default: /*unknown value*/ break;                                  \n");
@@ -648,8 +648,8 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
 
   }
 
-  for (auto& structi : c.structs) {
-    const char* sname = structi.name;
+  for (auto & structi : c.structs) {
+    const char * sname = structi.name;
 
     printf_ttws("///////////////////////////////////////////////////////////////////\n");
     printf_ttws("//  struct %s\n", sname);
@@ -661,7 +661,7 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
     printf_ttws("bool operator==(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
     printf_ttws("  return \n");
     int left = structi.members.size() - 1;
-    for (auto& member : structi.members) {
+    for (auto & member : structi.members) {
       printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "&&" : ";");
       --left;
     }
@@ -670,7 +670,7 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
     printf_ttws("bool operator!=(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
     printf_ttws("  return \n");
     left = structi.members.size() - 1;
-    for (auto& member : structi.members) {
+    for (auto & member : structi.members) {
       printf_ttws("    !rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "||" : ";");
       --left;
     }
@@ -683,8 +683,8 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
     printf_ttws("void rose::ecs::serialize(%s &o, ISerializer &s) {                      \n", sname);
     printf_ttws("  if(s.node_begin(\"%s\", rose::hash(\"%s\"), &o)) {                \n", sname, sname);
 
-    for (auto& member : structi.members) {
-      const char* mname = member.name;
+    for (auto & member : structi.members) {
+      const char * mname = member.name;
       printf_ttws("    s.key(\"%s\");                                                \n", mname);
       printf_ttws("    serialize(o.%s, s);                                           \n", mname);
     }
@@ -704,8 +704,8 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
     printf_ttws("  while (s.next_key()) {                                 \n");
     printf_ttws("    switch (s.hash_key()) {                              \n");
 
-    for (auto& member : structi.members) {
-      const char* mname = member.name;
+    for (auto & member : structi.members) {
+      const char * mname = member.name;
       printf_ttws("      case rose::hash(\"%s\"):                         \n", mname);
       printf_ttws("        deserialize(o.%s, s);                          \n", mname);
       printf_ttws("        break;                                         \n");
@@ -721,8 +721,8 @@ void dump_cpp(ParseContext& c, int argc = 0, char** argv = nullptr) {
     printf_ttws("rose::hash_value rose::hash(const %s &o) {              \n", sname);
     printf_ttws("  rose::hash_value h = 0;                   \n");
 
-    for (auto& member : structi.members) {
-      const char* mname = member.name;
+    for (auto & member : structi.members) {
+      const char * mname = member.name;
       printf_ttws("  h ^= rose::hash(o.%s);                  \n", mname);
       printf_ttws("  h = rose::xor64(h);                     \n");
     }
@@ -780,7 +780,7 @@ void printhelp() {
   );
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char ** argv) {
   if (argc < 2) {
     printhelp();
     exit(1);
@@ -789,11 +789,11 @@ int main(int argc, char** argv) {
   rose::hash_value state = rose::hash("NONE");
 
   bool close_stdout = false; //in case we redirect stdout to something else
-  
-  const char* json_path = nullptr;
+
+  const char * json_path = nullptr;
 
   for (int i = 1; i < argc; ++i) {
-    const char* arg = argv[i];
+    const char * arg = argv[i];
     rose::hash_value h = rose::hash(arg);
     if (h == rose::hash("--help") || h == rose::hash("-H")) {
       state = rose::hash("NONE");
@@ -808,7 +808,7 @@ int main(int argc, char** argv) {
       state = rose::hash("NONE");
       ++i;
       assert(i != argc);
-      const char* path = argv[i];
+      const char * path = argv[i];
       (void)freopen(path, "wb", stdout);
       close_stdout = true;
       continue;
@@ -817,11 +817,11 @@ int main(int argc, char** argv) {
       state = rose::hash("NONE");
       ++i;
       assert(i != argc);
-      const char* path = argv[i];
+      const char * path = argv[i];
       json_path = path;
       continue;
     }
-    
+
     switch (state) {
     case rose::hash("INCLUDE"): input_files.push_back(arg); break;
     default: printf("Unknown argument %s. \n", arg); exit(1); break;
@@ -836,7 +836,7 @@ int main(int argc, char** argv) {
     parse(c, buffer);
     buffer.unload();
   }
-  
+
   dump_cpp(c, argc, argv);
 
   if (close_stdout) {
@@ -844,7 +844,7 @@ int main(int argc, char** argv) {
   }
 
   if (json_path) {
-    FILE* f = fopen(json_path, "w");
+    FILE * f = fopen(json_path, "w");
     assert(f);
     JsonSerializer jsons(f);
     rose::ecs::serialize(c, jsons);
