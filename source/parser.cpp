@@ -388,7 +388,7 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
             c = buffer.sws_get();
           }
 
-          if (c == ',') goto new_member;
+          if (c == ',') goto new_member; //new member, same type
           if (c == '=') {
             buffer.sws_read_till(memberi.default_value, ";");
             c = buffer.get();
