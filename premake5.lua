@@ -4,7 +4,7 @@ print("Building Solution " .. project_name)
 
 workspace (project_name)
   characterset ("MBCS")
-  configurations { "Debug", "DebugConsole", "DebugFast", "Release", "ReleaseInstall" }
+  configurations { "DebugTest", "ReleaseTest", "DebugParserHeader", "ReleaseParserHeader", "ReleaseInstall" }
   startproject "app.parser"
   location ".build/projects"
   targetdir ".build/bin/%{cfg.buildcfg}"
@@ -39,18 +39,21 @@ workspace (project_name)
     defines { "DEBUG", "EA_DEBUG" }
     symbols "Full"
     optimize "Off"
-    targetsuffix "-d"
-
-  filter "configurations:DebugFast"
-    optimize "Size"
 
   filter "configurations:Release*"
     defines { "RELEASE", "NDEBUG" }
     symbols "Off"
     optimize "Size"
-    targetsuffix ""
 
-  filter "configurations:ReleaseInstall"
+  filter "configurations:*ParserHeader"
+    debugdir "source/"
+    debugargs { "--include parser.h -O parser_serializer.h" }
+
+  filter "configurations:*Test"
+    debugdir "bin/"
+    debugargs { "--include enginesettings.h -O enginesettings_serializer.h -J enginesettings.json -V" }
+
+  filter "configurations:*Install"
     targetdir "../environment/PATH/"
 
 project "_root"
@@ -68,8 +71,6 @@ project "app.parser"
   warnings "Extra"
   --debugdir "bin/"
   --debugargs { "--include camera.h -O camera_serilizer.h -J camera.json" }
-  debugdir "source/"
-  debugargs { "--include parser.h -O parser_serializer.h" }
   includedirs { "externals/roselib/include" }
   includedirs { "externals/premake-comppp/include" }
   files { "source/**" }
