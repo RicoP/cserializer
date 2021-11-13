@@ -1,0 +1,7 @@
+﻿---
+IndentWidth: '2'
+PointerAlignment: Middle
+TabWidth: '2'
+UseTab: Never
+
+...
