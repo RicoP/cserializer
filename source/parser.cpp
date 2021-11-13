@@ -873,6 +873,7 @@ int main(int argc, char ** argv) {
   rose::hash_value state = rose::hash("NONE");
 
   bool close_stdout = false; //in case we redirect stdout to something else
+  bool verbose = false;
 
   const char * json_path = nullptr;
 
@@ -886,6 +887,10 @@ int main(int argc, char ** argv) {
     }
     if (h == rose::hash("--include") || h == rose::hash("-I")) {
       state = rose::hash("INCLUDE");
+      continue;
+    }
+    if (h == rose::hash("--verbose") || h == rose::hash("-V")) {
+      verbose = true;
       continue;
     }
     if (h == rose::hash("--output") || h == rose::hash("-O")) {
@@ -916,6 +921,7 @@ int main(int argc, char ** argv) {
 
   for (auto path : input_files) {
     StreamBuffer buffer;
+    if (verbose) fprintf(stderr, "Parsing File %s\n", path);
     buffer.load(path);
     parse(c, buffer);
     buffer.unload();
