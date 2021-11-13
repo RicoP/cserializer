@@ -418,6 +418,58 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
 
       char name[64];
       buffer.sws_read_c_identifier(name);
+
+      if (rose::hash(name) == rose::hash("operator")) {
+        size_t len = strlen("operator");
+        size_t size = sizeof(name) - len;
+        char * p = name + len;
+
+        assert(size > 3);
+        *(p++) = buffer.get();
+        *(p++) = buffer.get();
+        *(p++) = 0;
+
+        switch (rose::hash(name)) {
+        case rose::hash("operator!"):
+        case rose::hash("operator!="):
+        case rose::hash("operator%"):
+        case rose::hash("operator%="):
+        case rose::hash("operator&"):
+        case rose::hash("operator&&"):
+        case rose::hash("operator&="):
+        case rose::hash("operator*"):
+        case rose::hash("operator*="):
+        case rose::hash("operator+"):
+        case rose::hash("operator++"):
+        case rose::hash("operator+="):
+        case rose::hash("operator,"):
+        case rose::hash("operator-"):
+        case rose::hash("operator--"):
+        case rose::hash("operator-="):
+        case rose::hash("operator->"):
+        case rose::hash("operator->*"):
+        case rose::hash("operator<"):
+        case rose::hash("operator<<"):
+        case rose::hash("operator<<="):
+        case rose::hash("operator<="):
+        case rose::hash("operator="):
+        case rose::hash("operator=="):
+        case rose::hash("operator>"):
+        case rose::hash("operator>="):
+        case rose::hash("operator>>"):
+        case rose::hash("operator>>="):
+        case rose::hash("operator|"):
+        case rose::hash("operator|="):
+        case rose::hash("operator||"):
+        case rose::hash("operator~"):
+        case rose::hash("operator/"):
+        case rose::hash("operator/="):
+          //https://www.ibm.com/docs/en/zos/2.1.0?topic=only-overloading-operators
+          /* OK */ break;
+        default: error("Unknown operator", buffer);
+        }
+      }
+
       if (buffer.test_and_skip("(")) {
         function_info & funci = ctx.functions.emplace_back();
         copy(funci.type, type);
