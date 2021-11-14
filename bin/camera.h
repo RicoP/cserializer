@@ -32,6 +32,7 @@ struct Camera {
 };
 
 struct Transform {
+	char name[64] = "Hello";
 	Camera camera;
 	vector3 position;
 };
@@ -48,5 +49,5 @@ void serialize2(const Camera o, ISerializer & s) {
 
 
 bool compare(const Camera & lhs, const Camera & rhs) {
-	//BLA BLA
+	return false;
 }

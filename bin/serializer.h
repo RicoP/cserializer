@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////////////////
 //  AUTOGEN                                                      //
 //  command:
-//    rose.parser --include camera.h -O camera_serilizer.h -J camera.json
+//    rose.parser --include enginesettings.h camera.h -O serializer.h -J output.json -V
 ///////////////////////////////////////////////////////////////////
 
 enum class                   enum_test : long long ;
@@ -16,7 +16,8 @@ namespace rose {
     void      deserialize(enum_test &o, IDeserializer &s);
     void        serialize(enum_test &o, ISerializer &s);
   }
-  hash_value       hash(const enum_test &o);
+  hash_value         hash(const enum_test &o);
+  void construct_defaults(      enum_test &o); //TODO: implement me
 }
 
 
@@ -27,7 +28,21 @@ namespace rose {
     void      deserialize(enum_test2 &o, IDeserializer &s);
     void        serialize(enum_test2 &o, ISerializer &s);
   }
-  hash_value       hash(const enum_test2 &o);
+  hash_value         hash(const enum_test2 &o);
+  void construct_defaults(      enum_test2 &o); //TODO: implement me
+}
+
+
+struct                EngineSettings;
+namespace rose {
+  namespace ecs {
+    bool operator==(const EngineSettings &lhs, const EngineSettings &rhs);
+    bool operator!=(const EngineSettings &lhs, const EngineSettings &rhs);
+    void      deserialize(EngineSettings &o, IDeserializer &s);
+    void        serialize(EngineSettings &o, ISerializer &s);
+  }
+  hash_value         hash(const EngineSettings &o);
+  void construct_defaults(      EngineSettings &o); //TODO: implement me
 }
 
 
@@ -39,7 +54,8 @@ namespace rose {
     void      deserialize(vector3 &o, IDeserializer &s);
     void        serialize(vector3 &o, ISerializer &s);
   }
-  hash_value       hash(const vector3 &o);
+  hash_value         hash(const vector3 &o);
+  void construct_defaults(      vector3 &o); //TODO: implement me
 }
 
 
@@ -51,7 +67,8 @@ namespace rose {
     void      deserialize(Camera &o, IDeserializer &s);
     void        serialize(Camera &o, ISerializer &s);
   }
-  hash_value       hash(const Camera &o);
+  hash_value         hash(const Camera &o);
+  void construct_defaults(      Camera &o); //TODO: implement me
 }
 
 
@@ -63,7 +80,8 @@ namespace rose {
     void      deserialize(Transform &o, IDeserializer &s);
     void        serialize(Transform &o, ISerializer &s);
   }
-  hash_value       hash(const Transform &o);
+  hash_value         hash(const Transform &o);
+  void construct_defaults(      Transform &o); //TODO: implement me
 }
 
 
@@ -75,12 +93,57 @@ namespace rose {
     void      deserialize(Scene1 &o, IDeserializer &s);
     void        serialize(Scene1 &o, ISerializer &s);
   }
-  hash_value       hash(const Scene1 &o);
+  hash_value         hash(const Scene1 &o);
+  void construct_defaults(      Scene1 &o); //TODO: implement me
 }
 
 
 #ifdef IMPL_SERIALIZER
 
+    #include <cstring>
+
+    //internal helper methods
+    template<class T>
+    bool rose_parser_equals(const T& lhs, const T& rhs) {
+      return lhs == rhs;
+    }
+
+    template<class T, size_t N>
+    bool rose_parser_equals(const T(&lhs)[N], const T(&rhs)[N]) {
+      for (size_t i = 0; i != N; ++i) {
+        if (lhs[i] != rhs[i]) return false;
+      }
+      return true;
+    }
+
+    template<size_t N>
+    bool rose_parser_equals(const char(&lhs)[N], const char(&rhs)[N]) {
+      for (size_t i = 0; i != N; ++i) {
+        if (lhs[i] != rhs[i]) return false;
+        if (lhs[i] == 0) return true;
+      }
+      return true;
+    }
+
+    template<class T>
+    bool rose_parser_equals(const std::vector<T> &lhs, const std::vector<T> &rhs) {
+      if (lhs.size() != rhs.size()) return false;
+      for (size_t i = 0; i != lhs.size(); ++i) {
+        if (lhs[i] != rhs[i]) return false;
+      }
+      return true;
+    }
+
+    template<class TL, class TR>
+    void assign(TL& lhs, TR&& rhs) {
+      lhs = rhs;
+    }
+
+    template<class T>
+    void construct_default(std::vector<T> & v) {
+      c.clear();
+    }
+  
 const char * to_string(const enum_test & e) {
     switch(e) {
         case enum_test::NONE: return "NONE";
@@ -210,20 +273,62 @@ rose::hash_value       rose::hash(const enum_test2& o) {
 }
 
 ///////////////////////////////////////////////////////////////////
+//  struct EngineSettings
+///////////////////////////////////////////////////////////////////
+bool operator==(const EngineSettings &lhs, const EngineSettings &rhs) {
+  return
+    rose_parser_equals(lhs.raytracer, rhs.raytracer) ;
+}
+
+bool operator!=(const EngineSettings &lhs, const EngineSettings &rhs) {
+  return
+    !rose_parser_equals(lhs.raytracer, rhs.raytracer) ;
+}
+
+void rose::ecs::serialize(EngineSettings &o, ISerializer &s) {
+  if(s.node_begin("EngineSettings", rose::hash("EngineSettings"), &o)) {
+    s.key("raytracer");
+    serialize(o.raytracer, s);
+    s.node_end();
+  }
+  s.end();
+}
+
+void rose::ecs::deserialize(EngineSettings &o, IDeserializer &s) {
+  //TODO: implement me
+  //construct_defaults(o);
+
+  while (s.next_key()) {
+    switch (s.hash_key()) {
+      case rose::hash("raytracer"):
+        deserialize(o.raytracer, s);
+        break;
+      default: s.skip_key(); break;
+    }
+  }
+}
+
+rose::hash_value rose::hash(const EngineSettings &o) {
+  rose::hash_value h = 0;
+  h ^= rose::hash(o.raytracer);
+  h = rose::xor64(h);
+  return h;
+}
+///////////////////////////////////////////////////////////////////
 //  struct vector3
 ///////////////////////////////////////////////////////////////////
 bool operator==(const vector3 &lhs, const vector3 &rhs) {
   return
-    lhs.x == rhs.x &&
-    lhs.y == rhs.y &&
-    lhs.z == rhs.z;
+    rose_parser_equals(lhs.x, rhs.x) &&
+    rose_parser_equals(lhs.y, rhs.y) &&
+    rose_parser_equals(lhs.z, rhs.z) ;
 }
 
 bool operator!=(const vector3 &lhs, const vector3 &rhs) {
   return
-    lhs.x != rhs.x ||
-    lhs.y != rhs.y ||
-    lhs.z != rhs.z;
+    !rose_parser_equals(lhs.x, rhs.x) ||
+    !rose_parser_equals(lhs.y, rhs.y) ||
+    !rose_parser_equals(lhs.z, rhs.z) ;
 }
 
 void rose::ecs::serialize(vector3 &o, ISerializer &s) {
@@ -274,16 +379,16 @@ rose::hash_value rose::hash(const vector3 &o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const Camera &lhs, const Camera &rhs) {
   return
-    lhs.x == rhs.x &&
-    lhs.y == rhs.y &&
-    lhs.z == rhs.z;
+    rose_parser_equals(lhs.x, rhs.x) &&
+    rose_parser_equals(lhs.y, rhs.y) &&
+    rose_parser_equals(lhs.z, rhs.z) ;
 }
 
 bool operator!=(const Camera &lhs, const Camera &rhs) {
   return
-    lhs.x != rhs.x ||
-    lhs.y != rhs.y ||
-    lhs.z != rhs.z;
+    !rose_parser_equals(lhs.x, rhs.x) ||
+    !rose_parser_equals(lhs.y, rhs.y) ||
+    !rose_parser_equals(lhs.z, rhs.z) ;
 }
 
 void rose::ecs::serialize(Camera &o, ISerializer &s) {
@@ -334,18 +439,22 @@ rose::hash_value rose::hash(const Camera &o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const Transform &lhs, const Transform &rhs) {
   return
-    lhs.camera == rhs.camera &&
-    lhs.position == rhs.position;
+    rose_parser_equals(lhs.name, rhs.name) &&
+    rose_parser_equals(lhs.camera, rhs.camera) &&
+    rose_parser_equals(lhs.position, rhs.position) ;
 }
 
 bool operator!=(const Transform &lhs, const Transform &rhs) {
   return
-    lhs.camera != rhs.camera ||
-    lhs.position != rhs.position;
+    !rose_parser_equals(lhs.name, rhs.name) ||
+    !rose_parser_equals(lhs.camera, rhs.camera) ||
+    !rose_parser_equals(lhs.position, rhs.position) ;
 }
 
 void rose::ecs::serialize(Transform &o, ISerializer &s) {
   if(s.node_begin("Transform", rose::hash("Transform"), &o)) {
+    s.key("name");
+    serialize(o.name, s, std::strlen(o.name));
     s.key("camera");
     serialize(o.camera, s);
     s.key("position");
@@ -361,6 +470,9 @@ void rose::ecs::deserialize(Transform &o, IDeserializer &s) {
 
   while (s.next_key()) {
     switch (s.hash_key()) {
+      case rose::hash("name"):
+        deserialize(o.name, s);
+        break;
       case rose::hash("camera"):
         deserialize(o.camera, s);
         break;
@@ -374,6 +486,8 @@ void rose::ecs::deserialize(Transform &o, IDeserializer &s) {
 
 rose::hash_value rose::hash(const Transform &o) {
   rose::hash_value h = 0;
+  h ^= rose::hash(o.name);
+  h = rose::xor64(h);
   h ^= rose::hash(o.camera);
   h = rose::xor64(h);
   h ^= rose::hash(o.position);
@@ -385,12 +499,12 @@ rose::hash_value rose::hash(const Transform &o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const Scene1 &lhs, const Scene1 &rhs) {
   return
-    lhs.cameras == rhs.cameras;
+    rose_parser_equals(lhs.cameras, rhs.cameras) ;
 }
 
 bool operator!=(const Scene1 &lhs, const Scene1 &rhs) {
   return
-    lhs.cameras != rhs.cameras;
+    !rose_parser_equals(lhs.cameras, rhs.cameras) ;
 }
 
 void rose::ecs::serialize(Scene1 &o, ISerializer &s) {

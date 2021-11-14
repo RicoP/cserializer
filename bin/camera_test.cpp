@@ -11,8 +11,10 @@
 #include <serializer/jsonserializer.h>
 
 #include "camera.h"
+#include "enginesettings.h"
+
 #define IMPL_SERIALIZER
-#include "camera_serilizer.h"
+#include "serializer.h"
 
 int main() {
   
@@ -53,6 +55,9 @@ int main() {
   JsonDeserializer jsond(json);
   Transform transform2;
   rose::ecs::deserialize(transform2, jsond);
+  //transform2.name[0] = 'B';
   
-  return transform == transform2 ? 0 : 1;
+  bool equal = transform == transform2;
+  assert(equal);
+  return equal ? 0 : 1;
 }
