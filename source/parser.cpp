@@ -397,10 +397,13 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
       char c = buffer.get();
       if (c == '{') {
         for (;;) {
-          char annotation_s[128];
-          member_info ignored_member; //in case we want to ignore the member
           member_annotations_t annotation = member_annotations_t::NONE;
-          if (buffer.test_annotation(annotation_s)) {
+          member_info ignored_member; //in case we want to ignore the member
+          
+          char annotation_s[128] = "\"";
+          if (buffer.test_annotation(annotation_s + 1, sizeof(annotation_s) - 1)) {
+            annotation_s[strlen(annotation_s)] = '\"';
+            annotation_s[strlen(annotation_s)] = 0;
             JsonDeserializer jsond(annotation_s);
             rose::ecs::deserialize(annotation, jsond);
           }
@@ -410,8 +413,8 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
 
         new_member:
           member_info & memberi = annotation == member_annotations_t::Ignore 
-            ? ignored_member 
-            : structi.members.emplace_back();
+            ? ignored_member //fake member we just write to but immediately discard
+            : structi.members.emplace_back(); //otherwise create new member
 
           memberi.annotations = annotation;
           copy(memberi.type, type);
@@ -427,7 +430,7 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
             c = buffer.sws_get();
           }
 
-          if (c == ',') goto new_member; //new member, same type
+          if (c == ',') goto new_member; //new member, same type and annotation
           if (c == '=') {
             buffer.sws_read_till(memberi.default_value, ";");
             c = buffer.get();
@@ -813,7 +816,30 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       printf_ttws("    s.key(\"%s\");                                                \n", mname);
       if (member.count > 1 && rose::hash(member.type) == rose::hash("char")) {
         //when type is char[n] then treat is as a string.
-        printf_ttws("    serialize(o.%s, s, std::strlen(o.%s));                      \n", mname, mname);
+        int bit = 0;
+        bit |= member.annotations == member_annotations_t::Data ? 1 << 0 : 0;
+        bit |= member.annotations == member_annotations_t::String ? 1 << 1 : 0;
+        switch (bit)
+        {
+        case 1 << 0: //DATA
+          printf_ttws("    serialize(o.%s, s);                                         \n", mname);
+          break;
+        case 1 << 1: //STRING
+          printf_ttws("    serialize(o.%s, s, std::strlen(o.%s));                      \n", mname, mname);
+          break;
+        case 0: //NONE
+          fprintf(stderr, "Member '%s::%s' must have either annotations @String or @Data.", structi.name, member.name);
+          exit(1);
+          break;
+        case 1 << 0 | 1 << 1: //BOTH
+          fprintf(stderr, "Member '%s::%s' can't have both annotations @String and @Data.", structi.name, member.name);
+          exit(1);
+          break;
+        default:
+          //Shoyuld be unreachable
+          assert(false);
+          break;
+        }
       }
       else {
         printf_ttws("    serialize(o.%s, s);                                         \n", mname);
