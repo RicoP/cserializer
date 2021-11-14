@@ -45,17 +45,6 @@ workspace (project_name)
     symbols "Off"
     optimize "Size"
 
-  filter "configurations:*ParserHeader"
-    debugdir "source/"
-    debugargs { "--include parser.h -O parser_serializer.h" }
-
-  filter "configurations:*Test"
-    debugdir "bin/"
-    debugargs { "--include enginesettings.h -O enginesettings_serializer.h -J enginesettings.json -V" }
-
-  filter "configurations:*Install"
-    targetdir "../environment/PATH/"
-
 project "_root"
   filter "system:Windows"
     kind "None"
@@ -69,11 +58,17 @@ project "app.parser"
   targetname "rose.parser"
   kind "ConsoleApp"
   warnings "Extra"
-  --debugdir "bin/"
-  --debugargs { "--include camera.h -O camera_serilizer.h -J camera.json" }
   includedirs { "externals/roselib/include" }
   includedirs { "externals/premake-comppp/include" }
   files { "source/**" }
+  filter "configurations:*ParserHeader"
+    debugdir "source/"
+    debugargs { "--include parser.h -O parser_serializer.h" }
+  filter "configurations:*Test"
+    debugdir "bin/"
+    debugargs { "--include enginesettings.h camera.h -O serializer.h -J output.json -V" }
+  filter "configurations:*Install"
+    targetdir "../environment/PATH/"
 
 project "test.camera"
   kind "ConsoleApp"
