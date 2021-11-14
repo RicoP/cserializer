@@ -13,7 +13,7 @@
 #define IMPL_SERIALIZER
 #include "parser_serializer.h"
 
-#define WHITESPACE " \t\n\r"
+#define WHITESPACE " \n\r\t"
 
 bool is_empty(const char * c) {
   return *c == 0;
@@ -305,9 +305,10 @@ void error(const char * msg, StreamBuffer & buffer) {
   exit(1);
 }
 
-void surround_qoutes(char * str, size_t len, StreamBuffer & buffer) {
+//str -> "str"
+void quotify(char * str, size_t len, StreamBuffer & buffer) {
   size_t l = std::strlen(str);
-  if (l >= len - 1) error("string to long", buffer);
+  if (l >= len - 2) error("string to long", buffer);
   str[l+2] = 0;
   str[l+1] = '\"';
   for (size_t i = l; i != 0; --i) {
@@ -317,10 +318,9 @@ void surround_qoutes(char * str, size_t len, StreamBuffer & buffer) {
 }
 
 template<size_t N>
-void surround_qoutes(char(&str)[N], StreamBuffer & buffer) {
-  surround_qoutes(str, N, buffer);
+void quotify(char(&str)[N], StreamBuffer & buffer) {
+  quotify(str, N, buffer);
 }
-
 
 void parse(ParseContext & ctx, StreamBuffer & buffer) {
   char tmp[64] = "";
@@ -364,7 +364,7 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
         enum_class_info & enumci = ctx.enum_classes.emplace_back();
 
         if (has_annotation) {
-          surround_qoutes(annotation_s, buffer);
+          quotify(annotation_s, buffer);
           JsonDeserializer jsond(annotation_s);
           rose::ecs::deserialize(enumci.enum_annotations, jsond);
         }
@@ -431,7 +431,7 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
           
           char annotation_s[64];
           if (buffer.test_annotation(annotation_s)) {
-            surround_qoutes(annotation_s, buffer);
+            quotify(annotation_s, buffer);
             JsonDeserializer jsond(annotation_s);
             rose::ecs::deserialize(annotation, jsond);
           }
