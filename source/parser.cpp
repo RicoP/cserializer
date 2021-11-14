@@ -223,6 +223,33 @@ struct StreamBuffer {
     }
   }
 
+  bool test_annotation(char * dst, size_t len) {
+    if (test_and_skip("//@")) {
+      read_till(dst, len, WHITESPACE);
+      skip_line();
+      return true;
+    }
+    return false;
+  }
+
+  template<size_t N>
+  bool test_annotation(char (&dst)[N]) {
+    return test_annotation(dst, N);
+  }
+
+  bool skip_comment() {
+    bool has_multi_comment = test_and_skip("/*");
+    if (has_multi_comment) {
+      skip_till("*/");
+      skip(2);
+      return true;
+    }
+
+    bool has_single_comment = test_and_skip("//");
+    if (has_single_comment) { skip_line(); }
+    return has_single_comment;
+  }
+
   void read_c_identifier(char * dst, size_t len) {
     char * p = dst;
     for (;;) {
@@ -284,9 +311,8 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
     ////////////////////////////////////////////////////////
     // COMMENTS                                           //
     ////////////////////////////////////////////////////////
-    if (buffer.test_and_skip("//")) {
+    if (buffer.skip_comment()) {
       //TODO: we need a more flexible way to check for comments
-      buffer.skip_line();
       continue;
     }
 

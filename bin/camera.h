@@ -20,6 +20,12 @@ enum struct enum_test2 {
 	INVALID
 };
 
+/* Multi 
+line comments
+should work fine*/
+
+// Single comments too 
+
 struct vector3 {
 	float x,  y  ,   z;
 };
