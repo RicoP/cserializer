@@ -38,6 +38,7 @@ struct Camera {
 };
 
 struct Transform {
+	//@String
 	char name[64] = "Hello";
 	Camera camera;
 	vector3 position;

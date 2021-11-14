@@ -55,9 +55,15 @@ int main() {
   JsonDeserializer jsond(json);
   Transform transform2;
   rose::ecs::deserialize(transform2, jsond);
-  //transform2.name[0] = 'B';
-  
-  bool equal = transform == transform2;
-  assert(equal);
-  return equal ? 0 : 1;
+
+  assert(transform == transform2);
+
+  transform.interpolated_position.x = 1;
+  transform2.interpolated_position.x = 2;
+  assert(transform == transform2); //interpolated_position is ignored
+
+  transform2.name[0] = 'B';
+  assert(transform != transform2);
+
+  return 0;
 }
