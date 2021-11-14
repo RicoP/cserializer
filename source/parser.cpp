@@ -639,6 +639,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   printf_ttws("\n#ifdef IMPL_SERIALIZER\n");
 
   puts(R"MLS(
+    #include <cstring>
+
     //internal helper methods
     template<class T>
     bool rose_parser_equals(const T& lhs, const T& rhs) {
@@ -657,7 +659,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     bool rose_parser_equals(const char(&lhs)[N], const char(&rhs)[N]) {
       for (size_t i = 0; i != N; ++i) {
         if (lhs[i] != rhs[i]) return false;
-        if (lhs[i] == 0) return false;
+        if (lhs[i] == 0) return true;
       }
       return true;
     }
@@ -770,7 +772,13 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     for (auto & member : structi.members) {
       const char * mname = member.name;
       printf_ttws("    s.key(\"%s\");                                                \n", mname);
-      printf_ttws("    serialize(o.%s, s);                                           \n", mname);
+      if (member.count > 1 && rose::hash(member.type) == rose::hash("char")) {
+        //when type is char[n] then treat is as a string.
+        printf_ttws("    serialize(o.%s, s, std::strlen(o.%s));                      \n", mname, mname);
+      }
+      else {
+        printf_ttws("    serialize(o.%s, s);                                         \n", mname);
+      }
     }
     printf_ttws("    s.node_end();                                                   \n");
     printf_ttws("  }                                                                 \n");

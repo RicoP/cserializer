@@ -114,6 +114,8 @@ namespace rose {
 
 #ifdef IMPL_SERIALIZER
 
+    #include <cstring>
+
     //internal helper methods
     template<class T>
     bool rose_parser_equals(const T& lhs, const T& rhs) {
@@ -132,7 +134,7 @@ namespace rose {
     bool rose_parser_equals(const char(&lhs)[N], const char(&rhs)[N]) {
       for (size_t i = 0; i != N; ++i) {
         if (lhs[i] != rhs[i]) return false;
-        if (lhs[i] == 0) return false;
+        if (lhs[i] == 0) return true;
       }
       return true;
     }
@@ -214,11 +216,11 @@ bool operator!=(const member_info &lhs, const member_info &rhs) {
 void rose::ecs::serialize(member_info &o, ISerializer &s) {
   if(s.node_begin("member_info", rose::hash("member_info"), &o)) {
     s.key("type");
-    serialize(o.type, s);
+    serialize(o.type, s, std::strlen(o.type));
     s.key("name");
-    serialize(o.name, s);
+    serialize(o.name, s, std::strlen(o.name));
     s.key("default_value");
-    serialize(o.default_value, s);
+    serialize(o.default_value, s, std::strlen(o.default_value));
     s.key("count");
     serialize(o.count, s);
     s.node_end();
@@ -279,7 +281,7 @@ bool operator!=(const struct_info &lhs, const struct_info &rhs) {
 void rose::ecs::serialize(struct_info &o, ISerializer &s) {
   if(s.node_begin("struct_info", rose::hash("struct_info"), &o)) {
     s.key("name");
-    serialize(o.name, s);
+    serialize(o.name, s, std::strlen(o.name));
     s.key("members");
     serialize(o.members, s);
     s.node_end();
@@ -332,9 +334,9 @@ bool operator!=(const enum_info &lhs, const enum_info &rhs) {
 void rose::ecs::serialize(enum_info &o, ISerializer &s) {
   if(s.node_begin("enum_info", rose::hash("enum_info"), &o)) {
     s.key("name");
-    serialize(o.name, s);
+    serialize(o.name, s, std::strlen(o.name));
     s.key("value");
-    serialize(o.value, s);
+    serialize(o.value, s, std::strlen(o.value));
     s.key("value_type");
     serialize(o.value_type, s);
     s.node_end();
@@ -396,9 +398,9 @@ bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs) {
 void rose::ecs::serialize(enum_class_info &o, ISerializer &s) {
   if(s.node_begin("enum_class_info", rose::hash("enum_class_info"), &o)) {
     s.key("name");
-    serialize(o.name, s);
+    serialize(o.name, s, std::strlen(o.name));
     s.key("type");
-    serialize(o.type, s);
+    serialize(o.type, s, std::strlen(o.type));
     s.key("custom_type");
     serialize(o.custom_type, s);
     s.key("enums");
@@ -472,9 +474,9 @@ bool operator!=(const function_parameter_info &lhs, const function_parameter_inf
 void rose::ecs::serialize(function_parameter_info &o, ISerializer &s) {
   if(s.node_begin("function_parameter_info", rose::hash("function_parameter_info"), &o)) {
     s.key("name");
-    serialize(o.name, s);
+    serialize(o.name, s, std::strlen(o.name));
     s.key("type");
-    serialize(o.type, s);
+    serialize(o.type, s, std::strlen(o.type));
     s.key("modifier");
     serialize(o.modifier, s);
     s.key("is_const");
@@ -539,9 +541,9 @@ bool operator!=(const function_info &lhs, const function_info &rhs) {
 void rose::ecs::serialize(function_info &o, ISerializer &s) {
   if(s.node_begin("function_info", rose::hash("function_info"), &o)) {
     s.key("name");
-    serialize(o.name, s);
+    serialize(o.name, s, std::strlen(o.name));
     s.key("type");
-    serialize(o.type, s);
+    serialize(o.type, s, std::strlen(o.type));
     s.key("parameters");
     serialize(o.parameters, s);
     s.node_end();
