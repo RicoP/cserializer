@@ -305,16 +305,38 @@ void error(const char * msg, StreamBuffer & buffer) {
   exit(1);
 }
 
+void surround_qoutes(char * str, size_t len, StreamBuffer & buffer) {
+  size_t l = std::strlen(str);
+  if (l >= len - 1) error("string to long", buffer);
+  str[l+2] = 0;
+  str[l+1] = '\"';
+  for (size_t i = l; i != 0; --i) {
+    str[i] = str[i - 1];
+  }
+  str[0] = '\"';
+}
+
+template<size_t N>
+void surround_qoutes(char(&str)[N], StreamBuffer & buffer) {
+  surround_qoutes(str, N, buffer);
+}
+
+
 void parse(ParseContext & ctx, StreamBuffer & buffer) {
   char tmp[64] = "";
   while (!buffer.eof)
   {
+    char annotation_s[64];
+    bool has_annotation = buffer.test_annotation(annotation_s);
+    bool has_second_annotation = buffer.test_annotation(annotation_s);
+
+    if (has_second_annotation) error("No support for more than one global annotations yet.", buffer);
+
     ////////////////////////////////////////////////////////
     // COMMENTS                                           //
     ////////////////////////////////////////////////////////
-    if (buffer.skip_comment()) {
+    while(buffer.skip_comment()) {
       //TODO: we need a more flexible way to check for comments
-      continue;
     }
 
     ////////////////////////////////////////////////////////
@@ -340,6 +362,13 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
     if (buffer.test_and_skip("enum ")) {
       if (buffer.test_and_skip("class ") || buffer.test_and_skip("struct ")) {
         enum_class_info & enumci = ctx.enum_classes.emplace_back();
+
+        if (has_annotation) {
+          surround_qoutes(annotation_s, buffer);
+          JsonDeserializer jsond(annotation_s);
+          rose::ecs::deserialize(enumci.enum_annotations, jsond);
+        }
+
         buffer.sws_read_till(enumci.name, "{:" WHITESPACE);
         char c = buffer.sws_get();
 
@@ -400,10 +429,9 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
           member_annotations_t annotation = member_annotations_t::NONE;
           member_info ignored_member; //in case we want to ignore the member
           
-          char annotation_s[128] = "\"";
-          if (buffer.test_annotation(annotation_s + 1, sizeof(annotation_s) - 1)) {
-            annotation_s[strlen(annotation_s)] = '\"';
-            annotation_s[strlen(annotation_s)] = 0;
+          char annotation_s[64];
+          if (buffer.test_annotation(annotation_s)) {
+            surround_qoutes(annotation_s, buffer);
             JsonDeserializer jsond(annotation_s);
             rose::ecs::deserialize(annotation, jsond);
           }

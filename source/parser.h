@@ -2,12 +2,12 @@
 
 #include <vector>
 
-//TODO: Make this flags
+//@Flag 
 enum class member_annotations_t {
   NONE = 0,
-  Ignore,
-  String,
-  Data
+  Ignore = 1 << 0,
+  String = 1 << 1,
+  Data = 1 << 2
 };
 
 //1 = simple variabel, >1 = array, -1 = vector
@@ -33,6 +33,11 @@ enum class value_type_t {
   Set
 };
 
+enum class enum_annotations_t {
+  NONE = 0,
+  Flag
+};
+
 struct enum_info {
   //@String
   char name[64];
@@ -49,6 +54,7 @@ struct enum_class_info {
   bool custom_type = false;
   std::vector<enum_info> enums;
   enum_info default_value;
+  enum_annotations_t enum_annotations = enum_annotations_t::NONE;
 };
 
 //modifier: 0 = none, '*', '&'

@@ -33,6 +33,18 @@ namespace rose {
 }
 
 
+enum class                   enum_annotations_t;
+const char * to_string(const enum_annotations_t &);
+namespace rose {
+  namespace ecs {
+    void      deserialize(enum_annotations_t &o, IDeserializer &s);
+    void        serialize(enum_annotations_t &o, ISerializer &s);
+  }
+  hash_value         hash(const enum_annotations_t &o);
+  void construct_defaults(      enum_annotations_t &o); //TODO: implement me
+}
+
+
 struct                member_info;
 namespace rose {
   namespace ecs {
@@ -256,6 +268,42 @@ rose::hash_value       rose::hash(const value_type_t& o) {
   return static_cast<rose::hash_value>(o);
 }
 
+const char * to_string(const enum_annotations_t & e) {
+    switch(e) {
+        case enum_annotations_t::NONE: return "NONE";
+        case enum_annotations_t::Flag: return "Flag";
+        default: return "<UNKNOWN>";
+    }
+}
+void rose::ecs::serialize(enum_annotations_t& o, ISerializer& s) {
+  switch (o) {
+    case enum_annotations_t::NONE: {
+      char str[] = "NONE";
+      serialize(str, s);
+      break;
+    }
+    case enum_annotations_t::Flag: {
+      char str[] = "Flag";
+      serialize(str, s);
+      break;
+    }
+    default: /* unknown */ break;
+  }
+}
+void rose::ecs::deserialize(enum_annotations_t& o, IDeserializer& s) {
+  char str[64];
+  deserialize(str, s);
+  rose::hash_value h = rose::hash(str);
+  switch (h) {
+  case rose::hash("NONE"): o = enum_annotations_t::NONE; break;
+  case rose::hash("Flag"): o = enum_annotations_t::Flag; break;
+  default: /*unknown value*/ break;
+  }
+}
+rose::hash_value       rose::hash(const enum_annotations_t& o) {
+  return static_cast<rose::hash_value>(o);
+}
+
 ///////////////////////////////////////////////////////////////////
 //  struct member_info
 ///////////////////////////////////////////////////////////////////
@@ -454,7 +502,8 @@ bool operator==(const enum_class_info &lhs, const enum_class_info &rhs) {
     rose_parser_equals(lhs.type, rhs.type) &&
     rose_parser_equals(lhs.custom_type, rhs.custom_type) &&
     rose_parser_equals(lhs.enums, rhs.enums) &&
-    rose_parser_equals(lhs.default_value, rhs.default_value) ;
+    rose_parser_equals(lhs.default_value, rhs.default_value) &&
+    rose_parser_equals(lhs.enum_annotations, rhs.enum_annotations) ;
 }
 
 bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs) {
@@ -463,7 +512,8 @@ bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs) {
     !rose_parser_equals(lhs.type, rhs.type) ||
     !rose_parser_equals(lhs.custom_type, rhs.custom_type) ||
     !rose_parser_equals(lhs.enums, rhs.enums) ||
-    !rose_parser_equals(lhs.default_value, rhs.default_value) ;
+    !rose_parser_equals(lhs.default_value, rhs.default_value) ||
+    !rose_parser_equals(lhs.enum_annotations, rhs.enum_annotations) ;
 }
 
 void rose::ecs::serialize(enum_class_info &o, ISerializer &s) {
@@ -478,6 +528,8 @@ void rose::ecs::serialize(enum_class_info &o, ISerializer &s) {
     serialize(o.enums, s);
     s.key("default_value");
     serialize(o.default_value, s);
+    s.key("enum_annotations");
+    serialize(o.enum_annotations, s);
     s.node_end();
   }
   s.end();
@@ -504,6 +556,9 @@ void rose::ecs::deserialize(enum_class_info &o, IDeserializer &s) {
       case rose::hash("default_value"):
         deserialize(o.default_value, s);
         break;
+      case rose::hash("enum_annotations"):
+        deserialize(o.enum_annotations, s);
+        break;
       default: s.skip_key(); break;
     }
   }
@@ -520,6 +575,8 @@ rose::hash_value rose::hash(const enum_class_info &o) {
   h ^= rose::hash(o.enums);
   h = rose::xor64(h);
   h ^= rose::hash(o.default_value);
+  h = rose::xor64(h);
+  h ^= rose::hash(o.enum_annotations);
   h = rose::xor64(h);
   return h;
 }
