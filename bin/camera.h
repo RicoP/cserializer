@@ -41,6 +41,9 @@ struct Transform {
 	char name[64] = "Hello";
 	Camera camera;
 	vector3 position;
+
+	//@Ignore this will not be serialized
+	vector3 interpolated_position;
 };
 
 struct Scene1 {

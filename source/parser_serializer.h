@@ -9,6 +9,18 @@
 //    rose.parser --include parser.h -O parser_serializer.h
 ///////////////////////////////////////////////////////////////////
 
+enum class                   member_annotations_t;
+const char * to_string(const member_annotations_t &);
+namespace rose {
+  namespace ecs {
+    void      deserialize(member_annotations_t &o, IDeserializer &s);
+    void        serialize(member_annotations_t &o, ISerializer &s);
+  }
+  hash_value         hash(const member_annotations_t &o);
+  void construct_defaults(      member_annotations_t &o); //TODO: implement me
+}
+
+
 enum class                   value_type_t;
 const char * to_string(const value_type_t &);
 namespace rose {
@@ -158,6 +170,56 @@ namespace rose {
       c.clear();
     }
   
+const char * to_string(const member_annotations_t & e) {
+    switch(e) {
+        case member_annotations_t::NONE: return "NONE";
+        case member_annotations_t::Ignore: return "Ignore";
+        case member_annotations_t::String: return "String";
+        case member_annotations_t::Data: return "Data";
+        default: return "<UNKNOWN>";
+    }
+}
+void rose::ecs::serialize(member_annotations_t& o, ISerializer& s) {
+  switch (o) {
+    case member_annotations_t::NONE: {
+      char str[] = "NONE";
+      serialize(str, s);
+      break;
+    }
+    case member_annotations_t::Ignore: {
+      char str[] = "Ignore";
+      serialize(str, s);
+      break;
+    }
+    case member_annotations_t::String: {
+      char str[] = "String";
+      serialize(str, s);
+      break;
+    }
+    case member_annotations_t::Data: {
+      char str[] = "Data";
+      serialize(str, s);
+      break;
+    }
+    default: /* unknown */ break;
+  }
+}
+void rose::ecs::deserialize(member_annotations_t& o, IDeserializer& s) {
+  char str[64];
+  deserialize(str, s);
+  rose::hash_value h = rose::hash(str);
+  switch (h) {
+  case rose::hash("NONE"): o = member_annotations_t::NONE; break;
+  case rose::hash("Ignore"): o = member_annotations_t::Ignore; break;
+  case rose::hash("String"): o = member_annotations_t::String; break;
+  case rose::hash("Data"): o = member_annotations_t::Data; break;
+  default: /*unknown value*/ break;
+  }
+}
+rose::hash_value       rose::hash(const member_annotations_t& o) {
+  return static_cast<rose::hash_value>(o);
+}
+
 const char * to_string(const value_type_t & e) {
     switch(e) {
         case value_type_t::Increment: return "Increment";
@@ -202,7 +264,8 @@ bool operator==(const member_info &lhs, const member_info &rhs) {
     rose_parser_equals(lhs.type, rhs.type) &&
     rose_parser_equals(lhs.name, rhs.name) &&
     rose_parser_equals(lhs.default_value, rhs.default_value) &&
-    rose_parser_equals(lhs.count, rhs.count) ;
+    rose_parser_equals(lhs.count, rhs.count) &&
+    rose_parser_equals(lhs.annotations, rhs.annotations) ;
 }
 
 bool operator!=(const member_info &lhs, const member_info &rhs) {
@@ -210,7 +273,8 @@ bool operator!=(const member_info &lhs, const member_info &rhs) {
     !rose_parser_equals(lhs.type, rhs.type) ||
     !rose_parser_equals(lhs.name, rhs.name) ||
     !rose_parser_equals(lhs.default_value, rhs.default_value) ||
-    !rose_parser_equals(lhs.count, rhs.count) ;
+    !rose_parser_equals(lhs.count, rhs.count) ||
+    !rose_parser_equals(lhs.annotations, rhs.annotations) ;
 }
 
 void rose::ecs::serialize(member_info &o, ISerializer &s) {
@@ -223,6 +287,8 @@ void rose::ecs::serialize(member_info &o, ISerializer &s) {
     serialize(o.default_value, s, std::strlen(o.default_value));
     s.key("count");
     serialize(o.count, s);
+    s.key("annotations");
+    serialize(o.annotations, s);
     s.node_end();
   }
   s.end();
@@ -246,6 +312,9 @@ void rose::ecs::deserialize(member_info &o, IDeserializer &s) {
       case rose::hash("count"):
         deserialize(o.count, s);
         break;
+      case rose::hash("annotations"):
+        deserialize(o.annotations, s);
+        break;
       default: s.skip_key(); break;
     }
   }
@@ -260,6 +329,8 @@ rose::hash_value rose::hash(const member_info &o) {
   h ^= rose::hash(o.default_value);
   h = rose::xor64(h);
   h ^= rose::hash(o.count);
+  h = rose::xor64(h);
+  h ^= rose::hash(o.annotations);
   h = rose::xor64(h);
   return h;
 }

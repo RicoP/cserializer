@@ -223,20 +223,6 @@ struct StreamBuffer {
     }
   }
 
-  bool test_annotation(char * dst, size_t len) {
-    if (test_and_skip("//@")) {
-      read_till(dst, len, WHITESPACE);
-      skip_line();
-      return true;
-    }
-    return false;
-  }
-
-  template<size_t N>
-  bool test_annotation(char (&dst)[N]) {
-    return test_annotation(dst, N);
-  }
-
   bool skip_comment() {
     bool has_multi_comment = test_and_skip("/*");
     if (has_multi_comment) {
@@ -248,6 +234,21 @@ struct StreamBuffer {
     bool has_single_comment = test_and_skip("//");
     if (has_single_comment) { skip_line(); }
     return has_single_comment;
+  }
+
+  bool test_annotation(char * dst, size_t len) {
+    if (test_and_skip("//@")) {
+      read_till(dst, len, WHITESPACE);
+      skip_line();
+      return true;
+    }
+    skip_comment();
+    return false;
+  }
+
+  template<size_t N>
+  bool test_annotation(char(&dst)[N]) {
+    return test_annotation(dst, N);
   }
 
   void read_c_identifier(char * dst, size_t len) {
@@ -396,11 +397,23 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
       char c = buffer.get();
       if (c == '{') {
         for (;;) {
+          char annotation_s[128];
+          member_info ignored_member; //in case we want to ignore the member
+          member_annotations_t annotation = member_annotations_t::NONE;
+          if (buffer.test_annotation(annotation_s)) {
+            JsonDeserializer jsond(annotation_s);
+            rose::ecs::deserialize(annotation, jsond);
+          }
+
           char type[64];
           buffer.sws_read_till(type, WHITESPACE);
 
         new_member:
-          member_info & memberi = structi.members.emplace_back();
+          member_info & memberi = annotation == member_annotations_t::Ignore 
+            ? ignored_member 
+            : structi.members.emplace_back();
+
+          memberi.annotations = annotation;
           copy(memberi.type, type);
           buffer.sws_read_till(memberi.name, "[;," WHITESPACE);
           c = buffer.sws_get();
