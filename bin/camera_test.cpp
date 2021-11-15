@@ -28,7 +28,6 @@ int main() {
   vector3 position{ 4,5,6 };
   transform.position = position;
 
-
   char tmp_path_B[L_tmpnam];
   
   char* tmp_path = tmpnam(tmp_path_B);

@@ -665,7 +665,6 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   }
   printf_ttws("///////////////////////////////////////////////////////////////////\n");
 
-
   //dump declaration
   for (auto & enumci : c.enum_classes) {
     puts("");
@@ -932,11 +931,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     */
   }
 
-
-
   //end
   printf("\n#endif\n");
-
 }
 
 void printhelp() {
@@ -959,6 +955,9 @@ void printhelp() {
     " \n"
     "       -J, --json \n"
     "              A optional JSON file containing meta info of the header files. \n"
+    " \n"
+    "       -V, --verbose \n"
+    "              Verbose output.\n"
     " \n"
     "AUTHOR \n"
     "       Written by Rico Possienka. \n"
