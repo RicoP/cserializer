@@ -643,7 +643,7 @@ void printf_ttws(const char * f, Args... args) {
       continue;
     }
   }
-  printf(buffer);
+  fputs(buffer, stdout);
 }
 
 void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
@@ -655,13 +655,12 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   printf_ttws("///////////////////////////////////////////////////////////////////\n");
   printf_ttws("//  AUTOGEN                                                      //\n");
   if (argc && argv) {
-    printf("//  command:\n");
-    printf("//    rose.parser");
+    printf_ttws("//  command:\n");
+    printf_ttws("//    rose.parser");
     for (int i = 1; i < argc; ++i) {
-      printf(" ");
-      printf("%s", argv[i]);
+      printf_ttws(" %s", argv[i]);
     }
-    printf("\n");
+    printf_ttws("\n");
   }
   printf_ttws("///////////////////////////////////////////////////////////////////\n");
 
@@ -932,7 +931,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   }
 
   //end
-  printf("\n#endif\n");
+  printf_ttws("\n#endif\n");
 }
 
 void printhelp() {
