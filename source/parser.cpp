@@ -323,7 +323,9 @@ void quotify(char(&str)[N], StreamBuffer & buffer) {
 }
 
 void parse(ParseContext & ctx, StreamBuffer & buffer) {
+
   char tmp[64] = "";
+  global_annotations_t global_annotation = global_annotations_t::NONE;
   while (!buffer.eof)
   {
     char annotation_s[64];
@@ -331,6 +333,23 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
     bool has_second_annotation = buffer.test_annotation(annotation_s);
 
     if (has_second_annotation) error("No support for more than one global annotations yet.", buffer);
+
+    if (has_annotation) {
+      quotify(annotation_s, buffer);
+      JsonDeserializer jsond(annotation_s);
+      rose::ecs::deserialize(global_annotation, jsond);
+
+      if (global_annotation == global_annotations_t::Imposter) {
+        bool ok = buffer.test_and_skip("/*");
+        if (!ok) error("expects '/*' with Imposter annotation.", buffer);
+      }
+    }
+
+    if (global_annotation == global_annotations_t::Imposter) {
+      if (buffer.test_and_skip("*/")) {
+        global_annotation = global_annotations_t::NONE;
+      }
+    }
 
     ////////////////////////////////////////////////////////
     // COMMENTS                                           //
@@ -361,13 +380,12 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
     ////////////////////////////////////////////////////////
     if (buffer.test_and_skip("enum ")) {
       if (buffer.test_and_skip("class ") || buffer.test_and_skip("struct ")) {
-        enum_class_info & enumci = ctx.enum_classes.emplace_back();
-
-        if (has_annotation) {
-          quotify(annotation_s, buffer);
-          JsonDeserializer jsond(annotation_s);
-          rose::ecs::deserialize(enumci.enum_annotations, jsond);
+        if (global_annotation != global_annotations_t::NONE && global_annotation != global_annotations_t::Flag) {
+          error("enum class annotation cn't be anything other than 'Flag'", buffer);
         }
+        enum_class_info & enumci = ctx.enum_classes.emplace_back();
+        enumci.enum_annotations = global_annotation;
+        global_annotation = global_annotations_t::NONE;
 
         buffer.sws_read_till(enumci.name, "{:" WHITESPACE);
         char c = buffer.sws_get();

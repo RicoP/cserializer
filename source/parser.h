@@ -33,9 +33,12 @@ enum class value_type_t {
   Set
 };
 
-enum class enum_annotations_t {
+//Flag: enum class is treated as flags, meaning it has |& operators
+//Imposter: Parse the next multiline comment like it's regular code
+enum class global_annotations_t {
   NONE = 0,
-  Flag
+  Flag,
+  Imposter
 };
 
 struct enum_info {
@@ -54,7 +57,7 @@ struct enum_class_info {
   bool custom_type = false;
   std::vector<enum_info> enums;
   enum_info default_value;
-  enum_annotations_t enum_annotations = enum_annotations_t::NONE;
+  global_annotations_t enum_annotations = global_annotations_t::NONE;
 };
 
 //modifier: 0 = none, '*', '&'
