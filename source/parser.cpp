@@ -178,7 +178,7 @@ struct StreamBuffer {
     }
   }
 
-  bool test_and_skip(const char * str, size_t len) {
+  bool test(const char * str, size_t len) {
     skip_ws();
     assert(len < buffer_size_max);
 
@@ -189,9 +189,22 @@ struct StreamBuffer {
     for (size_t i = 0; i != len; ++i) {
       if (buf[i] != str[i]) return false;
     }
-    buffer_head += len;
-    buffer_size -= len;
     return true;
+  }
+
+  template<size_t N>
+  bool test(const char(&str)[N]) {
+    return test(str, N - 1);
+  }
+
+  bool test_and_skip(const char * str, size_t len) {
+    if (test(str, len)) {
+      assert(buffer_size >= len);
+      buffer_head += len;
+      buffer_size -= len;
+      return true;
+    }
+    return false;
   }
 
   template<size_t N>
@@ -231,6 +244,9 @@ struct StreamBuffer {
       return true;
     }
 
+    bool has_annotation = test("//@");
+    if (has_annotation) return false;
+
     bool has_single_comment = test_and_skip("//");
     if (has_single_comment) { skip_line(); }
     return has_single_comment;
@@ -242,7 +258,6 @@ struct StreamBuffer {
       skip_line();
       return true;
     }
-    skip_comment();
     return false;
   }
 
@@ -328,6 +343,16 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
   global_annotations_t global_annotation = global_annotations_t::NONE;
   while (!buffer.eof)
   {
+    ////////////////////////////////////////////////////////
+    // COMMENTS                                           //
+    ////////////////////////////////////////////////////////
+    while (buffer.skip_comment()) {
+      //TODO: we need a more flexible way to check for comments
+    }
+
+    ////////////////////////////////////////////////////////
+    // GLOBAL ANNOTATION                                  //
+    ////////////////////////////////////////////////////////
     char annotation_s[64];
     bool has_annotation = buffer.test_annotation(annotation_s);
     bool has_second_annotation = buffer.test_annotation(annotation_s);
@@ -349,13 +374,6 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
       if (buffer.test_and_skip("*/")) {
         global_annotation = global_annotations_t::NONE;
       }
-    }
-
-    ////////////////////////////////////////////////////////
-    // COMMENTS                                           //
-    ////////////////////////////////////////////////////////
-    while(buffer.skip_comment()) {
-      //TODO: we need a more flexible way to check for comments
     }
 
     ////////////////////////////////////////////////////////
