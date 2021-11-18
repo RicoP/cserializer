@@ -26,10 +26,12 @@ should work fine*/
 
 // Single comments too 
 
+//@Imposter vector3 is declared somewhere else, but we need just the basic version
+/*
 struct vector3 {
 	float x,  y  ,   z;
 };
-
+*/
 
 struct Camera {
 	int x;
