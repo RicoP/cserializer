@@ -33,15 +33,15 @@ namespace rose {
 }
 
 
-enum class                   enum_annotations_t;
-const char * to_string(const enum_annotations_t &);
+enum class                   global_annotations_t;
+const char * to_string(const global_annotations_t &);
 namespace rose {
   namespace ecs {
-    void      deserialize(enum_annotations_t &o, IDeserializer &s);
-    void        serialize(enum_annotations_t &o, ISerializer &s);
+    void      deserialize(global_annotations_t &o, IDeserializer &s);
+    void        serialize(global_annotations_t &o, ISerializer &s);
   }
-  hash_value         hash(const enum_annotations_t &o);
-  void construct_defaults(      enum_annotations_t &o); //TODO: implement me
+  hash_value         hash(const global_annotations_t &o);
+  void construct_defaults(      global_annotations_t &o); //TODO: implement me
 }
 
 
@@ -268,39 +268,46 @@ rose::hash_value       rose::hash(const value_type_t& o) {
   return static_cast<rose::hash_value>(o);
 }
 
-const char * to_string(const enum_annotations_t & e) {
+const char * to_string(const global_annotations_t & e) {
     switch(e) {
-        case enum_annotations_t::NONE: return "NONE";
-        case enum_annotations_t::Flag: return "Flag";
+        case global_annotations_t::NONE: return "NONE";
+        case global_annotations_t::Flag: return "Flag";
+        case global_annotations_t::Imposter: return "Imposter";
         default: return "<UNKNOWN>";
     }
 }
-void rose::ecs::serialize(enum_annotations_t& o, ISerializer& s) {
+void rose::ecs::serialize(global_annotations_t& o, ISerializer& s) {
   switch (o) {
-    case enum_annotations_t::NONE: {
+    case global_annotations_t::NONE: {
       char str[] = "NONE";
       serialize(str, s);
       break;
     }
-    case enum_annotations_t::Flag: {
+    case global_annotations_t::Flag: {
       char str[] = "Flag";
+      serialize(str, s);
+      break;
+    }
+    case global_annotations_t::Imposter: {
+      char str[] = "Imposter";
       serialize(str, s);
       break;
     }
     default: /* unknown */ break;
   }
 }
-void rose::ecs::deserialize(enum_annotations_t& o, IDeserializer& s) {
+void rose::ecs::deserialize(global_annotations_t& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
   rose::hash_value h = rose::hash(str);
   switch (h) {
-  case rose::hash("NONE"): o = enum_annotations_t::NONE; break;
-  case rose::hash("Flag"): o = enum_annotations_t::Flag; break;
+  case rose::hash("NONE"): o = global_annotations_t::NONE; break;
+  case rose::hash("Flag"): o = global_annotations_t::Flag; break;
+  case rose::hash("Imposter"): o = global_annotations_t::Imposter; break;
   default: /*unknown value*/ break;
   }
 }
-rose::hash_value       rose::hash(const enum_annotations_t& o) {
+rose::hash_value       rose::hash(const global_annotations_t& o) {
   return static_cast<rose::hash_value>(o);
 }
 
