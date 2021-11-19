@@ -108,6 +108,20 @@
           "is_const" : true
         }]
     }, {
+      "name" : "serialize", 
+      "type" : "void", 
+      "parameters" : [{
+          "name" : "o", 
+          "type" : "vector3", 
+          "modifier" : "&", 
+          "is_const" : false
+        }, {
+          "name" : "s", 
+          "type" : "ISerializer", 
+          "modifier" : "&", 
+          "is_const" : false
+        }]
+    }, {
       "name" : "serialize1", 
       "type" : "void", 
       "parameters" : [{

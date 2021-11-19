@@ -28,6 +28,24 @@ bool operator!=(vector3 lhs, vector3 rhs) {
     lhs.z != rhs.z;
 }
 
+namespace rose {
+  namespace ecs {
+    void serialize(vector3 & o, ISerializer & s) {
+      if (s.node_begin("vector3", rose::hash("vector3"), &o)) {
+        s.key("x");
+        serialize(o.x, s);
+        s.key("y");
+        serialize(o.y, s);
+        s.key("z");
+        serialize(o.z, s);
+        s.node_end();
+      }
+      s.end();
+    }
+  }
+}
+
+
 #include "test_header.h"
 #include "enginesettings.h"
 

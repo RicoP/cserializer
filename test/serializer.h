@@ -36,8 +36,8 @@ namespace rose {
 struct                EngineSettings;
 namespace rose {
   namespace ecs {
-    void      deserialize(EngineSettings &o, IDeserializer &s);
     void        serialize(EngineSettings &o, ISerializer &s);
+    void      deserialize(EngineSettings &o, IDeserializer &s);
   }
   hash_value         hash(const EngineSettings &o);
   void construct_defaults(      EngineSettings &o); //TODO: implement me
@@ -46,11 +46,9 @@ bool operator==(const EngineSettings &lhs, const EngineSettings &rhs);
 bool operator!=(const EngineSettings &lhs, const EngineSettings &rhs);
 
 
-struct                vector3;
 namespace rose {
   namespace ecs {
     void      deserialize(vector3 &o, IDeserializer &s);
-    void        serialize(vector3 &o, ISerializer &s);
   }
   hash_value         hash(const vector3 &o);
   void construct_defaults(      vector3 &o); //TODO: implement me
@@ -60,8 +58,8 @@ namespace rose {
 struct                Camera;
 namespace rose {
   namespace ecs {
-    void      deserialize(Camera &o, IDeserializer &s);
     void        serialize(Camera &o, ISerializer &s);
+    void      deserialize(Camera &o, IDeserializer &s);
   }
   hash_value         hash(const Camera &o);
   void construct_defaults(      Camera &o); //TODO: implement me
@@ -73,8 +71,8 @@ bool operator!=(const Camera &lhs, const Camera &rhs);
 struct                Transform;
 namespace rose {
   namespace ecs {
-    void      deserialize(Transform &o, IDeserializer &s);
     void        serialize(Transform &o, ISerializer &s);
+    void      deserialize(Transform &o, IDeserializer &s);
   }
   hash_value         hash(const Transform &o);
   void construct_defaults(      Transform &o); //TODO: implement me
@@ -86,8 +84,8 @@ bool operator!=(const Transform &lhs, const Transform &rhs);
 struct                Scene1;
 namespace rose {
   namespace ecs {
-    void      deserialize(Scene1 &o, IDeserializer &s);
     void        serialize(Scene1 &o, ISerializer &s);
+    void      deserialize(Scene1 &o, IDeserializer &s);
   }
   hash_value         hash(const Scene1 &o);
   void construct_defaults(      Scene1 &o); //TODO: implement me
@@ -313,19 +311,6 @@ rose::hash_value rose::hash(const EngineSettings &o) {
 ///////////////////////////////////////////////////////////////////
 //  struct vector3
 ///////////////////////////////////////////////////////////////////
-void rose::ecs::serialize(vector3 &o, ISerializer &s) {
-  if(s.node_begin("vector3", rose::hash("vector3"), &o)) {
-    s.key("x");
-    serialize(o.x, s);
-    s.key("y");
-    serialize(o.y, s);
-    s.key("z");
-    serialize(o.z, s);
-    s.node_end();
-  }
-  s.end();
-}
-
 void rose::ecs::deserialize(vector3 &o, IDeserializer &s) {
   //TODO: implement me
   //construct_defaults(o);

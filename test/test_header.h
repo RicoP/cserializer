@@ -32,20 +32,9 @@ struct vector3 {
 	float x,  y  ,   z;
 };
 
-void operator== (const vector3 & lhs, const vector3 & rhs) {
-	return
-		lhs.x == rhs.x &&
-		lhs.y == rhs.y &&
-		lhs.z == rhs.z;
-}
-
-void operator!= (const vector3 & lhs, const vector3 & rhs) {
-	return
-		lhs.x != rhs.x ||
-		lhs.y != rhs.y ||
-		lhs.z != rhs.z;
-}
-
+void operator== (const vector3 & lhs, const vector3 & rhs);
+void operator!= (const vector3 & lhs, const vector3 & rhs);
+void serialize(vector3 & o, ISerializer & s);
 */
 
 struct Camera {
