@@ -41,6 +41,49 @@ bool is_c_identifier(char c) {
   return false;
 }
 
+bool is_valid_operator(const char * op) {
+  //https://www.ibm.com/docs/en/zos/2.1.0?topic=only-overloading-operators
+  switch (rose::hash(op)) {
+  case rose::hash("operator!"):
+  case rose::hash("operator!="):
+  case rose::hash("operator%"):
+  case rose::hash("operator%="):
+  case rose::hash("operator&"):
+  case rose::hash("operator&&"):
+  case rose::hash("operator&="):
+  case rose::hash("operator*"):
+  case rose::hash("operator*="):
+  case rose::hash("operator+"):
+  case rose::hash("operator++"):
+  case rose::hash("operator+="):
+  case rose::hash("operator,"):
+  case rose::hash("operator-"):
+  case rose::hash("operator--"):
+  case rose::hash("operator-="):
+  case rose::hash("operator->"):
+  case rose::hash("operator->*"):
+  case rose::hash("operator<"):
+  case rose::hash("operator<<"):
+  case rose::hash("operator<<="):
+  case rose::hash("operator<="):
+  case rose::hash("operator="):
+  case rose::hash("operator=="):
+  case rose::hash("operator>"):
+  case rose::hash("operator>="):
+  case rose::hash("operator>>"):
+  case rose::hash("operator>>="):
+  case rose::hash("operator|"):
+  case rose::hash("operator|="):
+  case rose::hash("operator||"):
+  case rose::hash("operator~"):
+  case rose::hash("operator/"):
+  case rose::hash("operator/="):
+    return true;
+  default: 
+    return false;
+  }
+}
+
 template<size_t N>
 void copy(char(&dst)[N], const char * src) {
   for (size_t i = 0; i != N; ++i) {
@@ -530,49 +573,10 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
         size_t size = sizeof(name) - len;
         char * p = name + len;
 
-        assert(size > 3);
-        *(p++) = buffer.get();
-        *(p++) = buffer.get();
-        *(p++) = 0;
+        buffer.read_till(p, size, "(" WHITESPACE);
 
-        switch (rose::hash(name)) {
-        case rose::hash("operator!"):
-        case rose::hash("operator!="):
-        case rose::hash("operator%"):
-        case rose::hash("operator%="):
-        case rose::hash("operator&"):
-        case rose::hash("operator&&"):
-        case rose::hash("operator&="):
-        case rose::hash("operator*"):
-        case rose::hash("operator*="):
-        case rose::hash("operator+"):
-        case rose::hash("operator++"):
-        case rose::hash("operator+="):
-        case rose::hash("operator,"):
-        case rose::hash("operator-"):
-        case rose::hash("operator--"):
-        case rose::hash("operator-="):
-        case rose::hash("operator->"):
-        case rose::hash("operator->*"):
-        case rose::hash("operator<"):
-        case rose::hash("operator<<"):
-        case rose::hash("operator<<="):
-        case rose::hash("operator<="):
-        case rose::hash("operator="):
-        case rose::hash("operator=="):
-        case rose::hash("operator>"):
-        case rose::hash("operator>="):
-        case rose::hash("operator>>"):
-        case rose::hash("operator>>="):
-        case rose::hash("operator|"):
-        case rose::hash("operator|="):
-        case rose::hash("operator||"):
-        case rose::hash("operator~"):
-        case rose::hash("operator/"):
-        case rose::hash("operator/="):
-          //https://www.ibm.com/docs/en/zos/2.1.0?topic=only-overloading-operators
-          /* OK */ break;
-        default: error("Unknown operator", buffer);
+        if (!is_valid_operator(name)) {
+          error("Unknown operator", buffer);
         }
       }
 
