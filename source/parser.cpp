@@ -975,12 +975,17 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     // hashing                                                       //
     ///////////////////////////////////////////////////////////////////
     printf_ttws("rose::hash_value rose::hash(const %s &o) {              \n", sname);
-    printf_ttws("  rose::hash_value h = 0;                   \n");
-
-    for (auto & member : structi.members) {
-      const char * mname = member.name;
-      printf_ttws("  h ^= rose::hash(o.%s);                  \n", mname);
-      printf_ttws("  h = rose::xor64(h);                     \n");
+    //TODO: compatify, remove von xor64
+    //for (auto & member : structi.members) {
+    for (size_t i = 0; i != structi.members.size(); ++i) {
+      auto & member = structi.members[i];
+      if (i == 0) {
+        printf_ttws("  rose::hash_value h = rose::hash(o.%s);  \n", member.name);
+      }
+      else {
+        printf_ttws("  h = rose::xor64(h);                     \n");
+        printf_ttws("  h ^= rose::hash(o.%s);                  \n", member.name);
+      }
     }
 
     printf_ttws("  return h;                           \n");

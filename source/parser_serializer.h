@@ -376,8 +376,7 @@ void rose::ecs::deserialize(member_info &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const member_info &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.type);
+  rose::hash_value h = rose::hash(o.type);
   h = rose::xor64(h);
   h ^= rose::hash(o.name);
   h = rose::xor64(h);
@@ -386,7 +385,6 @@ rose::hash_value rose::hash(const member_info &o) {
   h ^= rose::hash(o.count);
   h = rose::xor64(h);
   h ^= rose::hash(o.annotations);
-  h = rose::xor64(h);
   return h;
 }
 ///////////////////////////////////////////////////////////////////
@@ -433,11 +431,9 @@ void rose::ecs::deserialize(struct_info &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const struct_info &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.name);
+  rose::hash_value h = rose::hash(o.name);
   h = rose::xor64(h);
   h ^= rose::hash(o.members);
-  h = rose::xor64(h);
   return h;
 }
 ///////////////////////////////////////////////////////////////////
@@ -491,13 +487,11 @@ void rose::ecs::deserialize(enum_info &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const enum_info &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.name);
+  rose::hash_value h = rose::hash(o.name);
   h = rose::xor64(h);
   h ^= rose::hash(o.value);
   h = rose::xor64(h);
   h ^= rose::hash(o.value_type);
-  h = rose::xor64(h);
   return h;
 }
 ///////////////////////////////////////////////////////////////////
@@ -572,8 +566,7 @@ void rose::ecs::deserialize(enum_class_info &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const enum_class_info &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.name);
+  rose::hash_value h = rose::hash(o.name);
   h = rose::xor64(h);
   h ^= rose::hash(o.type);
   h = rose::xor64(h);
@@ -584,7 +577,6 @@ rose::hash_value rose::hash(const enum_class_info &o) {
   h ^= rose::hash(o.default_value);
   h = rose::xor64(h);
   h ^= rose::hash(o.enum_annotations);
-  h = rose::xor64(h);
   return h;
 }
 ///////////////////////////////////////////////////////////////////
@@ -645,15 +637,13 @@ void rose::ecs::deserialize(function_parameter_info &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const function_parameter_info &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.name);
+  rose::hash_value h = rose::hash(o.name);
   h = rose::xor64(h);
   h ^= rose::hash(o.type);
   h = rose::xor64(h);
   h ^= rose::hash(o.modifier);
   h = rose::xor64(h);
   h ^= rose::hash(o.is_const);
-  h = rose::xor64(h);
   return h;
 }
 ///////////////////////////////////////////////////////////////////
@@ -707,13 +697,11 @@ void rose::ecs::deserialize(function_info &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const function_info &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.name);
+  rose::hash_value h = rose::hash(o.name);
   h = rose::xor64(h);
   h ^= rose::hash(o.type);
   h = rose::xor64(h);
   h ^= rose::hash(o.parameters);
-  h = rose::xor64(h);
   return h;
 }
 ///////////////////////////////////////////////////////////////////
@@ -767,13 +755,11 @@ void rose::ecs::deserialize(ParseContext &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const ParseContext &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.enum_classes);
+  rose::hash_value h = rose::hash(o.enum_classes);
   h = rose::xor64(h);
   h ^= rose::hash(o.functions);
   h = rose::xor64(h);
   h ^= rose::hash(o.structs);
-  h = rose::xor64(h);
   return h;
 }
 
