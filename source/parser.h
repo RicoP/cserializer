@@ -10,6 +10,19 @@ enum class member_annotations_t {
   Data = 1 << 2
 };
 
+enum class value_type_t {
+  Increment = 0,
+  Set
+};
+
+//Flag: enum class is treated as flags, meaning it has |& operators
+//Imposter: Parse the next multiline comment like it's regular code
+enum class global_annotations_t {
+  NONE = 0,
+  Flag,
+  Imposter
+};
+
 //1 = simple variabel, >1 = array, -1 = vector
 struct member_info {
   //@String
@@ -25,20 +38,8 @@ struct member_info {
 struct struct_info {
   //@String
   char name[64];
+  global_annotations_t global_annotations = global_annotations_t::NONE;
   std::vector<member_info> members;
-};
-
-enum class value_type_t {
-  Increment = 0,
-  Set
-};
-
-//Flag: enum class is treated as flags, meaning it has |& operators
-//Imposter: Parse the next multiline comment like it's regular code
-enum class global_annotations_t {
-  NONE = 0,
-  Flag,
-  Imposter
 };
 
 struct enum_info {

@@ -393,12 +393,14 @@ rose::hash_value rose::hash(const member_info &o) {
 bool operator==(const struct_info &lhs, const struct_info &rhs) {
   return
     rose_parser_equals(lhs.name, rhs.name) &&
+    rose_parser_equals(lhs.global_annotations, rhs.global_annotations) &&
     rose_parser_equals(lhs.members, rhs.members) ;
 }
 
 bool operator!=(const struct_info &lhs, const struct_info &rhs) {
   return
     !rose_parser_equals(lhs.name, rhs.name) ||
+    !rose_parser_equals(lhs.global_annotations, rhs.global_annotations) ||
     !rose_parser_equals(lhs.members, rhs.members) ;
 }
 
@@ -406,6 +408,8 @@ void rose::ecs::serialize(struct_info &o, ISerializer &s) {
   if(s.node_begin("struct_info", rose::hash("struct_info"), &o)) {
     s.key("name");
     serialize(o.name, s, std::strlen(o.name));
+    s.key("global_annotations");
+    serialize(o.global_annotations, s);
     s.key("members");
     serialize(o.members, s);
     s.node_end();
@@ -422,6 +426,9 @@ void rose::ecs::deserialize(struct_info &o, IDeserializer &s) {
       case rose::hash("name"):
         deserialize(o.name, s);
         break;
+      case rose::hash("global_annotations"):
+        deserialize(o.global_annotations, s);
+        break;
       case rose::hash("members"):
         deserialize(o.members, s);
         break;
@@ -432,6 +439,8 @@ void rose::ecs::deserialize(struct_info &o, IDeserializer &s) {
 
 rose::hash_value rose::hash(const struct_info &o) {
   rose::hash_value h = rose::hash(o.name);
+  h = rose::xor64(h);
+  h ^= rose::hash(o.global_annotations);
   h = rose::xor64(h);
   h ^= rose::hash(o.members);
   return h;
