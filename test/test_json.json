@@ -152,6 +152,7 @@
     }], 
   "structs" : [{
       "name" : "EngineSettings", 
+      "global_annotations" : "NONE", 
       "members" : [{
           "type" : "bool", 
           "name" : "raytracer", 
@@ -161,6 +162,7 @@
         }]
     }, {
       "name" : "vector3", 
+      "global_annotations" : "Imposter", 
       "members" : [{
           "type" : "float", 
           "name" : "x", 
@@ -182,6 +184,7 @@
         }]
     }, {
       "name" : "Camera", 
+      "global_annotations" : "NONE", 
       "members" : [{
           "type" : "int", 
           "name" : "x", 
@@ -203,6 +206,7 @@
         }]
     }, {
       "name" : "Transform", 
+      "global_annotations" : "NONE", 
       "members" : [{
           "type" : "char", 
           "name" : "name", 
@@ -224,6 +228,7 @@
         }]
     }, {
       "name" : "Scene1", 
+      "global_annotations" : "NONE", 
       "members" : [{
           "type" : "Camera", 
           "name" : "cameras", 

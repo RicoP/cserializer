@@ -498,6 +498,8 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
     if (buffer.test_and_skip("struct ")) {
       struct_info & structi = ctx.structs.emplace_back();
 
+      structi.global_annotations = global_annotation;
+
       buffer.sws_read_till(structi.name, ";{" WHITESPACE);
 
       buffer.skip_ws();
