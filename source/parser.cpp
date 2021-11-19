@@ -686,10 +686,12 @@ void printf_ttws(const char * f, Args... args) {
   fputs(buffer, stdout);
 }
 
-void has_compare_ops(bool & has_eqop, bool & has_neqop, ParseContext & c, const char * sname) {
+void has_compare_ops(bool & has_eqop, bool & has_neqop, bool & has_serialize, bool & has_deserialize, ParseContext & c, const char * sname) {
   rose::hash_value shash = rose::hash(sname);
   has_eqop = false;
   has_neqop = false;
+  has_serialize = false;
+  has_deserialize = false;
 
   for (auto & inf : c.functions) {
     if (inf.parameters.size() == 2 &&
@@ -703,6 +705,14 @@ void has_compare_ops(bool & has_eqop, bool & has_neqop, ParseContext & c, const 
       rose::hash(inf.parameters[0].type) == shash &&
       rose::hash(inf.parameters[1].type) == shash)
       has_neqop = true;
+
+    if (inf.parameters.size() == 2 &&
+      rose::hash(inf.name) == rose::hash("serialize"))
+      has_serialize = true;
+
+    if (inf.parameters.size() == 2 &&
+      rose::hash(inf.name) == rose::hash("deserialize"))
+      has_deserialize = true;
   }
 }
 
@@ -751,7 +761,9 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     bool has_eqop = false;
     bool has_neqop = false;
-    has_compare_ops(has_eqop, has_neqop, c, sname);
+    bool has_serialize = false;
+    bool has_deserialize = false;
+    has_compare_ops(has_eqop, has_neqop, has_serialize, has_deserialize, c, sname);
 
     puts("");
     printf_ttws("struct                %s;\n", structi.name);
@@ -879,7 +891,9 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     bool has_eqop = false;
     bool has_neqop = false;
-    has_compare_ops(has_eqop, has_neqop, c, sname);
+    bool has_serialize = false;
+    bool has_deserialize = false;
+    has_compare_ops(has_eqop, has_neqop, has_serialize, has_deserialize, c, sname);
 
     if (!has_eqop) {
       printf_ttws("bool operator==(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
@@ -903,93 +917,96 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       printf_ttws("} \n\n");
     }
 
-    ///////////////////////////////////////////////////////////////////
-    // serializer                                                    //
-    // TODO: skip functions that are already declared
-    ///////////////////////////////////////////////////////////////////
-    printf_ttws("void rose::ecs::serialize(%s &o, ISerializer &s) {                      \n", sname);
-    printf_ttws("  if(s.node_begin(\"%s\", rose::hash(\"%s\"), &o)) {                \n", sname, sname);
+    if (!has_serialize) {
+      ///////////////////////////////////////////////////////////////////
+      // serializer                                                    //
+      // TODO: skip functions that are already declared
+      ///////////////////////////////////////////////////////////////////
+      printf_ttws("void rose::ecs::serialize(%s &o, ISerializer &s) {                      \n", sname);
+      printf_ttws("  if(s.node_begin(\"%s\", rose::hash(\"%s\"), &o)) {                \n", sname, sname);
 
-    for (auto & member : structi.members) {
-      const char * mname = member.name;
-      printf_ttws("    s.key(\"%s\");                                                \n", mname);
-      if (member.count > 1 && rose::hash(member.type) == rose::hash("char")) {
-        //when type is char[n] then treat is as a string.
-        int bit = 0;
-        bit |= member.annotations == member_annotations_t::Data ? 1 << 0 : 0;
-        bit |= member.annotations == member_annotations_t::String ? 1 << 1 : 0;
-        switch (bit)
-        {
-        case 1 << 0: //DATA
+      for (auto & member : structi.members) {
+        const char * mname = member.name;
+        printf_ttws("    s.key(\"%s\");                                                \n", mname);
+        if (member.count > 1 && rose::hash(member.type) == rose::hash("char")) {
+          //when type is char[n] then treat is as a string.
+          int bit = 0;
+          bit |= member.annotations == member_annotations_t::Data ? 1 << 0 : 0;
+          bit |= member.annotations == member_annotations_t::String ? 1 << 1 : 0;
+          switch (bit)
+          {
+          case 1 << 0: //DATA
+            printf_ttws("    serialize(o.%s, s);                                         \n", mname);
+            break;
+          case 1 << 1: //STRING
+            printf_ttws("    serialize(o.%s, s, std::strlen(o.%s));                      \n", mname, mname);
+            break;
+          case 0: //NONE
+            fprintf(stderr, "Member '%s::%s' must have either annotations @String or @Data.", structi.name, member.name);
+            exit(1);
+            break;
+          case 1 << 0 | 1 << 1: //BOTH
+            fprintf(stderr, "Member '%s::%s' can't have both annotations @String and @Data.", structi.name, member.name);
+            exit(1);
+            break;
+          default:
+            //Shoyuld be unreachable
+            assert(false);
+            break;
+          }
+        }
+        else {
           printf_ttws("    serialize(o.%s, s);                                         \n", mname);
-          break;
-        case 1 << 1: //STRING
-          printf_ttws("    serialize(o.%s, s, std::strlen(o.%s));                      \n", mname, mname);
-          break;
-        case 0: //NONE
-          fprintf(stderr, "Member '%s::%s' must have either annotations @String or @Data.", structi.name, member.name);
-          exit(1);
-          break;
-        case 1 << 0 | 1 << 1: //BOTH
-          fprintf(stderr, "Member '%s::%s' can't have both annotations @String and @Data.", structi.name, member.name);
-          exit(1);
-          break;
-        default:
-          //Shoyuld be unreachable
-          assert(false);
-          break;
         }
       }
-      else {
-        printf_ttws("    serialize(o.%s, s);                                         \n", mname);
-      }
-    }
-    printf_ttws("    s.node_end();                                                   \n");
-    printf_ttws("  }                                                                 \n");
-    printf_ttws("  s.end();                                                          \n");
-    printf_ttws("}                                                                   \n\n");
-
-    ///////////////////////////////////////////////////////////////////
-    // deserializer                                                  //
-    // TODO: skip functions that are already declared
-    ///////////////////////////////////////////////////////////////////
-    printf_ttws("void rose::ecs::deserialize(%s &o, IDeserializer &s) {              \n", sname);
-    printf_ttws("  //TODO: implement me                                   \n");
-    printf_ttws("  //construct_defaults(o);                                 \n");
-    printf_ttws("                                                         \n");
-    printf_ttws("  while (s.next_key()) {                                 \n");
-    printf_ttws("    switch (s.hash_key()) {                              \n");
-
-    for (auto & member : structi.members) {
-      const char * mname = member.name;
-      printf_ttws("      case rose::hash(\"%s\"):                         \n", mname);
-      printf_ttws("        deserialize(o.%s, s);                          \n", mname);
-      printf_ttws("        break;                                         \n");
-    }
-    printf_ttws("      default: s.skip_key(); break;                      \n");
-    printf_ttws("    }                                                    \n");
-    printf_ttws("  }                                                      \n");
-    printf_ttws("}                                                        \n\n");
-
-    ///////////////////////////////////////////////////////////////////
-    // hashing                                                       //
-    ///////////////////////////////////////////////////////////////////
-    printf_ttws("rose::hash_value rose::hash(const %s &o) {              \n", sname);
-    //TODO: compatify, remove von xor64
-    //for (auto & member : structi.members) {
-    for (size_t i = 0; i != structi.members.size(); ++i) {
-      auto & member = structi.members[i];
-      if (i == 0) {
-        printf_ttws("  rose::hash_value h = rose::hash(o.%s);  \n", member.name);
-      }
-      else {
-        printf_ttws("  h = rose::xor64(h);                     \n");
-        printf_ttws("  h ^= rose::hash(o.%s);                  \n", member.name);
-      }
+      printf_ttws("    s.node_end();                                                   \n");
+      printf_ttws("  }                                                                 \n");
+      printf_ttws("  s.end();                                                          \n");
+      printf_ttws("}                                                                   \n\n");
     }
 
-    printf_ttws("  return h;                           \n");
-    printf_ttws("}                                     \n");
+    if (!has_deserialize) {
+      ///////////////////////////////////////////////////////////////////
+      // deserializer                                                  //
+      ///////////////////////////////////////////////////////////////////
+      printf_ttws("void rose::ecs::deserialize(%s &o, IDeserializer &s) {              \n", sname);
+      printf_ttws("  //TODO: implement me                                   \n");
+      printf_ttws("  //construct_defaults(o);                                 \n");
+      printf_ttws("                                                         \n");
+      printf_ttws("  while (s.next_key()) {                                 \n");
+      printf_ttws("    switch (s.hash_key()) {                              \n");
+
+      for (auto & member : structi.members) {
+        const char * mname = member.name;
+        printf_ttws("      case rose::hash(\"%s\"):                         \n", mname);
+        printf_ttws("        deserialize(o.%s, s);                          \n", mname);
+        printf_ttws("        break;                                         \n");
+      }
+      printf_ttws("      default: s.skip_key(); break;                      \n");
+      printf_ttws("    }                                                    \n");
+      printf_ttws("  }                                                      \n");
+      printf_ttws("}                                                        \n\n");
+
+      ///////////////////////////////////////////////////////////////////
+      // hashing                                                       //
+      ///////////////////////////////////////////////////////////////////
+      printf_ttws("rose::hash_value rose::hash(const %s &o) {              \n", sname);
+      //TODO: compatify, remove von xor64
+      //for (auto & member : structi.members) {
+      for (size_t i = 0; i != structi.members.size(); ++i) {
+        auto & member = structi.members[i];
+        if (i == 0) {
+          printf_ttws("  rose::hash_value h = rose::hash(o.%s);  \n", member.name);
+        }
+        else {
+          printf_ttws("  h = rose::xor64(h);                     \n");
+          printf_ttws("  h ^= rose::hash(o.%s);                  \n", member.name);
+        }
+      }
+
+      printf_ttws("  return h;                           \n");
+      printf_ttws("}                                     \n");
+    }
 
     ///////////////////////////////////////////////////////////////////
     // Construct Defaults                                            //
