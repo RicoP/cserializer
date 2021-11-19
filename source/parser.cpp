@@ -79,7 +79,7 @@ bool is_valid_operator(const char * op) {
   case rose::hash("operator/"):
   case rose::hash("operator/="):
     return true;
-  default: 
+  default:
     return false;
   }
 }
@@ -367,8 +367,8 @@ void error(const char * msg, StreamBuffer & buffer) {
 void quotify(char * str, size_t len, StreamBuffer & buffer) {
   size_t l = std::strlen(str);
   if (l >= len - 2) error("string to long", buffer);
-  str[l+2] = 0;
-  str[l+1] = '\"';
+  str[l + 2] = 0;
+  str[l + 1] = '\"';
   for (size_t i = l; i != 0; --i) {
     str[i] = str[i - 1];
   }
@@ -507,7 +507,7 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
         for (;;) {
           member_annotations_t annotation = member_annotations_t::NONE;
           member_info ignored_member; //in case we want to ignore the member
-          
+
           char annotation_s[64];
           if (buffer.test_annotation(annotation_s)) {
             quotify(annotation_s, buffer);
@@ -519,7 +519,7 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
           buffer.sws_read_till(type, WHITESPACE);
 
         new_member:
-          member_info & memberi = annotation == member_annotations_t::Ignore 
+          member_info & memberi = annotation == member_annotations_t::Ignore
             ? ignored_member //fake member we just write to but immediately discard
             : structi.members.emplace_back(); //otherwise create new member
 
@@ -686,6 +686,26 @@ void printf_ttws(const char * f, Args... args) {
   fputs(buffer, stdout);
 }
 
+void has_compare_ops(bool & has_eqop, bool & has_neqop, ParseContext & c, const char * sname) {
+  rose::hash_value shash = rose::hash(sname);
+  has_eqop = false;
+  has_neqop = false;
+
+  for (auto & inf : c.functions) {
+    if (inf.parameters.size() == 2 &&
+      rose::hash(inf.name) == rose::hash("operator==") &&
+      rose::hash(inf.parameters[0].type) == shash &&
+      rose::hash(inf.parameters[1].type) == shash)
+      has_eqop = true;
+
+    if (inf.parameters.size() == 2 &&
+      rose::hash(inf.name) == rose::hash("operator!=") &&
+      rose::hash(inf.parameters[0].type) == shash &&
+      rose::hash(inf.parameters[1].type) == shash)
+      has_neqop = true;
+  }
+}
+
 void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   printf_ttws("#pragma once\n");
   printf_ttws("\n");
@@ -729,18 +749,22 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   for (auto & structi : c.structs) {
     const char * sname = structi.name;
 
+    bool has_eqop = false;
+    bool has_neqop = false;
+    has_compare_ops(has_eqop, has_neqop, c, sname);
+
     puts("");
     printf_ttws("struct                %s;\n", structi.name);
     printf_ttws("namespace rose {\n");
     printf_ttws("  namespace ecs {\n");
-    printf_ttws("    bool operator==(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
-    printf_ttws("    bool operator!=(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
     printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", sname);
     printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", sname);
     printf_ttws("  }\n");
     printf_ttws("  hash_value         hash(const %s &o);\n", sname);
     printf_ttws("  void construct_defaults(      %s &o); //TODO: implement me\n", sname);
     printf_ttws("}\n");
+    if (!has_eqop) printf_ttws("bool operator==(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
+    if (!has_neqop) printf_ttws("bool operator!=(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
     puts("");
   }
 
@@ -852,23 +876,32 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     ///////////////////////////////////////////////////////////////////
     // == and != operator                                            //
     ///////////////////////////////////////////////////////////////////
-    printf_ttws("bool operator==(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
-    printf_ttws("  return \n");
-    int left = structi.members.size() - 1;
-    for (auto & member : structi.members) {
-      printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "&&" : ";");
-      --left;
-    }
-    printf_ttws("} \n\n");
 
-    printf_ttws("bool operator!=(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
-    printf_ttws("  return \n");
-    left = structi.members.size() - 1;
-    for (auto & member : structi.members) {
-      printf_ttws("    !rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "||" : ";");
-      --left;
+    bool has_eqop = false;
+    bool has_neqop = false;
+    has_compare_ops(has_eqop, has_neqop, c, sname);
+
+    if (!has_eqop) {
+      printf_ttws("bool operator==(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
+      printf_ttws("  return \n");
+      int left = structi.members.size() - 1;
+      for (auto & member : structi.members) {
+        printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "&&" : ";");
+        --left;
+      }
+      printf_ttws("} \n\n");
     }
-    printf_ttws("} \n\n");
+
+    if (!has_eqop) {
+      printf_ttws("bool operator!=(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
+      printf_ttws("  return \n");
+      int left = structi.members.size() - 1;
+      for (auto & member : structi.members) {
+        printf_ttws("    !rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "||" : ";");
+        --left;
+      }
+      printf_ttws("} \n\n");
+    }
 
     ///////////////////////////////////////////////////////////////////
     // serializer                                                    //

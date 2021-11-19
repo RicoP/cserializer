@@ -36,21 +36,19 @@ namespace rose {
 struct                EngineSettings;
 namespace rose {
   namespace ecs {
-    bool operator==(const EngineSettings &lhs, const EngineSettings &rhs);
-    bool operator!=(const EngineSettings &lhs, const EngineSettings &rhs);
     void      deserialize(EngineSettings &o, IDeserializer &s);
     void        serialize(EngineSettings &o, ISerializer &s);
   }
   hash_value         hash(const EngineSettings &o);
   void construct_defaults(      EngineSettings &o); //TODO: implement me
 }
+bool operator==(const EngineSettings &lhs, const EngineSettings &rhs);
+bool operator!=(const EngineSettings &lhs, const EngineSettings &rhs);
 
 
 struct                vector3;
 namespace rose {
   namespace ecs {
-    bool operator==(const vector3 &lhs, const vector3 &rhs);
-    bool operator!=(const vector3 &lhs, const vector3 &rhs);
     void      deserialize(vector3 &o, IDeserializer &s);
     void        serialize(vector3 &o, ISerializer &s);
   }
@@ -62,40 +60,40 @@ namespace rose {
 struct                Camera;
 namespace rose {
   namespace ecs {
-    bool operator==(const Camera &lhs, const Camera &rhs);
-    bool operator!=(const Camera &lhs, const Camera &rhs);
     void      deserialize(Camera &o, IDeserializer &s);
     void        serialize(Camera &o, ISerializer &s);
   }
   hash_value         hash(const Camera &o);
   void construct_defaults(      Camera &o); //TODO: implement me
 }
+bool operator==(const Camera &lhs, const Camera &rhs);
+bool operator!=(const Camera &lhs, const Camera &rhs);
 
 
 struct                Transform;
 namespace rose {
   namespace ecs {
-    bool operator==(const Transform &lhs, const Transform &rhs);
-    bool operator!=(const Transform &lhs, const Transform &rhs);
     void      deserialize(Transform &o, IDeserializer &s);
     void        serialize(Transform &o, ISerializer &s);
   }
   hash_value         hash(const Transform &o);
   void construct_defaults(      Transform &o); //TODO: implement me
 }
+bool operator==(const Transform &lhs, const Transform &rhs);
+bool operator!=(const Transform &lhs, const Transform &rhs);
 
 
 struct                Scene1;
 namespace rose {
   namespace ecs {
-    bool operator==(const Scene1 &lhs, const Scene1 &rhs);
-    bool operator!=(const Scene1 &lhs, const Scene1 &rhs);
     void      deserialize(Scene1 &o, IDeserializer &s);
     void        serialize(Scene1 &o, ISerializer &s);
   }
   hash_value         hash(const Scene1 &o);
   void construct_defaults(      Scene1 &o); //TODO: implement me
 }
+bool operator==(const Scene1 &lhs, const Scene1 &rhs);
+bool operator!=(const Scene1 &lhs, const Scene1 &rhs);
 
 
 #ifdef IMPL_SERIALIZER
@@ -317,20 +315,6 @@ rose::hash_value rose::hash(const EngineSettings &o) {
 ///////////////////////////////////////////////////////////////////
 //  struct vector3
 ///////////////////////////////////////////////////////////////////
-bool operator==(const vector3 &lhs, const vector3 &rhs) {
-  return
-    rose_parser_equals(lhs.x, rhs.x) &&
-    rose_parser_equals(lhs.y, rhs.y) &&
-    rose_parser_equals(lhs.z, rhs.z) ;
-}
-
-bool operator!=(const vector3 &lhs, const vector3 &rhs) {
-  return
-    !rose_parser_equals(lhs.x, rhs.x) ||
-    !rose_parser_equals(lhs.y, rhs.y) ||
-    !rose_parser_equals(lhs.z, rhs.z) ;
-}
-
 void rose::ecs::serialize(vector3 &o, ISerializer &s) {
   if(s.node_begin("vector3", rose::hash("vector3"), &o)) {
     s.key("x");
