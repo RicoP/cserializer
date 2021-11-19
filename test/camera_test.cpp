@@ -14,6 +14,20 @@ struct vector3 {
   float x, y, z;
 };
 
+bool operator==(vector3 lhs, vector3 rhs) {
+  return
+    lhs.x == rhs.x &&
+    lhs.y == rhs.y &&
+    lhs.z == rhs.z;
+}
+
+bool operator!=(vector3 lhs, vector3 rhs) {
+  return
+    lhs.x != rhs.x ||
+    lhs.y != rhs.y ||
+    lhs.z != rhs.z;
+}
+
 #include "test_header.h"
 #include "enginesettings.h"
 

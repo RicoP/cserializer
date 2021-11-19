@@ -307,9 +307,7 @@ void rose::ecs::deserialize(EngineSettings &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const EngineSettings &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.raytracer);
-  h = rose::xor64(h);
+  rose::hash_value h = rose::hash(o.raytracer);
   return h;
 }
 ///////////////////////////////////////////////////////////////////
@@ -349,13 +347,11 @@ void rose::ecs::deserialize(vector3 &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const vector3 &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.x);
+  rose::hash_value h = rose::hash(o.x);
   h = rose::xor64(h);
   h ^= rose::hash(o.y);
   h = rose::xor64(h);
   h ^= rose::hash(o.z);
-  h = rose::xor64(h);
   return h;
 }
 ///////////////////////////////////////////////////////////////////
@@ -409,13 +405,11 @@ void rose::ecs::deserialize(Camera &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const Camera &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.x);
+  rose::hash_value h = rose::hash(o.x);
   h = rose::xor64(h);
   h ^= rose::hash(o.y);
   h = rose::xor64(h);
   h ^= rose::hash(o.z);
-  h = rose::xor64(h);
   return h;
 }
 ///////////////////////////////////////////////////////////////////
@@ -469,13 +463,11 @@ void rose::ecs::deserialize(Transform &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const Transform &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.name);
+  rose::hash_value h = rose::hash(o.name);
   h = rose::xor64(h);
   h ^= rose::hash(o.camera);
   h = rose::xor64(h);
   h ^= rose::hash(o.position);
-  h = rose::xor64(h);
   return h;
 }
 ///////////////////////////////////////////////////////////////////
@@ -515,9 +507,7 @@ void rose::ecs::deserialize(Scene1 &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const Scene1 &o) {
-  rose::hash_value h = 0;
-  h ^= rose::hash(o.cameras);
-  h = rose::xor64(h);
+  rose::hash_value h = rose::hash(o.cameras);
   return h;
 }
 
