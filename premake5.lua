@@ -65,16 +65,16 @@ project "app.parser"
     debugdir "source/"
     debugargs { "--include parser.h -O parser_serializer.h" }
   filter "configurations:*Test"
-    debugdir "bin/"
-    debugargs { "--include enginesettings.h camera.h -O serializer.h -J output.json -V" }
+    debugdir "test/"
+    debugargs { "--include enginesettings.h test_header.h -O serializer.h -J test_json.json -V" }
   filter "configurations:*Install"
     targetdir "../environment/PATH/"
 
 project "test.camera"
   kind "ConsoleApp"
   warnings "Extra"
-  debugdir "bin/"
+  debugdir "test/"
   includedirs { "externals/roselib/include" }
   includedirs { "externals/premake-comppp/include" }
-  files { "bin/**" }
+  files { "test/**" }
 

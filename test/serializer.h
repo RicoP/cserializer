@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////////////////
 //  AUTOGEN                                                      //
 //  command:
-//    rose.parser --include enginesettings.h camera.h -O serializer.h -J output.json -V
+//    rose.parser --include enginesettings.h test_header.h -O serializer.h -J test_json.json -V
 ///////////////////////////////////////////////////////////////////
 
 enum class                   enum_test : long long ;

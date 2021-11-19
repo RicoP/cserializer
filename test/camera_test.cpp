@@ -10,7 +10,11 @@
 #include <serializer/serializer.h>
 #include <serializer/jsonserializer.h>
 
-#include "camera.h"
+struct vector3 {
+  float x, y, z;
+};
+
+#include "test_header.h"
 #include "enginesettings.h"
 
 #define IMPL_SERIALIZER
