@@ -48,92 +48,92 @@ namespace rose {
 struct                member_info;
 namespace rose {
   namespace ecs {
-    bool operator==(const member_info &lhs, const member_info &rhs);
-    bool operator!=(const member_info &lhs, const member_info &rhs);
     void      deserialize(member_info &o, IDeserializer &s);
     void        serialize(member_info &o, ISerializer &s);
   }
   hash_value         hash(const member_info &o);
   void construct_defaults(      member_info &o); //TODO: implement me
 }
+bool operator==(const member_info &lhs, const member_info &rhs);
+bool operator!=(const member_info &lhs, const member_info &rhs);
 
 
 struct                struct_info;
 namespace rose {
   namespace ecs {
-    bool operator==(const struct_info &lhs, const struct_info &rhs);
-    bool operator!=(const struct_info &lhs, const struct_info &rhs);
     void      deserialize(struct_info &o, IDeserializer &s);
     void        serialize(struct_info &o, ISerializer &s);
   }
   hash_value         hash(const struct_info &o);
   void construct_defaults(      struct_info &o); //TODO: implement me
 }
+bool operator==(const struct_info &lhs, const struct_info &rhs);
+bool operator!=(const struct_info &lhs, const struct_info &rhs);
 
 
 struct                enum_info;
 namespace rose {
   namespace ecs {
-    bool operator==(const enum_info &lhs, const enum_info &rhs);
-    bool operator!=(const enum_info &lhs, const enum_info &rhs);
     void      deserialize(enum_info &o, IDeserializer &s);
     void        serialize(enum_info &o, ISerializer &s);
   }
   hash_value         hash(const enum_info &o);
   void construct_defaults(      enum_info &o); //TODO: implement me
 }
+bool operator==(const enum_info &lhs, const enum_info &rhs);
+bool operator!=(const enum_info &lhs, const enum_info &rhs);
 
 
 struct                enum_class_info;
 namespace rose {
   namespace ecs {
-    bool operator==(const enum_class_info &lhs, const enum_class_info &rhs);
-    bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs);
     void      deserialize(enum_class_info &o, IDeserializer &s);
     void        serialize(enum_class_info &o, ISerializer &s);
   }
   hash_value         hash(const enum_class_info &o);
   void construct_defaults(      enum_class_info &o); //TODO: implement me
 }
+bool operator==(const enum_class_info &lhs, const enum_class_info &rhs);
+bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs);
 
 
 struct                function_parameter_info;
 namespace rose {
   namespace ecs {
-    bool operator==(const function_parameter_info &lhs, const function_parameter_info &rhs);
-    bool operator!=(const function_parameter_info &lhs, const function_parameter_info &rhs);
     void      deserialize(function_parameter_info &o, IDeserializer &s);
     void        serialize(function_parameter_info &o, ISerializer &s);
   }
   hash_value         hash(const function_parameter_info &o);
   void construct_defaults(      function_parameter_info &o); //TODO: implement me
 }
+bool operator==(const function_parameter_info &lhs, const function_parameter_info &rhs);
+bool operator!=(const function_parameter_info &lhs, const function_parameter_info &rhs);
 
 
 struct                function_info;
 namespace rose {
   namespace ecs {
-    bool operator==(const function_info &lhs, const function_info &rhs);
-    bool operator!=(const function_info &lhs, const function_info &rhs);
     void      deserialize(function_info &o, IDeserializer &s);
     void        serialize(function_info &o, ISerializer &s);
   }
   hash_value         hash(const function_info &o);
   void construct_defaults(      function_info &o); //TODO: implement me
 }
+bool operator==(const function_info &lhs, const function_info &rhs);
+bool operator!=(const function_info &lhs, const function_info &rhs);
 
 
 struct                ParseContext;
 namespace rose {
   namespace ecs {
-    bool operator==(const ParseContext &lhs, const ParseContext &rhs);
-    bool operator!=(const ParseContext &lhs, const ParseContext &rhs);
     void      deserialize(ParseContext &o, IDeserializer &s);
     void        serialize(ParseContext &o, ISerializer &s);
   }
   hash_value         hash(const ParseContext &o);
   void construct_defaults(      ParseContext &o); //TODO: implement me
 }
+bool operator==(const ParseContext &lhs, const ParseContext &rhs);
+bool operator!=(const ParseContext &lhs, const ParseContext &rhs);
 
 
 #ifdef IMPL_SERIALIZER
