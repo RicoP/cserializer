@@ -32,7 +32,8 @@
         "name" : "NONE", 
         "value" : "0", 
         "value_type" : "Set"
-      }
+      }, 
+      "enum_annotations" : "NONE"
     }, {
       "name" : "enum_test2", 
       "type" : "int", 
@@ -66,7 +67,8 @@
         "name" : "NONE", 
         "value" : "0", 
         "value_type" : "Set"
-      }
+      }, 
+      "enum_annotations" : "NONE"
     }], 
   "functions" : [{
       "name" : "construct_defaults", 
@@ -79,82 +81,31 @@
         }]
     }, {
       "name" : "operator==", 
-      "type" : "bool", 
+      "type" : "void", 
       "parameters" : [{
           "name" : "lhs", 
-          "type" : "EngineSettings", 
+          "type" : "vector3", 
           "modifier" : "&", 
           "is_const" : true
         }, {
           "name" : "rhs", 
-          "type" : "EngineSettings", 
+          "type" : "vector3", 
           "modifier" : "&", 
           "is_const" : true
         }]
     }, {
       "name" : "operator!=", 
-      "type" : "bool", 
+      "type" : "void", 
       "parameters" : [{
           "name" : "lhs", 
-          "type" : "EngineSettings", 
+          "type" : "vector3", 
           "modifier" : "&", 
           "is_const" : true
         }, {
           "name" : "rhs", 
-          "type" : "EngineSettings", 
+          "type" : "vector3", 
           "modifier" : "&", 
           "is_const" : true
-        }]
-    }, {
-      "name" : "serialize", 
-      "type" : "void", 
-      "parameters" : [{
-          "name" : "o", 
-          "type" : "EngineSettings", 
-          "modifier" : "&", 
-          "is_const" : false
-        }, {
-          "name" : "s", 
-          "type" : "ISerializer", 
-          "modifier" : "&", 
-          "is_const" : false
-        }]
-    }, {
-      "name" : "deserialize", 
-      "type" : "void", 
-      "parameters" : [{
-          "name" : "o", 
-          "type" : "EngineSettings", 
-          "modifier" : "&", 
-          "is_const" : false
-        }, {
-          "name" : "s", 
-          "type" : "IDeserializer", 
-          "modifier" : "&", 
-          "is_const" : false
-        }]
-    }, {
-      "name" : "randomize", 
-      "type" : "void", 
-      "parameters" : [{
-          "name" : "o", 
-          "type" : "EngineSettings", 
-          "modifier" : "&", 
-          "is_const" : false
-        }, {
-          "name" : "h", 
-          "type" : "rose::hash_value", 
-          "modifier" : "&", 
-          "is_const" : false
-        }]
-    }, {
-      "name" : "hash", 
-      "type" : "hash_value", 
-      "parameters" : [{
-          "name" : "o", 
-          "type" : "ecs::EngineSettings", 
-          "modifier" : "&", 
-          "is_const" : false
         }]
     }, {
       "name" : "serialize1", 
@@ -205,7 +156,8 @@
           "type" : "bool", 
           "name" : "raytracer", 
           "default_value" : "", 
-          "count" : 1
+          "count" : 1, 
+          "annotations" : "NONE"
         }]
     }, {
       "name" : "vector3", 
@@ -213,17 +165,20 @@
           "type" : "float", 
           "name" : "x", 
           "default_value" : "", 
-          "count" : 1
+          "count" : 1, 
+          "annotations" : "NONE"
         }, {
           "type" : "float", 
           "name" : "y", 
           "default_value" : "", 
-          "count" : 1
+          "count" : 1, 
+          "annotations" : "NONE"
         }, {
           "type" : "float", 
           "name" : "z", 
           "default_value" : "", 
-          "count" : 1
+          "count" : 1, 
+          "annotations" : "NONE"
         }]
     }, {
       "name" : "Camera", 
@@ -231,17 +186,20 @@
           "type" : "int", 
           "name" : "x", 
           "default_value" : "", 
-          "count" : 1
+          "count" : 1, 
+          "annotations" : "NONE"
         }, {
           "type" : "int", 
           "name" : "y", 
           "default_value" : "", 
-          "count" : 1
+          "count" : 1, 
+          "annotations" : "NONE"
         }, {
           "type" : "int", 
           "name" : "z", 
           "default_value" : "", 
-          "count" : 1
+          "count" : 1, 
+          "annotations" : "NONE"
         }]
     }, {
       "name" : "Transform", 
@@ -249,17 +207,20 @@
           "type" : "char", 
           "name" : "name", 
           "default_value" : "\"Hello\"", 
-          "count" : 64
+          "count" : 64, 
+          "annotations" : "String"
         }, {
           "type" : "Camera", 
           "name" : "camera", 
           "default_value" : "", 
-          "count" : 1
+          "count" : 1, 
+          "annotations" : "NONE"
         }, {
           "type" : "vector3", 
           "name" : "position", 
           "default_value" : "", 
-          "count" : 1
+          "count" : 1, 
+          "annotations" : "NONE"
         }]
     }, {
       "name" : "Scene1", 
@@ -267,7 +228,8 @@
           "type" : "Camera", 
           "name" : "cameras", 
           "default_value" : "", 
-          "count" : 16
+          "count" : 16, 
+          "annotations" : "NONE"
         }]
     }]
 }

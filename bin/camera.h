@@ -31,6 +31,21 @@ should work fine*/
 struct vector3 {
 	float x,  y  ,   z;
 };
+
+void operator== (const vector3 & lhs, const vector3 & rhs) {
+	return
+		lhs.x == rhs.x &&
+		lhs.y == rhs.y &&
+		lhs.z == rhs.z;
+}
+
+void operator!= (const vector3 & lhs, const vector3 & rhs) {
+	return
+		lhs.x != rhs.x ||
+		lhs.y != rhs.y ||
+		lhs.z != rhs.z;
+}
+
 */
 
 struct Camera {
