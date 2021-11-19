@@ -709,11 +709,13 @@ void has_compare_ops(bool & has_eqop, bool & has_neqop, bool & has_serialize, bo
       has_neqop = true;
 
     if (inf.parameters.size() == 2 &&
-      rose::hash(inf.name) == rose::hash("serialize"))
+      rose::hash(inf.name) == rose::hash("serialize") &&
+      rose::hash(inf.parameters[0].type) == shash)
       has_serialize = true;
 
     if (inf.parameters.size() == 2 &&
-      rose::hash(inf.name) == rose::hash("deserialize"))
+      rose::hash(inf.name) == rose::hash("deserialize") &&
+      rose::hash(inf.parameters[0].type) == shash)
       has_deserialize = true;
   }
 }
@@ -768,11 +770,13 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     has_compare_ops(has_eqop, has_neqop, has_serialize, has_deserialize, c, sname);
 
     puts("");
-    printf_ttws("struct                %s;\n", structi.name);
+    if (structi.global_annotations != global_annotations_t::Imposter) {
+      printf_ttws("struct                %s;\n", structi.name);
+    }
     printf_ttws("namespace rose {\n");
     printf_ttws("  namespace ecs {\n");
-    printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", sname);
-    printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", sname);
+    if (!has_serialize)   printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", sname);
+    if (!has_deserialize) printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", sname);
     printf_ttws("  }\n");
     printf_ttws("  hash_value         hash(const %s &o);\n", sname);
     printf_ttws("  void construct_defaults(      %s &o); //TODO: implement me\n", sname);
@@ -988,27 +992,27 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       printf_ttws("    }                                                    \n");
       printf_ttws("  }                                                      \n");
       printf_ttws("}                                                        \n\n");
-
-      ///////////////////////////////////////////////////////////////////
-      // hashing                                                       //
-      ///////////////////////////////////////////////////////////////////
-      printf_ttws("rose::hash_value rose::hash(const %s &o) {              \n", sname);
-      //TODO: compatify, remove von xor64
-      //for (auto & member : structi.members) {
-      for (size_t i = 0; i != structi.members.size(); ++i) {
-        auto & member = structi.members[i];
-        if (i == 0) {
-          printf_ttws("  rose::hash_value h = rose::hash(o.%s);  \n", member.name);
-        }
-        else {
-          printf_ttws("  h = rose::xor64(h);                     \n");
-          printf_ttws("  h ^= rose::hash(o.%s);                  \n", member.name);
-        }
-      }
-
-      printf_ttws("  return h;                           \n");
-      printf_ttws("}                                     \n");
     }
+
+    ///////////////////////////////////////////////////////////////////
+    // hashing                                                       //
+    ///////////////////////////////////////////////////////////////////
+    printf_ttws("rose::hash_value rose::hash(const %s &o) {              \n", sname);
+    //TODO: compatify, remove von xor64
+    //for (auto & member : structi.members) {
+    for (size_t i = 0; i != structi.members.size(); ++i) {
+      auto & member = structi.members[i];
+      if (i == 0) {
+        printf_ttws("  rose::hash_value h = rose::hash(o.%s);  \n", member.name);
+      }
+      else {
+        printf_ttws("  h = rose::xor64(h);                     \n");
+        printf_ttws("  h ^= rose::hash(o.%s);                  \n", member.name);
+      }
+    }
+
+    printf_ttws("  return h;                           \n");
+    printf_ttws("}                                     \n");
 
     ///////////////////////////////////////////////////////////////////
     // Construct Defaults                                            //
