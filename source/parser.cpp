@@ -1110,6 +1110,10 @@ int main(int argc, char ** argv) {
       json_path = path;
       continue;
     }
+    if (h == rose::hash("--watch") || h == rose::hash("-W")) {
+      //TODO: use filewatch option https://github.com/ThomasMonkman/filewatch
+      continue;
+    }
 
     switch (state) {
     case rose::hash("INCLUDE"): input_files.push_back(arg); break;
