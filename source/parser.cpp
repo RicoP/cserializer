@@ -754,7 +754,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", enumci.name);
     printf_ttws("  }\n");
     printf_ttws("  hash_value         hash(const %s &o);\n", enumci.name);
-    printf_ttws("  void construct_defaults(      %s &o); //TODO: implement me\n", enumci.name);
+    printf_ttws("  void construct_defaults(      %s &o); //implement me\n", enumci.name);
 
     printf_ttws("}\n");
     puts("");
@@ -779,7 +779,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     if (!has_deserialize) printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", sname);
     printf_ttws("  }\n");
     printf_ttws("  hash_value         hash(const %s &o);\n", sname);
-    printf_ttws("  void construct_defaults(      %s &o); //TODO: implement me\n", sname);
+    printf_ttws("  void construct_defaults(      %s &o); // implement me\n", sname);
     printf_ttws("}\n");
     if (!has_eqop) printf_ttws("bool operator==(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
     if (!has_neqop) printf_ttws("bool operator!=(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
@@ -789,8 +789,11 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   printf_ttws("\n#ifdef IMPL_SERIALIZER\n");
 
   puts(R"MLS(
+    #ifndef IMPL_SERIALIZER_UTIL
+    #define IMPL_SERIALIZER_UTIL
     #include <cstring>
 
+    namespace {
     //internal helper methods
     template<class T>
     bool rose_parser_equals(const T& lhs, const T& rhs) {
@@ -832,6 +835,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     void construct_default(std::vector<T> & v) {
       c.clear();
     }
+    }
+    #endif
   )MLS");
 
 
@@ -975,9 +980,9 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       ///////////////////////////////////////////////////////////////////
       // deserializer                                                  //
       ///////////////////////////////////////////////////////////////////
-      printf_ttws("void rose::ecs::deserialize(%s &o, IDeserializer &s) {              \n", sname);
-      printf_ttws("  //TODO: implement me                                   \n");
-      printf_ttws("  //construct_defaults(o);                                 \n");
+      printf_ttws("void rose::ecs::deserialize(%s &o, IDeserializer &s) {   \n", sname);
+      printf_ttws("  //implement me                                         \n");
+      printf_ttws("  //construct_defaults(o);                               \n");
       printf_ttws("                                                         \n");
       printf_ttws("  while (s.next_key()) {                                 \n");
       printf_ttws("    switch (s.hash_key()) {                              \n");

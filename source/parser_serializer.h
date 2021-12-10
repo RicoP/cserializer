@@ -17,7 +17,7 @@ namespace rose {
     void        serialize(member_annotations_t &o, ISerializer &s);
   }
   hash_value         hash(const member_annotations_t &o);
-  void construct_defaults(      member_annotations_t &o); //TODO: implement me
+  void construct_defaults(      member_annotations_t &o); //implement me
 }
 
 
@@ -29,7 +29,7 @@ namespace rose {
     void        serialize(value_type_t &o, ISerializer &s);
   }
   hash_value         hash(const value_type_t &o);
-  void construct_defaults(      value_type_t &o); //TODO: implement me
+  void construct_defaults(      value_type_t &o); //implement me
 }
 
 
@@ -41,18 +41,18 @@ namespace rose {
     void        serialize(global_annotations_t &o, ISerializer &s);
   }
   hash_value         hash(const global_annotations_t &o);
-  void construct_defaults(      global_annotations_t &o); //TODO: implement me
+  void construct_defaults(      global_annotations_t &o); //implement me
 }
 
 
 struct                member_info;
 namespace rose {
   namespace ecs {
-    void      deserialize(member_info &o, IDeserializer &s);
     void        serialize(member_info &o, ISerializer &s);
+    void      deserialize(member_info &o, IDeserializer &s);
   }
   hash_value         hash(const member_info &o);
-  void construct_defaults(      member_info &o); //TODO: implement me
+  void construct_defaults(      member_info &o); // implement me
 }
 bool operator==(const member_info &lhs, const member_info &rhs);
 bool operator!=(const member_info &lhs, const member_info &rhs);
@@ -61,11 +61,11 @@ bool operator!=(const member_info &lhs, const member_info &rhs);
 struct                struct_info;
 namespace rose {
   namespace ecs {
-    void      deserialize(struct_info &o, IDeserializer &s);
     void        serialize(struct_info &o, ISerializer &s);
+    void      deserialize(struct_info &o, IDeserializer &s);
   }
   hash_value         hash(const struct_info &o);
-  void construct_defaults(      struct_info &o); //TODO: implement me
+  void construct_defaults(      struct_info &o); // implement me
 }
 bool operator==(const struct_info &lhs, const struct_info &rhs);
 bool operator!=(const struct_info &lhs, const struct_info &rhs);
@@ -74,11 +74,11 @@ bool operator!=(const struct_info &lhs, const struct_info &rhs);
 struct                enum_info;
 namespace rose {
   namespace ecs {
-    void      deserialize(enum_info &o, IDeserializer &s);
     void        serialize(enum_info &o, ISerializer &s);
+    void      deserialize(enum_info &o, IDeserializer &s);
   }
   hash_value         hash(const enum_info &o);
-  void construct_defaults(      enum_info &o); //TODO: implement me
+  void construct_defaults(      enum_info &o); // implement me
 }
 bool operator==(const enum_info &lhs, const enum_info &rhs);
 bool operator!=(const enum_info &lhs, const enum_info &rhs);
@@ -87,11 +87,11 @@ bool operator!=(const enum_info &lhs, const enum_info &rhs);
 struct                enum_class_info;
 namespace rose {
   namespace ecs {
-    void      deserialize(enum_class_info &o, IDeserializer &s);
     void        serialize(enum_class_info &o, ISerializer &s);
+    void      deserialize(enum_class_info &o, IDeserializer &s);
   }
   hash_value         hash(const enum_class_info &o);
-  void construct_defaults(      enum_class_info &o); //TODO: implement me
+  void construct_defaults(      enum_class_info &o); // implement me
 }
 bool operator==(const enum_class_info &lhs, const enum_class_info &rhs);
 bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs);
@@ -100,11 +100,11 @@ bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs);
 struct                function_parameter_info;
 namespace rose {
   namespace ecs {
-    void      deserialize(function_parameter_info &o, IDeserializer &s);
     void        serialize(function_parameter_info &o, ISerializer &s);
+    void      deserialize(function_parameter_info &o, IDeserializer &s);
   }
   hash_value         hash(const function_parameter_info &o);
-  void construct_defaults(      function_parameter_info &o); //TODO: implement me
+  void construct_defaults(      function_parameter_info &o); // implement me
 }
 bool operator==(const function_parameter_info &lhs, const function_parameter_info &rhs);
 bool operator!=(const function_parameter_info &lhs, const function_parameter_info &rhs);
@@ -113,11 +113,11 @@ bool operator!=(const function_parameter_info &lhs, const function_parameter_inf
 struct                function_info;
 namespace rose {
   namespace ecs {
-    void      deserialize(function_info &o, IDeserializer &s);
     void        serialize(function_info &o, ISerializer &s);
+    void      deserialize(function_info &o, IDeserializer &s);
   }
   hash_value         hash(const function_info &o);
-  void construct_defaults(      function_info &o); //TODO: implement me
+  void construct_defaults(      function_info &o); // implement me
 }
 bool operator==(const function_info &lhs, const function_info &rhs);
 bool operator!=(const function_info &lhs, const function_info &rhs);
@@ -126,11 +126,11 @@ bool operator!=(const function_info &lhs, const function_info &rhs);
 struct                ParseContext;
 namespace rose {
   namespace ecs {
-    void      deserialize(ParseContext &o, IDeserializer &s);
     void        serialize(ParseContext &o, ISerializer &s);
+    void      deserialize(ParseContext &o, IDeserializer &s);
   }
   hash_value         hash(const ParseContext &o);
-  void construct_defaults(      ParseContext &o); //TODO: implement me
+  void construct_defaults(      ParseContext &o); // implement me
 }
 bool operator==(const ParseContext &lhs, const ParseContext &rhs);
 bool operator!=(const ParseContext &lhs, const ParseContext &rhs);
@@ -138,8 +138,11 @@ bool operator!=(const ParseContext &lhs, const ParseContext &rhs);
 
 #ifdef IMPL_SERIALIZER
 
+    #ifndef IMPL_SERIALIZER_UTIL
+    #define IMPL_SERIALIZER_UTIL
     #include <cstring>
 
+    namespace {
     //internal helper methods
     template<class T>
     bool rose_parser_equals(const T& lhs, const T& rhs) {
@@ -181,6 +184,8 @@ bool operator!=(const ParseContext &lhs, const ParseContext &rhs);
     void construct_default(std::vector<T> & v) {
       c.clear();
     }
+    }
+    #endif
   
 const char * to_string(const member_annotations_t & e) {
     switch(e) {
@@ -350,7 +355,7 @@ void rose::ecs::serialize(member_info &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(member_info &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -418,7 +423,7 @@ void rose::ecs::serialize(struct_info &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(struct_info &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -476,7 +481,7 @@ void rose::ecs::serialize(enum_info &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(enum_info &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -546,7 +551,7 @@ void rose::ecs::serialize(enum_class_info &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(enum_class_info &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -623,7 +628,7 @@ void rose::ecs::serialize(function_parameter_info &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(function_parameter_info &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -686,7 +691,7 @@ void rose::ecs::serialize(function_info &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(function_info &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -744,7 +749,7 @@ void rose::ecs::serialize(ParseContext &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(ParseContext &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
