@@ -20,6 +20,12 @@ namespace rose {
   void construct_defaults(      member_annotations_t &o); //implement me
 }
 
+inline member_annotations_t operator|(const member_annotations_t &a, const member_annotations_t &b) { return static_cast<member_annotations_t>(static_cast<int>(a) | static_cast<int>(b)); }
+inline member_annotations_t operator|=(member_annotations_t &a, const member_annotations_t &b) { return a = a | b; }
+inline member_annotations_t operator&(const member_annotations_t &a, const member_annotations_t &b) { return static_cast<member_annotations_t>(static_cast<int>(a) & static_cast<int>(b)); }
+inline member_annotations_t operator&=(member_annotations_t &a, const member_annotations_t &b) { return a = a & b; }
+inline bool operator!(const member_annotations_t &e) { return static_cast<int>(e) == 0; }
+
 
 enum class                   value_type_t;
 const char * to_string(const value_type_t &);

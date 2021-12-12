@@ -746,23 +746,37 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
   //dump declaration
   for (auto & enumci : c.enum_classes) {
+    const char * name = enumci.name;
+    const char * type = enumci.type;
+
     puts("");
-    char type[64] = "";
     if (enumci.custom_type) {
-      sprintf(type, " : %s", enumci.type);
+      printf_ttws("enum class                   %s : %s;\n", name, type);
     }
-    printf_ttws("enum class                   %s%s;\n", enumci.name, type);
-    printf_ttws("const char * to_string(const %s &);\n", enumci.name);
+    else {
+      printf_ttws("enum class                   %s;\n", name);
+    }
+    printf_ttws("const char * to_string(const %s &);\n", name);
 
     printf_ttws("namespace rose {\n");
     printf_ttws("  namespace ecs {\n");
-    printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", enumci.name);
-    printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", enumci.name);
+    printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", name);
+    printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", name);
     printf_ttws("  }\n");
-    printf_ttws("  hash_value         hash(const %s &o);\n", enumci.name);
-    printf_ttws("  void construct_defaults(      %s &o); //implement me\n", enumci.name);
+    printf_ttws("  hash_value         hash(const %s &o);\n", name);
+    printf_ttws("  void construct_defaults(      %s &o); //implement me\n", name);
 
     printf_ttws("}\n");
+
+    if (enumci.enum_annotations == global_annotations_t::Flag) {
+        puts("");
+        printf_ttws("inline %s operator|(const %s &a, const %s &b) { return static_cast<%s>(static_cast<%s>(a) | static_cast<%s>(b)); } \n", name, name, name, name, type, type);
+        printf_ttws("inline %s operator|=(%s &a, const %s &b) { return a = a | b; }                                                     \n", name, name, name);
+        printf_ttws("inline %s operator&(const %s &a, const %s &b) { return static_cast<%s>(static_cast<%s>(a) & static_cast<%s>(b)); } \n", name, name, name, name, type, type);
+        printf_ttws("inline %s operator&=(%s &a, const %s &b) { return a = a & b; }                                                     \n", name, name, name);
+        printf_ttws("inline bool operator!(const %s &e) { return static_cast<%s>(e) == 0; }                                             \n", name, type);
+    }
+
     puts("");
   }
 
