@@ -4,6 +4,8 @@
 
 //@Flag 
 enum class member_annotations_t {
+  //It's recommendet Bitfields should start 
+  //with NONE but it's not mandatory.
   NONE = 0,
   Ignore = 1 << 0,
   String = 1 << 1,

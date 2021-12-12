@@ -442,7 +442,7 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
     if (buffer.test_and_skip("enum ")) {
       if (buffer.test_and_skip("class ") || buffer.test_and_skip("struct ")) {
         if (global_annotation != global_annotations_t::NONE && global_annotation != global_annotations_t::Flag) {
-          error("enum class annotation cn't be anything other than 'Flag'", buffer);
+          error("enum class annotation can't be anything other than 'Flag'", buffer);
         }
         enum_class_info & enumci = ctx.enum_classes.emplace_back();
         enumci.enum_annotations = global_annotation;
@@ -458,7 +458,13 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
         }
 
         if (c != '{') error("Expected '{'", buffer);
+
         for (;;) {
+          while (buffer.skip_comment())
+          {
+            //Skip the comments
+          }
+
           c = buffer.sws_peek();
           if (c == '}') {
             buffer.skip(1);
