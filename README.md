@@ -19,6 +19,9 @@ DESCRIPTION
 
        -J, --json
               A optional JSON file containing meta info of the header files.
+              
+       -V, --verbose
+              Verbose output.
 
 AUTHOR
        Written by Rico Possienka.
