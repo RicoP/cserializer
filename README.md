@@ -36,6 +36,8 @@ create_solution.bat
 build_solution.bat
 ```
 
+You must include https://github.com/RicoP/premake-comppp/tree/main/include/serializer 
+
 ### Example:
 
 See bin folder for test cases and example output.
