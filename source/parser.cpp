@@ -153,17 +153,20 @@ struct StreamBuffer {
   }
 
   void fetch() {
-    if (buffer_head >= buffer_size_max) {
+    if (buffer_size == 0) {
+       buffer_head = 0;
+    }
+    else if (buffer_head >= buffer_size_max) {
       shift_buffer();
     }
-    char * current = end();
-    assert(current < buffer + buffer_size_max);
-    size_t count = fread(current, 1, buffer_size_max, file);
+    char * new_input_begin = end();
+    assert(new_input_begin <= buffer + buffer_size_max);
+    size_t count = fread(new_input_begin, 1, buffer_size_max, file);
     assert(count <= buffer_size_max);
     buffer_size += count;
     eof = count == 0;
     //replace tabs with spaces
-    for (char * p = current; p != current + count; ++p)
+    for (char * p = new_input_begin; p != end(); ++p)
       if (*p == '\t') *p = ' ';
   }
 
