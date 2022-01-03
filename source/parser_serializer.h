@@ -8,6 +8,13 @@
 //  command:
 //    rose.parser --include parser.h -O parser_serializer.h
 ///////////////////////////////////////////////////////////////////
+#ifndef ROSE_SERIALIZER_TYPE_ID
+#define ROSE_SERIALIZER_TYPE_ID
+namespace rose {
+template<typename T>
+struct type_id;
+}
+#endif
 
 enum class                   member_annotations_t;
 const char * to_string(const member_annotations_t &);
@@ -16,6 +23,10 @@ namespace rose {
     void      deserialize(member_annotations_t &o, IDeserializer &s);
     void        serialize(member_annotations_t &o, ISerializer &s);
   }
+  template<>
+  struct type_id<member_annotations_t> {
+    hash_value VALUE = 15957115858621783131ULL;
+  };
   hash_value         hash(const member_annotations_t &o);
   void construct_defaults(      member_annotations_t &o); //implement me
 }
@@ -34,6 +45,10 @@ namespace rose {
     void      deserialize(value_type_t &o, IDeserializer &s);
     void        serialize(value_type_t &o, ISerializer &s);
   }
+  template<>
+  struct type_id<value_type_t> {
+    hash_value VALUE = 1365550538702330516ULL;
+  };
   hash_value         hash(const value_type_t &o);
   void construct_defaults(      value_type_t &o); //implement me
 }
@@ -46,6 +61,10 @@ namespace rose {
     void      deserialize(global_annotations_t &o, IDeserializer &s);
     void        serialize(global_annotations_t &o, ISerializer &s);
   }
+  template<>
+  struct type_id<global_annotations_t> {
+    hash_value VALUE = 7836407846768582511ULL;
+  };
   hash_value         hash(const global_annotations_t &o);
   void construct_defaults(      global_annotations_t &o); //implement me
 }
@@ -58,6 +77,10 @@ namespace rose {
     void      deserialize(member_info &o, IDeserializer &s);
   }
   hash_value         hash(const member_info &o);
+  template<>
+  struct type_id<member_info> {
+    hash_value VALUE = 2590716206756645766ULL;
+  };
   void construct_defaults(      member_info &o); // implement me
 }
 bool operator==(const member_info &lhs, const member_info &rhs);
@@ -71,6 +94,10 @@ namespace rose {
     void      deserialize(struct_info &o, IDeserializer &s);
   }
   hash_value         hash(const struct_info &o);
+  template<>
+  struct type_id<struct_info> {
+    hash_value VALUE = 14628859888345107740ULL;
+  };
   void construct_defaults(      struct_info &o); // implement me
 }
 bool operator==(const struct_info &lhs, const struct_info &rhs);
@@ -84,6 +111,10 @@ namespace rose {
     void      deserialize(enum_info &o, IDeserializer &s);
   }
   hash_value         hash(const enum_info &o);
+  template<>
+  struct type_id<enum_info> {
+    hash_value VALUE = 4261566644030889673ULL;
+  };
   void construct_defaults(      enum_info &o); // implement me
 }
 bool operator==(const enum_info &lhs, const enum_info &rhs);
@@ -97,6 +128,10 @@ namespace rose {
     void      deserialize(enum_class_info &o, IDeserializer &s);
   }
   hash_value         hash(const enum_class_info &o);
+  template<>
+  struct type_id<enum_class_info> {
+    hash_value VALUE = 15006823711549742444ULL;
+  };
   void construct_defaults(      enum_class_info &o); // implement me
 }
 bool operator==(const enum_class_info &lhs, const enum_class_info &rhs);
@@ -110,6 +145,10 @@ namespace rose {
     void      deserialize(function_parameter_info &o, IDeserializer &s);
   }
   hash_value         hash(const function_parameter_info &o);
+  template<>
+  struct type_id<function_parameter_info> {
+    hash_value VALUE = 4852199031995945534ULL;
+  };
   void construct_defaults(      function_parameter_info &o); // implement me
 }
 bool operator==(const function_parameter_info &lhs, const function_parameter_info &rhs);
@@ -123,6 +162,10 @@ namespace rose {
     void      deserialize(function_info &o, IDeserializer &s);
   }
   hash_value         hash(const function_info &o);
+  template<>
+  struct type_id<function_info> {
+    hash_value VALUE = 70535189779381672ULL;
+  };
   void construct_defaults(      function_info &o); // implement me
 }
 bool operator==(const function_info &lhs, const function_info &rhs);
@@ -136,6 +179,10 @@ namespace rose {
     void      deserialize(ParseContext &o, IDeserializer &s);
   }
   hash_value         hash(const ParseContext &o);
+  template<>
+  struct type_id<ParseContext> {
+    hash_value VALUE = 13874823424755968453ULL;
+  };
   void construct_defaults(      ParseContext &o); // implement me
 }
 bool operator==(const ParseContext &lhs, const ParseContext &rhs);

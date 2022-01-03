@@ -508,6 +508,7 @@ void parse(ParseContext & ctx, StreamBuffer & buffer) {
       struct_info & structi = ctx.structs.emplace_back();
 
       structi.global_annotations = global_annotation;
+      global_annotation = global_annotations_t::NONE;
 
       buffer.sws_read_till(structi.name, ";{" WHITESPACE);
 
@@ -747,6 +748,14 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   }
   printf_ttws("///////////////////////////////////////////////////////////////////\n");
 
+  printf_ttws("#ifndef ROSE_SERIALIZER_TYPE_ID     \n");
+  printf_ttws("#define ROSE_SERIALIZER_TYPE_ID     \n");
+  printf_ttws("namespace rose {         \n");
+  printf_ttws("template<typename T>     \n");
+  printf_ttws("struct type_id;          \n");
+  printf_ttws("}                        \n");
+  printf_ttws("#endif                   \n");
+
   //dump declaration
   for (auto & enumci : c.enum_classes) {
     const char * name = enumci.name;
@@ -766,6 +775,12 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", name);
     printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", name);
     printf_ttws("  }\n");
+
+    printf_ttws("  template<>                        \n");
+    printf_ttws("  struct type_id<%s> {              \n", name);
+    printf_ttws("    hash_value VALUE = %lluULL;     \n", (unsigned long long)rose::hash(enumci));
+    printf_ttws("  };                                \n");
+
     printf_ttws("  hash_value         hash(const %s &o);\n", name);
     printf_ttws("  void construct_defaults(      %s &o); //implement me\n", name);
 
@@ -802,6 +817,12 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     if (!has_deserialize) printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", sname);
     printf_ttws("  }\n");
     printf_ttws("  hash_value         hash(const %s &o);\n", sname);
+
+    printf_ttws("  template<>                        \n");
+    printf_ttws("  struct type_id<%s> {              \n", sname);
+    printf_ttws("    hash_value VALUE = %lluULL;     \n", (unsigned long long)rose::hash(structi));
+    printf_ttws("  };                                \n");
+
     printf_ttws("  void construct_defaults(      %s &o); // implement me\n", sname);
     printf_ttws("}\n");
     if (!has_eqop) printf_ttws("bool operator==(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
@@ -940,7 +961,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       printf_ttws("} \n\n");
     }
 
-    if (!has_eqop) {
+    if (!has_neqop) {
       printf_ttws("bool operator!=(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
       printf_ttws("  return \n");
       int left = structi.members.size() - 1;
@@ -1038,7 +1059,6 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
         printf_ttws("  h ^= rose::hash(o.%s);                  \n", member.name);
       }
     }
-
     printf_ttws("  return h;                           \n");
     printf_ttws("}                                     \n");
 

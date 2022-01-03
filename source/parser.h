@@ -17,8 +17,8 @@ enum class value_type_t {
   Set
 };
 
-//Flag: enum class is treated as flags, meaning it has |& operators
-//Imposter: Parse the next multiline comment like it's regular code
+//Flag: Enum class is treated as flags, meaning it has |= &= bit flag operators.
+//Imposter: Parse the next multiline comment like it's regular code.
 enum class global_annotations_t {
   NONE = 0,
   Flag,
