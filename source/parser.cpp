@@ -771,7 +771,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     printf_ttws("  template<>                        \n");
     printf_ttws("  struct type_id<%s> {              \n", name);
-    printf_ttws("    hash_value VALUE = %lluULL;     \n", (unsigned long long)rose::hash(enumci));
+    printf_ttws("    inline static hash_value VALUE = %lluULL;     \n", (unsigned long long)rose::hash(enumci));
     printf_ttws("  };                                \n");
 
     printf_ttws("  hash_value         hash(const %s &o);\n", name);

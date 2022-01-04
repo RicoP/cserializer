@@ -19,7 +19,7 @@ namespace rose {
   }
   template<>
   struct type_id<member_annotations_t> {
-    hash_value VALUE = 15957115858621783131ULL;
+    inline static hash_value VALUE = 15957115858621783131ULL;
   };
   hash_value         hash(const member_annotations_t &o);
   void construct_defaults(      member_annotations_t &o); //implement me
@@ -41,7 +41,7 @@ namespace rose {
   }
   template<>
   struct type_id<value_type_t> {
-    hash_value VALUE = 1365550538702330516ULL;
+    inline static hash_value VALUE = 1365550538702330516ULL;
   };
   hash_value         hash(const value_type_t &o);
   void construct_defaults(      value_type_t &o); //implement me
@@ -57,7 +57,7 @@ namespace rose {
   }
   template<>
   struct type_id<global_annotations_t> {
-    hash_value VALUE = 7836407846768582511ULL;
+    inline static hash_value VALUE = 7836407846768582511ULL;
   };
   hash_value         hash(const global_annotations_t &o);
   void construct_defaults(      global_annotations_t &o); //implement me
