@@ -734,6 +734,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   printf_ttws("#pragma once\n");
   printf_ttws("\n");
   printf_ttws("#include <rose/hash.h>\n");
+  printf_ttws("#include <rose/typetraits.h>\n");
   printf_ttws("#include <serializer/serializer.h>\n");
   printf_ttws("\n");
   printf_ttws("///////////////////////////////////////////////////////////////////\n");
@@ -747,14 +748,6 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("\n");
   }
   printf_ttws("///////////////////////////////////////////////////////////////////\n");
-
-  printf_ttws("#ifndef ROSE_SERIALIZER_TYPE_ID     \n");
-  printf_ttws("#define ROSE_SERIALIZER_TYPE_ID     \n");
-  printf_ttws("namespace rose {         \n");
-  printf_ttws("template<typename T>     \n");
-  printf_ttws("struct type_id;          \n");
-  printf_ttws("}                        \n");
-  printf_ttws("#endif                   \n");
 
   //dump declaration
   for (auto & enumci : c.enum_classes) {
