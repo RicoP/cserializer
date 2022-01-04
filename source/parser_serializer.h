@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rose/hash.h>
+#include <rose/typetraits.h>
 #include <serializer/serializer.h>
 
 ///////////////////////////////////////////////////////////////////
@@ -8,13 +9,6 @@
 //  command:
 //    rose.parser --include parser.h -O parser_serializer.h
 ///////////////////////////////////////////////////////////////////
-#ifndef ROSE_SERIALIZER_TYPE_ID
-#define ROSE_SERIALIZER_TYPE_ID
-namespace rose {
-template<typename T>
-struct type_id;
-}
-#endif
 
 enum class                   member_annotations_t;
 const char * to_string(const member_annotations_t &);
