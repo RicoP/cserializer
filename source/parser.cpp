@@ -532,7 +532,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     printf_ttws("  template<>                        \n");
     printf_ttws("  struct type_id<%s> {              \n", sname);
-    printf_ttws("    hash_value VALUE = %lluULL;     \n", (unsigned long long)rose::hash(structi));
+    printf_ttws("    inline static hash_value VALUE = %lluULL;     \n", (unsigned long long)rose::hash(structi));
     printf_ttws("  };                                \n");
 
     printf_ttws("  void construct_defaults(      %s &o); // implement me\n", sname);
@@ -803,6 +803,11 @@ void printhelp() {
     "SYNOPSIS \n"
     "       rose.parser [OPTION] \n"
     " \n"
+    "BUILDDATE \n"
+    "       " __DATE__ ", " __TIME__
+    " \n"
+    " \n"
+
     "DESCRIPTION \n"
     "       -H, --help \n"
     "              show this help. \n"
