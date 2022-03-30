@@ -504,6 +504,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
         printf_ttws("inline %s operator|=(%s &a, const %s &b) { return a = a | b; }                                                     \n", name, name, name);
         printf_ttws("inline %s operator&(const %s &a, const %s &b) { return static_cast<%s>(static_cast<%s>(a) & static_cast<%s>(b)); } \n", name, name, name, name, type, type);
         printf_ttws("inline %s operator&=(%s &a, const %s &b) { return a = a & b; }                                                     \n", name, name, name);
+        printf_ttws("inline %s operator^(const %s &a, const %s &b) { return static_cast<%s>(static_cast<%s>(a) ^ static_cast<%s>(b)); } \n", name, name, name, name, type, type);
+        printf_ttws("inline %s operator^=(%s &a, const %s &b) { return a = a ^ b; }                                                     \n", name, name, name);
         printf_ttws("inline bool operator!(const %s &e) { return static_cast<%s>(e) == 0; }                                             \n", name, type);
     }
 
