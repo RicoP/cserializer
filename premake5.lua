@@ -51,15 +51,14 @@ project "_root"
     files { "**" }
     removefiles { ".git/**" }
     removefiles { ".build/**" }
-    removefiles { "externals/**" }
     removefiles { "**.cpp", "**.h", "**.c" }
 
 project "app.parser"
   targetname "rose.parser"
   kind "ConsoleApp"
   warnings "Extra"
-  includedirs { "externals/roselib/include" }
-  includedirs { "externals/premake-comppp/include" }
+  includedirs { "../roselib/include" }
+  includedirs { "../premake-comppp/include" }
   files { "source/**" }
   filter "configurations:*ParserHeader"
     debugdir "source/"
@@ -74,7 +73,7 @@ project "test.camera"
   kind "ConsoleApp"
   warnings "Extra"
   debugdir "test/"
-  includedirs { "externals/roselib/include" }
-  includedirs { "externals/premake-comppp/include" }
+  includedirs { "../roselib/include" }
+  includedirs { "../premake-comppp/include" }
   files { "test/**" }
 
