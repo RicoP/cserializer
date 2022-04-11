@@ -25,8 +25,16 @@ enum class global_annotations_t {
   Imposter
 };
 
+enum class Member_info_kind {
+	NONE= 0,
+	Field,
+	Function
+};
+
 //1 = simple variabel, >1 = array, -1 = vector
 struct member_info {
+  Member_info_kind kind = Member_info_kind::NONE;
+
   //@String
   char type[64];
   //@String

@@ -138,18 +138,29 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
     // MACROS                                             //
     ////////////////////////////////////////////////////////
     if (buffer.test_and_skip("#")) {
+      char line[1024];
       //Macro
       buffer.read_till(tmp, WHITESPACE);
       switch (rose::hash(tmp)) { 
       case rose::hash("include"):
       case rose::hash("pragma"):
       case rose::hash("define"):
+        buffer.skip_line();
+        break;
+      case rose::hash("ifdef"):
       case rose::hash("ifndef"):
       case rose::hash("if"):
-      case rose::hash("else"):
-      case rose::hash("elif"):
-      case rose::hash("endif"): 
+        //skip all ifXXX macros.
         buffer.skip_line();
+        for (;;) {
+          if (buffer.sws_peek() == '#') {
+            if (buffer.test_and_skip("#endif")) {
+              break;
+            }
+          }
+          buffer.skip_line();
+        }
+
         break;
       default:
         error("unknown PP macro.", buffer);
@@ -254,12 +265,24 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
             ? ignored_member //fake member we just write to but immediately discard
             : structi.members.emplace_back(); //otherwise create new member
 
+          memberi.count = 1;
+          memberi.kind = Member_info_kind::Field;
           memberi.annotations = annotation;
           copy(memberi.type, type);
-          buffer.sws_read_till(memberi.name, "[;," WHITESPACE);
+          buffer.sws_read_till(memberi.name, "([;," WHITESPACE);
           c = buffer.sws_get();
 
-          memberi.count = 1;
+          if (c == '(') {
+            //function
+            memberi.kind = Member_info_kind::Function;
+            //skip for now. we don't really care.
+            buffer.skip_till_any(")");
+            buffer.skip(1);
+            if (buffer.sws_peek() == '{') {
+              error("can't deal with inline functions right now.", buffer);
+            }
+            c = buffer.sws_get();
+          }
 
           if (c == '[') {
             buffer.sws_read_till(tmp, "]");
@@ -275,6 +298,12 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
           }
 
           if (c != ';') error("Expected ';'", buffer);
+
+          if (memberi.kind == Member_info_kind::Function) {
+            //get rid of function member because we don't want to deal with it right now.
+            structi.members.pop_back();
+          }
+
           if (buffer.sws_peek() == '}') {
             buffer.skip(1);
             if (buffer.sws_get() != ';') error("Expected ';'", buffer);
