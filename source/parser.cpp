@@ -154,7 +154,8 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
         buffer.skip_line();
         for (;;) {
           if (buffer.sws_peek() == '#') {
-            if (buffer.test_and_skip("#endif")) {
+            if (buffer.test("#endif")) {
+              buffer.skip_line();
               break;
             }
           }
