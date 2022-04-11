@@ -138,7 +138,6 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
     // MACROS                                             //
     ////////////////////////////////////////////////////////
     if (buffer.test_and_skip("#")) {
-      char line[1024];
       //Macro
       buffer.read_till(tmp, WHITESPACE);
       switch (rose::hash(tmp)) { 
@@ -323,6 +322,8 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
     buffer.skip_ws();
     if (!buffer.eof)
     {
+      buffer.test_and_skip("inline");
+
       char type[64];
       buffer.sws_read_c_identifier(type);
 
