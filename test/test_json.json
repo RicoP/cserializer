@@ -70,7 +70,7 @@
       }, 
       "enum_annotations" : "NONE"
     }, {
-      "name" : "Direction", 
+      "name" : "rose::ecs::Direction", 
       "type" : "int", 
       "custom_type" : false, 
       "enums" : [{
@@ -282,7 +282,7 @@
           "annotations" : "NONE"
         }]
     }, {
-      "name" : "Button", 
+      "name" : "rose::ecs::Button", 
       "global_annotations" : "NONE", 
       "members" : [{
           "type" : "Direction", 

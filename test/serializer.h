@@ -42,19 +42,19 @@ namespace rose {
 }
 
 
-enum class                   Direction;
-const char * to_string(const Direction &);
+enum class                   rose::ecs::Direction;
+const char * to_string(const rose::ecs::Direction &);
 namespace rose {
   namespace ecs {
-    void      deserialize(Direction &o, IDeserializer &s);
-    void        serialize(Direction &o, ISerializer &s);
+    void      deserialize(rose::ecs::Direction &o, IDeserializer &s);
+    void        serialize(rose::ecs::Direction &o, ISerializer &s);
   }
   template<>
-  struct type_id<Direction> {
-    inline static hash_value VALUE = 1050951123511690101ULL;
+  struct type_id<rose::ecs::Direction> {
+    inline static hash_value VALUE = 1886528734137778031ULL;
   };
-  hash_value         hash(const Direction &o);
-  void construct_defaults(      Direction &o); //implement me
+  hash_value         hash(const rose::ecs::Direction &o);
+  void construct_defaults(      rose::ecs::Direction &o); //implement me
 }
 
 
@@ -139,21 +139,21 @@ bool operator==(const Scene1 &lhs, const Scene1 &rhs);
 bool operator!=(const Scene1 &lhs, const Scene1 &rhs);
 
 
-struct                Button;
+struct                rose::ecs::Button;
 namespace rose {
   namespace ecs {
-    void        serialize(Button &o, ISerializer &s);
-    void      deserialize(Button &o, IDeserializer &s);
+    void        serialize(rose::ecs::Button &o, ISerializer &s);
+    void      deserialize(rose::ecs::Button &o, IDeserializer &s);
   }
-  hash_value         hash(const Button &o);
+  hash_value         hash(const rose::ecs::Button &o);
   template<>
-  struct type_id<Button> {
-    inline static hash_value VALUE = 1167378402548977160ULL;
+  struct type_id<rose::ecs::Button> {
+    inline static hash_value VALUE = 11256285081531271822ULL;
   };
-  void construct_defaults(      Button &o); // implement me
+  void construct_defaults(      rose::ecs::Button &o); // implement me
 }
-bool operator==(const Button &lhs, const Button &rhs);
-bool operator!=(const Button &lhs, const Button &rhs);
+bool operator==(const rose::ecs::Button &lhs, const rose::ecs::Button &rhs);
+bool operator!=(const rose::ecs::Button &lhs, const rose::ecs::Button &rhs);
 
 
 #ifdef IMPL_SERIALIZER
@@ -335,39 +335,39 @@ rose::hash_value       rose::hash(const enum_test2& o) {
   return static_cast<rose::hash_value>(o);
 }
 
-const char * to_string(const Direction & e) {
+const char * to_string(const rose::ecs::Direction & e) {
     switch(e) {
-        case Direction::NONE: return "NONE";
-        case Direction::up: return "up";
-        case Direction::down: return "down";
-        case Direction::left: return "left";
-        case Direction::right: return "right";
+        case rose::ecs::Direction::NONE: return "NONE";
+        case rose::ecs::Direction::up: return "up";
+        case rose::ecs::Direction::down: return "down";
+        case rose::ecs::Direction::left: return "left";
+        case rose::ecs::Direction::right: return "right";
         default: return "<UNKNOWN>";
     }
 }
-void rose::ecs::serialize(Direction& o, ISerializer& s) {
+void rose::ecs::serialize(rose::ecs::Direction& o, ISerializer& s) {
   switch (o) {
-    case Direction::NONE: {
+    case rose::ecs::Direction::NONE: {
       char str[] = "NONE";
       serialize(str, s);
       break;
     }
-    case Direction::up: {
+    case rose::ecs::Direction::up: {
       char str[] = "up";
       serialize(str, s);
       break;
     }
-    case Direction::down: {
+    case rose::ecs::Direction::down: {
       char str[] = "down";
       serialize(str, s);
       break;
     }
-    case Direction::left: {
+    case rose::ecs::Direction::left: {
       char str[] = "left";
       serialize(str, s);
       break;
     }
-    case Direction::right: {
+    case rose::ecs::Direction::right: {
       char str[] = "right";
       serialize(str, s);
       break;
@@ -375,20 +375,20 @@ void rose::ecs::serialize(Direction& o, ISerializer& s) {
     default: /* unknown */ break;
   }
 }
-void rose::ecs::deserialize(Direction& o, IDeserializer& s) {
+void rose::ecs::deserialize(rose::ecs::Direction& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
   rose::hash_value h = rose::hash(str);
   switch (h) {
-  case rose::hash("NONE"): o = Direction::NONE; break;
-  case rose::hash("up"): o = Direction::up; break;
-  case rose::hash("down"): o = Direction::down; break;
-  case rose::hash("left"): o = Direction::left; break;
-  case rose::hash("right"): o = Direction::right; break;
+  case rose::hash("NONE"): o = rose::ecs::Direction::NONE; break;
+  case rose::hash("up"): o = rose::ecs::Direction::up; break;
+  case rose::hash("down"): o = rose::ecs::Direction::down; break;
+  case rose::hash("left"): o = rose::ecs::Direction::left; break;
+  case rose::hash("right"): o = rose::ecs::Direction::right; break;
   default: /*unknown value*/ break;
   }
 }
-rose::hash_value       rose::hash(const Direction& o) {
+rose::hash_value       rose::hash(const rose::ecs::Direction& o) {
   return static_cast<rose::hash_value>(o);
 }
 
@@ -620,22 +620,22 @@ rose::hash_value rose::hash(const Scene1 &o) {
   return h;
 }
 ///////////////////////////////////////////////////////////////////
-//  struct Button
+//  struct rose::ecs::Button
 ///////////////////////////////////////////////////////////////////
-bool operator==(const Button &lhs, const Button &rhs) {
+bool operator==(const rose::ecs::Button &lhs, const rose::ecs::Button &rhs) {
   return
     rose_parser_equals(lhs.dir, rhs.dir) &&
     rose_parser_equals(lhs.pos, rhs.pos) ;
 }
 
-bool operator!=(const Button &lhs, const Button &rhs) {
+bool operator!=(const rose::ecs::Button &lhs, const rose::ecs::Button &rhs) {
   return
     !rose_parser_equals(lhs.dir, rhs.dir) ||
     !rose_parser_equals(lhs.pos, rhs.pos) ;
 }
 
-void rose::ecs::serialize(Button &o, ISerializer &s) {
-  if(s.node_begin("Button", rose::hash("Button"), &o)) {
+void rose::ecs::serialize(rose::ecs::Button &o, ISerializer &s) {
+  if(s.node_begin("rose::ecs::Button", rose::hash("rose::ecs::Button"), &o)) {
     s.key("dir");
     serialize(o.dir, s);
     s.key("pos");
@@ -645,7 +645,7 @@ void rose::ecs::serialize(Button &o, ISerializer &s) {
   s.end();
 }
 
-void rose::ecs::deserialize(Button &o, IDeserializer &s) {
+void rose::ecs::deserialize(rose::ecs::Button &o, IDeserializer &s) {
   //implement me
   //construct_defaults(o);
 
@@ -662,7 +662,7 @@ void rose::ecs::deserialize(Button &o, IDeserializer &s) {
   }
 }
 
-rose::hash_value rose::hash(const Button &o) {
+rose::hash_value rose::hash(const rose::ecs::Button &o) {
   rose::hash_value h = rose::hash(o.dir);
   h = rose::xor64(h);
   h ^= rose::hash(o.pos);
