@@ -99,19 +99,39 @@ struct namespace_path {
   char path[64];
 };
 
-void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
+int read_in_namespaces(char * buffer, int N, const std::vector<namespace_path> & namespaces, rose::StreamBuffer & sb) {
+  char * p = buffer;
+  int size = N;
+  int len = 0;
+  for (auto & ns : namespaces) {
+    int s = std::snprintf(p, size, "%s::", ns.path);
+    size -= s;
+    len += s;
+    if (size < 0) error("out of space.", sb);
+    p += s;
+  }
+  return len;
+}
 
+template<size_t N>
+int read_in_namespaces(char (&buffer)[N], const std::vector<namespace_path> & namespaces, rose::StreamBuffer & sb) {
+  return read_in_namespaces(buffer, N, namespaces, sb);
+}
+
+void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
   char tmp[64] = "";
+  char namespace_name_buffer[128];
+  int namespace_name_size = sizeof(namespace_name_buffer);
+  char * namespace_name = namespace_name_buffer;
   global_annotations_t global_annotation = global_annotations_t::NONE;
   bool is_in_imposter_comment = false;
-  std::vector< namespace_path > namespaces;
-  while (!buffer.eof)
-  {
+  std::vector<namespace_path> namespaces;
+  while (!buffer.eof) {
     ////////////////////////////////////////////////////////
     // COMMENTS                                           //
     ////////////////////////////////////////////////////////
     while (buffer.skip_comment()) {
-      //TODO: we need a more flexible way to check for comments
+      // TODO: we need a more flexible way to check for comments
     }
 
     ////////////////////////////////////////////////////////
@@ -208,7 +228,8 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
         enumci.enum_annotations = global_annotation;
         global_annotation = global_annotations_t::NONE;
 
-        buffer.sws_read_till(enumci.name, "{:" WHITESPACE);
+        int s = read_in_namespaces(enumci.name, namespaces, buffer);
+        buffer.sws_read_till(enumci.name + s, sizeof(enumci.name) - s, "{:" WHITESPACE);
         char c = buffer.sws_get();
 
         if (c == ':') {
@@ -267,7 +288,8 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
       structi.global_annotations = global_annotation;
       global_annotation = global_annotations_t::NONE;
 
-      buffer.sws_read_till(structi.name, ";{" WHITESPACE);
+      int s = read_in_namespaces(structi.name, namespaces, buffer);
+      buffer.sws_read_till(structi.name + s, sizeof(structi.name) - s, ";{" WHITESPACE);
 
       buffer.skip_ws();
 
@@ -347,14 +369,13 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
     // Assume: GLOBAL FUNCTIONS                           //
     ////////////////////////////////////////////////////////
     buffer.skip_ws();
-    if (!buffer.eof)
-    {
-      buffer.test_and_skip("inline");
+    if (!buffer.eof) {
+      buffer.test_and_skip("inline ");
 
       char type[64];
       buffer.sws_read_c_identifier(type);
 
-      char name[64];
+      char name[128];
       buffer.sws_read_c_identifier(name);
 
       if (rose::hash(name) == rose::hash("operator")) {
