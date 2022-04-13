@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rose/hash.h>
+#include <rose/typetraits.h>
 #include <serializer/serializer.h>
 
 ///////////////////////////////////////////////////////////////////
@@ -16,8 +17,12 @@ namespace rose {
     void      deserialize(enum_test &o, IDeserializer &s);
     void        serialize(enum_test &o, ISerializer &s);
   }
+  template<>
+  struct type_id<enum_test> {
+    inline static hash_value VALUE = 5040772477107589634ULL;
+  };
   hash_value         hash(const enum_test &o);
-  void construct_defaults(      enum_test &o); //TODO: implement me
+  void construct_defaults(      enum_test &o); //implement me
 }
 
 
@@ -28,8 +33,28 @@ namespace rose {
     void      deserialize(enum_test2 &o, IDeserializer &s);
     void        serialize(enum_test2 &o, ISerializer &s);
   }
+  template<>
+  struct type_id<enum_test2> {
+    inline static hash_value VALUE = 9236210457033881375ULL;
+  };
   hash_value         hash(const enum_test2 &o);
-  void construct_defaults(      enum_test2 &o); //TODO: implement me
+  void construct_defaults(      enum_test2 &o); //implement me
+}
+
+
+enum class                   Direction;
+const char * to_string(const Direction &);
+namespace rose {
+  namespace ecs {
+    void      deserialize(Direction &o, IDeserializer &s);
+    void        serialize(Direction &o, ISerializer &s);
+  }
+  template<>
+  struct type_id<Direction> {
+    inline static hash_value VALUE = 1050951123511690101ULL;
+  };
+  hash_value         hash(const Direction &o);
+  void construct_defaults(      Direction &o); //implement me
 }
 
 
@@ -40,7 +65,11 @@ namespace rose {
     void      deserialize(EngineSettings &o, IDeserializer &s);
   }
   hash_value         hash(const EngineSettings &o);
-  void construct_defaults(      EngineSettings &o); //TODO: implement me
+  template<>
+  struct type_id<EngineSettings> {
+    inline static hash_value VALUE = 10086401970102489070ULL;
+  };
+  void construct_defaults(      EngineSettings &o); // implement me
 }
 bool operator==(const EngineSettings &lhs, const EngineSettings &rhs);
 bool operator!=(const EngineSettings &lhs, const EngineSettings &rhs);
@@ -51,7 +80,11 @@ namespace rose {
     void      deserialize(vector3 &o, IDeserializer &s);
   }
   hash_value         hash(const vector3 &o);
-  void construct_defaults(      vector3 &o); //TODO: implement me
+  template<>
+  struct type_id<vector3> {
+    inline static hash_value VALUE = 8723484739212616572ULL;
+  };
+  void construct_defaults(      vector3 &o); // implement me
 }
 
 
@@ -62,7 +95,11 @@ namespace rose {
     void      deserialize(Camera &o, IDeserializer &s);
   }
   hash_value         hash(const Camera &o);
-  void construct_defaults(      Camera &o); //TODO: implement me
+  template<>
+  struct type_id<Camera> {
+    inline static hash_value VALUE = 12979130266863026692ULL;
+  };
+  void construct_defaults(      Camera &o); // implement me
 }
 bool operator==(const Camera &lhs, const Camera &rhs);
 bool operator!=(const Camera &lhs, const Camera &rhs);
@@ -75,7 +112,11 @@ namespace rose {
     void      deserialize(Transform &o, IDeserializer &s);
   }
   hash_value         hash(const Transform &o);
-  void construct_defaults(      Transform &o); //TODO: implement me
+  template<>
+  struct type_id<Transform> {
+    inline static hash_value VALUE = 3361076748424456090ULL;
+  };
+  void construct_defaults(      Transform &o); // implement me
 }
 bool operator==(const Transform &lhs, const Transform &rhs);
 bool operator!=(const Transform &lhs, const Transform &rhs);
@@ -88,16 +129,40 @@ namespace rose {
     void      deserialize(Scene1 &o, IDeserializer &s);
   }
   hash_value         hash(const Scene1 &o);
-  void construct_defaults(      Scene1 &o); //TODO: implement me
+  template<>
+  struct type_id<Scene1> {
+    inline static hash_value VALUE = 14889867641241886570ULL;
+  };
+  void construct_defaults(      Scene1 &o); // implement me
 }
 bool operator==(const Scene1 &lhs, const Scene1 &rhs);
 bool operator!=(const Scene1 &lhs, const Scene1 &rhs);
 
 
+struct                Button;
+namespace rose {
+  namespace ecs {
+    void        serialize(Button &o, ISerializer &s);
+    void      deserialize(Button &o, IDeserializer &s);
+  }
+  hash_value         hash(const Button &o);
+  template<>
+  struct type_id<Button> {
+    inline static hash_value VALUE = 1167378402548977160ULL;
+  };
+  void construct_defaults(      Button &o); // implement me
+}
+bool operator==(const Button &lhs, const Button &rhs);
+bool operator!=(const Button &lhs, const Button &rhs);
+
+
 #ifdef IMPL_SERIALIZER
 
+    #ifndef IMPL_SERIALIZER_UTIL
+    #define IMPL_SERIALIZER_UTIL
     #include <cstring>
 
+    namespace {
     //internal helper methods
     template<class T>
     bool rose_parser_equals(const T& lhs, const T& rhs) {
@@ -139,6 +204,8 @@ bool operator!=(const Scene1 &lhs, const Scene1 &rhs);
     void construct_default(std::vector<T> & v) {
       c.clear();
     }
+    }
+    #endif
   
 const char * to_string(const enum_test & e) {
     switch(e) {
@@ -268,6 +335,63 @@ rose::hash_value       rose::hash(const enum_test2& o) {
   return static_cast<rose::hash_value>(o);
 }
 
+const char * to_string(const Direction & e) {
+    switch(e) {
+        case Direction::NONE: return "NONE";
+        case Direction::up: return "up";
+        case Direction::down: return "down";
+        case Direction::left: return "left";
+        case Direction::right: return "right";
+        default: return "<UNKNOWN>";
+    }
+}
+void rose::ecs::serialize(Direction& o, ISerializer& s) {
+  switch (o) {
+    case Direction::NONE: {
+      char str[] = "NONE";
+      serialize(str, s);
+      break;
+    }
+    case Direction::up: {
+      char str[] = "up";
+      serialize(str, s);
+      break;
+    }
+    case Direction::down: {
+      char str[] = "down";
+      serialize(str, s);
+      break;
+    }
+    case Direction::left: {
+      char str[] = "left";
+      serialize(str, s);
+      break;
+    }
+    case Direction::right: {
+      char str[] = "right";
+      serialize(str, s);
+      break;
+    }
+    default: /* unknown */ break;
+  }
+}
+void rose::ecs::deserialize(Direction& o, IDeserializer& s) {
+  char str[64];
+  deserialize(str, s);
+  rose::hash_value h = rose::hash(str);
+  switch (h) {
+  case rose::hash("NONE"): o = Direction::NONE; break;
+  case rose::hash("up"): o = Direction::up; break;
+  case rose::hash("down"): o = Direction::down; break;
+  case rose::hash("left"): o = Direction::left; break;
+  case rose::hash("right"): o = Direction::right; break;
+  default: /*unknown value*/ break;
+  }
+}
+rose::hash_value       rose::hash(const Direction& o) {
+  return static_cast<rose::hash_value>(o);
+}
+
 ///////////////////////////////////////////////////////////////////
 //  struct EngineSettings
 ///////////////////////////////////////////////////////////////////
@@ -291,7 +415,7 @@ void rose::ecs::serialize(EngineSettings &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(EngineSettings &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -312,7 +436,7 @@ rose::hash_value rose::hash(const EngineSettings &o) {
 //  struct vector3
 ///////////////////////////////////////////////////////////////////
 void rose::ecs::deserialize(vector3 &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -370,7 +494,7 @@ void rose::ecs::serialize(Camera &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(Camera &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -428,7 +552,7 @@ void rose::ecs::serialize(Transform &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(Transform &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -478,7 +602,7 @@ void rose::ecs::serialize(Scene1 &o, ISerializer &s) {
 }
 
 void rose::ecs::deserialize(Scene1 &o, IDeserializer &s) {
-  //TODO: implement me
+  //implement me
   //construct_defaults(o);
 
   while (s.next_key()) {
@@ -493,6 +617,55 @@ void rose::ecs::deserialize(Scene1 &o, IDeserializer &s) {
 
 rose::hash_value rose::hash(const Scene1 &o) {
   rose::hash_value h = rose::hash(o.cameras);
+  return h;
+}
+///////////////////////////////////////////////////////////////////
+//  struct Button
+///////////////////////////////////////////////////////////////////
+bool operator==(const Button &lhs, const Button &rhs) {
+  return
+    rose_parser_equals(lhs.dir, rhs.dir) &&
+    rose_parser_equals(lhs.pos, rhs.pos) ;
+}
+
+bool operator!=(const Button &lhs, const Button &rhs) {
+  return
+    !rose_parser_equals(lhs.dir, rhs.dir) ||
+    !rose_parser_equals(lhs.pos, rhs.pos) ;
+}
+
+void rose::ecs::serialize(Button &o, ISerializer &s) {
+  if(s.node_begin("Button", rose::hash("Button"), &o)) {
+    s.key("dir");
+    serialize(o.dir, s);
+    s.key("pos");
+    serialize(o.pos, s);
+    s.node_end();
+  }
+  s.end();
+}
+
+void rose::ecs::deserialize(Button &o, IDeserializer &s) {
+  //implement me
+  //construct_defaults(o);
+
+  while (s.next_key()) {
+    switch (s.hash_key()) {
+      case rose::hash("dir"):
+        deserialize(o.dir, s);
+        break;
+      case rose::hash("pos"):
+        deserialize(o.pos, s);
+        break;
+      default: s.skip_key(); break;
+    }
+  }
+}
+
+rose::hash_value rose::hash(const Button &o) {
+  rose::hash_value h = rose::hash(o.dir);
+  h = rose::xor64(h);
+  h ^= rose::hash(o.pos);
   return h;
 }
 

@@ -69,6 +69,37 @@
         "value_type" : "Set"
       }, 
       "enum_annotations" : "NONE"
+    }, {
+      "name" : "Direction", 
+      "type" : "int", 
+      "custom_type" : false, 
+      "enums" : [{
+          "name" : "NONE", 
+          "value" : "0", 
+          "value_type" : "Set"
+        }, {
+          "name" : "up", 
+          "value" : "0", 
+          "value_type" : "Increment"
+        }, {
+          "name" : "down", 
+          "value" : "0", 
+          "value_type" : "Increment"
+        }, {
+          "name" : "left", 
+          "value" : "0", 
+          "value_type" : "Increment"
+        }, {
+          "name" : "right", 
+          "value" : "0", 
+          "value_type" : "Increment"
+        }], 
+      "default_value" : {
+        "name" : "NONE", 
+        "value" : "0", 
+        "value_type" : "Set"
+      }, 
+      "enum_annotations" : "NONE"
     }], 
   "functions" : [{
       "name" : "construct_defaults", 
@@ -248,6 +279,22 @@
           "name" : "cameras", 
           "default_value" : "", 
           "count" : 16, 
+          "annotations" : "NONE"
+        }]
+    }, {
+      "name" : "Button", 
+      "global_annotations" : "NONE", 
+      "members" : [{
+          "type" : "Direction", 
+          "name" : "dir", 
+          "default_value" : "Direction::up", 
+          "count" : 1, 
+          "annotations" : "NONE"
+        }, {
+          "type" : "float", 
+          "name" : "pos", 
+          "default_value" : "", 
+          "count" : 2, 
           "annotations" : "NONE"
         }]
     }]
