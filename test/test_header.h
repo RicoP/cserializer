@@ -67,3 +67,23 @@ void serialize2(const Camera o, ISerializer & s) {
 bool compare(const Camera & lhs, const Camera & rhs) {
 	return false;
 }
+
+
+namespace rose {
+namespace ecs {
+
+enum class Direction {
+	NONE = 0,
+	up,
+	down,
+	left,
+	right
+};
+
+struct Button {
+	Direction dir = Direction::up;
+	float pos[2];
+};
+
+}
+}

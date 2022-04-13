@@ -95,10 +95,16 @@ void quotify(char(&str)[N], rose::StreamBuffer & buffer) {
   quotify(str, N, buffer);
 }
 
+struct namespace_path {
+  char path[64];
+};
+
 void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
 
   char tmp[64] = "";
   global_annotations_t global_annotation = global_annotations_t::NONE;
+  bool is_in_imposter_comment = false;
+  std::vector< namespace_path > namespaces;
   while (!buffer.eof)
   {
     ////////////////////////////////////////////////////////
@@ -125,12 +131,14 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
       if (global_annotation == global_annotations_t::Imposter) {
         bool ok = buffer.test_and_skip("/*");
         if (!ok) error("expects '/*' with Imposter annotation.", buffer);
+        is_in_imposter_comment = true;
       }
     }
 
-    if (global_annotation == global_annotations_t::Imposter) {
+    if (is_in_imposter_comment) {
       if (buffer.test_and_skip("*/")) {
         global_annotation = global_annotations_t::NONE;
+        is_in_imposter_comment = false;
       }
     }
 
@@ -166,6 +174,25 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
         error("unknown PP macro.", buffer);
         break;
       }
+      continue;
+    }
+
+    ////////////////////////////////////////////////////////
+    // NAMESPACE                                          //
+    ////////////////////////////////////////////////////////
+    if (buffer.test_and_skip("namespace ")) {
+      namespace_path path;
+      buffer.sws_read_till(path.path, "{" WHITESPACE);
+      namespaces.push_back(path);
+      buffer.test_and_skip("{");
+      continue;
+    }
+
+    if (buffer.test_and_skip("}")) {
+      if (namespaces.size() == 0)
+        error("unexpected '}'", buffer);
+
+      namespaces.pop_back();
       continue;
     }
 
