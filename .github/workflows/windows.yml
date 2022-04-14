@@ -29,7 +29,7 @@ jobs:
 
     - name: externals
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: cd ..; gh repo clone RicoP/roselib; gh repo clone RicoP/premake-comppp
+      run: cd ..; git clone git@github.com:RicoP/roselib.git; git clone git@github.com:RicoP/RicoP/premake-comppp.git
 
     - name: premake
       working-directory: ${{env.GITHUB_WORKSPACE}}
