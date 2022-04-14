@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-
-env:
-  rosedir:  ${{env.GITHUB_WORKSPACE}}/rose.parser    
-
 permissions:
   contents: read
 
