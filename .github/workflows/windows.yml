@@ -35,6 +35,28 @@ jobs:
       with:
         version: "5.0.0-beta1"
 
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Show Working directory
+      run: DIR
+
+    - name: Show Working directory
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: DIR
+
+    - name: Show Working directory
+      working-directory: rose.parser
+      run: DIR
+
+    - name: Show Working directory
+      working-directory: rose.parser
+      run: DIR ..
+
+    - name: Show Working directory
+      working-directory: rose.parser
+      run: DIR ..\.premake
+
     - name: test
       if: always()
       run: premake5 --help
@@ -49,19 +71,6 @@ jobs:
       working-directory: rose.parser
       run: ../.premake/premake5 --help
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
-
-    - name: Show Working directory
-      run: DIR
-
-    - name: Show Working directory
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: DIR
-
-    - name: Show Working directory
-      working-directory: rose.parser
-      run: DIR
 
     - name: premake
       working-directory: rose.parser
