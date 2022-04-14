@@ -12,21 +12,16 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@master
-      with:
-        name: RicoP/roselib
-        ref: refs/heads/release
-        path: ".."
-    - uses: actions/checkout@master
-      with:
-        name: RicoP/premake-comppp
-        ref: refs/heads/release
-        path: ".."
-
-    - uses: actions/checkout@v3
     
+    steps:
+    - name: Check out my other private repo
+      uses: actions/checkout@master
+      with:
+        repository: RicoP/roselib
+        token: ${{ secrets.my_pat }}
+        
+    - uses: actions/checkout@v3
+
     - name: Setup premake
       # You may pin to the exact commit or the version.
       # uses: abel0b/setup-premake@1e2c760b41abce778e60f3ef9702849d812dc2ed
