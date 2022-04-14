@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+
+env:
+  rosedir:  ${{env.GITHUB_WORKSPACE}}/rose.parser    
+
 permissions:
   contents: read
 
@@ -29,7 +33,7 @@ jobs:
       with:
         repository: RicoP/premake-comppp
         path: ./premake-comppp
-
+    
     - name: Setup premake
       uses: abel0b/setup-premake@v2
       with:
@@ -38,28 +42,39 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: premake
+    - name: Show Working directory
+      run: DIR
+
+    - name: Show Working directory
       working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: DIR
+
+    - name: Show Working directory
+      working-directory: ${{env.rosedir}}
+      run: DIR
+
+    - name: premake
+      working-directory: ${{env.rosedir}}
       run: ./solution_premake.bat
 
     - name: Build
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{env.rosedir}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: ./solution_compile.bat
 
     - name: execute test
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{env.rosedir}}
       run: pushd test; .\..\.build\bin\DebugTest\rose.parser.exe --include enginesettings.h test_header.h -O serializer.h -J test_json.json -V; popd
 
     - name: show serializer.h
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{env.rosedir}}
       run: TYPE test/serializer.h
 
     - name: show test_json.json
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{env.rosedir}}
       run: TYPE test/test_json.json
 
     - name: execute test error
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{env.rosedir}}
       run: pushd test; .\..\.build\bin\DebugTest\rose.parser.exe --error --include enginesettings.h test_header.h -O serializer.h -J test_json.json -V; popd
