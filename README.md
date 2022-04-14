@@ -1,4 +1,5 @@
 # rose.parser
+[![Windows Build](https://github.com/RicoP/rose.parser/actions/workflows/windows.yml/badge.svg)](https://github.com/RicoP/rose.parser/actions/workflows/windows.yml)
 
 ```
 NAME
