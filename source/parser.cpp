@@ -931,6 +931,10 @@ int main(int argc, char ** argv) {
       printhelp();
       continue;
     }
+    if (h == rose::hash("--error") || h == rose::hash("-E")) {
+      exit(1);
+      continue;
+    }
     if (h == rose::hash("--include") || h == rose::hash("-I")) {
       state = rose::hash("INCLUDE");
       continue;
