@@ -36,9 +36,11 @@ jobs:
         version: "5.0.0-beta1"
 
     - name: test
+      if: always()
       run: premake5 --help
 
     - name: test
+      if: always()
       working-directory: rose.parser
       run: premake5 --help
 
