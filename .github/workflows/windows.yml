@@ -35,6 +35,13 @@ jobs:
       with:
         version: "5.0.0-beta1"
 
+    - name: test
+      run: premake5
+
+    - name: test
+      working-directory: rose.parser
+      run: premake5
+
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
