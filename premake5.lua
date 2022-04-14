@@ -1,8 +1,4 @@
-local project_name = string.match(_MAIN_SCRIPT_DIR, ".*/([^/]+)") -- E:/repo/foobar -> foobar
-
-print("Building Solution " .. project_name)
-
-workspace (project_name)
+workspace "rose.parser"
   characterset ("MBCS")
   configurations { "DebugTest", "ReleaseTest", "DebugParserHeader", "ReleaseParserHeader", "ReleaseInstall" }
   startproject "app.parser"
