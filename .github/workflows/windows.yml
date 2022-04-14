@@ -14,7 +14,21 @@ jobs:
     runs-on: windows-latest
     
     steps:
+    # checkout rose.parser with it's dependencies.
     - uses: actions/checkout@v3
+      with:
+        repository: RicoP/rose.parser
+        path: ./rose.parser
+    
+    - uses: actions/checkout@v3
+      with:
+        repository: RicoP/roselib
+        path: ./roselib
+
+    - uses: actions/checkout@v3
+      with:
+        repository: RicoP/premake-comppp
+        path: ./premake-comppp
 
     - name: Setup premake
       uses: abel0b/setup-premake@v2
