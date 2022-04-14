@@ -885,8 +885,7 @@ void printhelp() {
     "       rose.parser [OPTION] \n"
     " \n"
     "BUILDDATE \n"
-    "       " __DATE__ ", " __TIME__
-    " \n"
+    "       " __DATE__ ", " __TIME__ " \n"
     " \n"
 
     "DESCRIPTION \n"
@@ -904,6 +903,9 @@ void printhelp() {
     " \n"
     "       -V, --verbose \n"
     "              Verbose output.\n"
+    " \n"
+    "       -E, --error \n"
+    "              Force Error.\n"
     " \n"
     "AUTHOR \n"
     "       Written by Rico Possienka. \n"
