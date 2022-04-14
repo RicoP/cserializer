@@ -52,3 +52,7 @@ jobs:
     - name: show test_json.json
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: TYPE test/test_json.json
+
+    - name: execute test error
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: pushd test; .\..\.build\bin\DebugTest\rose.parser.exe --error --include enginesettings.h test_header.h -O serializer.h -J test_json.json -V; popd
