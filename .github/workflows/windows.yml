@@ -50,31 +50,31 @@ jobs:
       run: DIR
 
     - name: Show Working directory
-      working-directory: ${{env.rosedir}}
+      working-directory: rose.parser
       run: DIR
 
     - name: premake
-      working-directory: ${{env.rosedir}}
+      working-directory: rose.parser
       run: ./solution_premake.bat
 
     - name: Build
-      working-directory: ${{env.rosedir}}
+      working-directory: rose.parser
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: ./solution_compile.bat
 
     - name: execute test
-      working-directory: ${{env.rosedir}}
+      working-directory: rose.parser
       run: pushd test; .\..\.build\bin\DebugTest\rose.parser.exe --include enginesettings.h test_header.h -O serializer.h -J test_json.json -V; popd
 
     - name: show serializer.h
-      working-directory: ${{env.rosedir}}
+      working-directory: rose.parser
       run: TYPE test/serializer.h
 
     - name: show test_json.json
-      working-directory: ${{env.rosedir}}
+      working-directory: rose.parser
       run: TYPE test/test_json.json
 
     - name: execute test error
-      working-directory: ${{env.rosedir}}
+      working-directory: rose.parser
       run: pushd test; .\..\.build\bin\DebugTest\rose.parser.exe --error --include enginesettings.h test_header.h -O serializer.h -J test_json.json -V; popd
