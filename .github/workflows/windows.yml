@@ -44,6 +44,11 @@ jobs:
       working-directory: rose.parser
       run: premake5 --help
 
+    - name: test
+      if: always()
+      working-directory: rose.parser
+      run: ../.premake/premake5 --help
+
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
@@ -60,7 +65,8 @@ jobs:
 
     - name: premake
       working-directory: rose.parser
-      run: ./solution_premake.bat
+      #run: ./solution_premake.bat
+      run: ../.premake/premake5 vs2019
 
     - name: Build
       working-directory: rose.parser
