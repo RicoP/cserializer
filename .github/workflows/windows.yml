@@ -64,13 +64,7 @@ jobs:
     - name: test
       if: always()
       working-directory: rose.parser
-      run: premake5 --help
-
-    - name: test
-      if: always()
-      working-directory: rose.parser
       run: ../.premake/premake5 --help
-
 
     - name: premake
       working-directory: rose.parser
