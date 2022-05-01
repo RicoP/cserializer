@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include <rose/attributes.h>
+
 //@Flag 
 enum class member_annotations_t {
   //It's recommendet Bitfields should start 
