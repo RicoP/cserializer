@@ -7,9 +7,12 @@
 #include "parser.h"
 
 #include <rose/hash.h>
+#include <rose/unused.h>
 #include <rose/streambuffer.h>
 #include <serializer/serializer.h>
 #include <serializer/jsonserializer.h>
+
+#include <windows.h>
 
 #define IMPL_SERIALIZER
 #include "parser_serializer.h"
@@ -920,7 +923,10 @@ int main(int argc, char ** argv) {
 
   rose::hash_value state = rose::hash("NONE");
 
-  bool close_stdout = false; //in case we redirect stdout to something else
+  char tmp_path[260];
+  char dst_path[260];
+
+  bool write_to_file = false; //in case we redirect stdout to something else
   bool verbose = false;
 
   const char * json_path = nullptr;
@@ -949,9 +955,10 @@ int main(int argc, char ** argv) {
       state = rose::hash("NONE");
       ++i;
       assert(i != argc);
-      const char * path = argv[i];
-      (void)freopen(path, "wb", stdout);
-      close_stdout = true;
+      sprintf(dst_path, "%s", argv[i]);
+      sprintf(tmp_path, "%s.bak", argv[i]);
+      (void)freopen(tmp_path, "wb", stdout);
+      write_to_file = true;
       continue;
     }
     if (h == rose::hash("--json") || h == rose::hash("-J")) {
@@ -985,8 +992,10 @@ int main(int argc, char ** argv) {
 
   dump_cpp(c, argc, argv);
 
-  if (close_stdout) {
+  if (write_to_file) {
     fclose(stdout);
+    auto ok = MoveFileExA(tmp_path, dst_path, MOVEFILE_REPLACE_EXISTING);
+    rose::unused(ok);
   }
 
   if (json_path) {
