@@ -98,10 +98,6 @@ void quotify(char(&str)[N], rose::StreamBuffer & buffer) {
   quotify(str, N, buffer);
 }
 
-struct namespace_path {
-  char path[64];
-};
-
 int read_in_namespaces(char * buffer, int N, const std::vector<namespace_path> & namespaces, rose::StreamBuffer & sb) {
   char * p = buffer;
   int size = N;
@@ -123,9 +119,6 @@ int read_in_namespaces(char (&buffer)[N], const std::vector<namespace_path> & na
 
 void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
   char tmp[64] = "";
-  char namespace_name_buffer[128];
-  int namespace_name_size = sizeof(namespace_name_buffer);
-  char * namespace_name = namespace_name_buffer;
   global_annotations_t global_annotation = global_annotations_t::NONE;
   bool is_in_imposter_comment = false;
   std::vector<namespace_path> namespaces;
@@ -231,8 +224,10 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
         enumci.enum_annotations = global_annotation;
         global_annotation = global_annotations_t::NONE;
 
-        int s = read_in_namespaces(enumci.name, namespaces, buffer);
-        buffer.sws_read_till(enumci.name + s, sizeof(enumci.name) - s, "{:" WHITESPACE);
+        enumci.namespaces = namespaces;
+        int s = read_in_namespaces(enumci.name_withns, namespaces, buffer);
+        buffer.sws_read_till(enumci.name_withoutns, "{:" WHITESPACE);
+        std::strcpy(enumci.name_withns + s, enumci.name_withoutns); //append name to namespaces part
         char c = buffer.sws_get();
 
         if (c == ':') {
@@ -440,7 +435,7 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
   }
 }
 
-//printf trim trailing hitespaces
+//printf trim trailing whitespaces
 template<typename... Args>
 void printf_ttws(const char * f, Args... args) {
   char buffer[1024];
@@ -552,15 +547,21 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
   //dump declaration
   for (auto & enumci : c.enum_classes) {
-    const char * name = enumci.name;
+    const char * name = enumci.name_withns;
     const char * type = enumci.type;
 
     puts("");
-    if (enumci.custom_type) {
-      printf_ttws("enum class                   %s : %s;\n", name, type);
+    for (auto & ns : enumci.namespaces) {
+        printf_ttws("namespace %s {\n", ns.path);
     }
-    else {
-      printf_ttws("enum class                   %s;\n", name);
+    if (enumci.custom_type) {
+        printf_ttws("enum class                   %s : %s;\n", enumci.name_withoutns, type);
+    } else {
+        printf_ttws("enum class                   %s;\n", enumci.name_withns);
+    }
+    for (auto & ns : enumci.namespaces) {
+        (void)ns;
+        printf_ttws("}\n");
     }
     printf_ttws("const char * to_string(const %s &);\n", name);
 
@@ -682,12 +683,12 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
   //dump implementation
   for (auto & enumci : c.enum_classes) {
-    const char * ename = enumci.name;
-    printf_ttws("const char * to_string(const %s & e) {\n", enumci.name);
+    const char * ename = enumci.name_withns;
+    printf_ttws("const char * to_string(const %s & e) {\n", ename);
     printf_ttws("    switch(e) {\n");
     for (auto & enumi : enumci.enums) {
       const char * eval = enumi.name;
-      printf_ttws("        case %s::%s: return \"%s\";\n", enumci.name, eval, eval);
+      printf_ttws("        case %s::%s: return \"%s\";\n", ename, eval, eval);
     }
     printf_ttws("        default: return \"<UNKNOWN>\";\n");
     printf_ttws("    }\n");

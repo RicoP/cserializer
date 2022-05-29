@@ -49,7 +49,7 @@ struct member_info {
 
 struct struct_info {
   //@String
-  char name[64];
+  char name[64] = "";
   global_annotations_t global_annotations = global_annotations_t::NONE;
   std::vector<member_info> members;
 };
@@ -62,13 +62,21 @@ struct enum_info {
   value_type_t value_type = value_type_t::Increment;
 };
 
+struct namespace_path {
+  //@String
+  char path[128];
+};
+
 struct enum_class_info {
   //@String
-  char name[64];
+  char name_withns[128];
+  //@String
+  char name_withoutns[128];
   //@String
   char type[64] = "int";
   bool custom_type = false;
   std::vector<enum_info> enums;
+  std::vector<namespace_path> namespaces;
   enum_info default_value;
   global_annotations_t enum_annotations = global_annotations_t::NONE;
 };
@@ -76,9 +84,9 @@ struct enum_class_info {
 //modifier: 0 = none, '*', '&'
 struct function_parameter_info {
   //@String
-  char name[64];
+  char name[64] = "";
   //@String
-  char type[64];
+  char type[64] = "";
   char modifier = 0;
   bool is_const = false;
 };
