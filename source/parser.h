@@ -33,6 +33,11 @@ enum class Member_info_kind {
 	Function
 };
 
+struct namespace_path {
+  //@String
+  char path[128];
+};
+
 //1 = simple variabel, >1 = array, -1 = vector
 struct member_info {
   Member_info_kind kind = Member_info_kind::NONE;
@@ -49,7 +54,10 @@ struct member_info {
 
 struct struct_info {
   //@String
-  char name[64] = "";
+  char name_withns[64] = "";
+  //@String
+  char name_withoutns[64] = "";
+  std::vector<namespace_path> namespaces;
   global_annotations_t global_annotations = global_annotations_t::NONE;
   std::vector<member_info> members;
 };
@@ -60,11 +68,6 @@ struct enum_info {
   //@String
   char value[64] = "0";
   value_type_t value_type = value_type_t::Increment;
-};
-
-struct namespace_path {
-  //@String
-  char path[128];
 };
 
 struct enum_class_info {

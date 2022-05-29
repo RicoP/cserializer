@@ -82,6 +82,23 @@ namespace rose {
 }
 
 
+struct                namespace_path;
+namespace rose {
+  namespace ecs {
+    void        serialize(namespace_path &o, ISerializer &s);
+    void      deserialize(namespace_path &o, IDeserializer &s);
+  }
+  hash_value         hash(const namespace_path &o);
+  template<>
+  struct type_id<namespace_path> {
+    inline static hash_value VALUE = 12258869517490701093ULL;
+  };
+  void construct_defaults(      namespace_path &o); // implement me
+}
+bool operator==(const namespace_path &lhs, const namespace_path &rhs);
+bool operator!=(const namespace_path &lhs, const namespace_path &rhs);
+
+
 struct                member_info;
 namespace rose {
   namespace ecs {
@@ -91,7 +108,7 @@ namespace rose {
   hash_value         hash(const member_info &o);
   template<>
   struct type_id<member_info> {
-    inline static hash_value VALUE = 7925914296115135804ULL;
+    inline static hash_value VALUE = 11323069267460255306ULL;
   };
   void construct_defaults(      member_info &o); // implement me
 }
@@ -108,7 +125,7 @@ namespace rose {
   hash_value         hash(const struct_info &o);
   template<>
   struct type_id<struct_info> {
-    inline static hash_value VALUE = 9250458120049481396ULL;
+    inline static hash_value VALUE = 2652356125487541418ULL;
   };
   void construct_defaults(      struct_info &o); // implement me
 }
@@ -125,29 +142,12 @@ namespace rose {
   hash_value         hash(const enum_info &o);
   template<>
   struct type_id<enum_info> {
-    inline static hash_value VALUE = 588653192025808279ULL;
+    inline static hash_value VALUE = 9578114829779115887ULL;
   };
   void construct_defaults(      enum_info &o); // implement me
 }
 bool operator==(const enum_info &lhs, const enum_info &rhs);
 bool operator!=(const enum_info &lhs, const enum_info &rhs);
-
-
-struct                namespace_path;
-namespace rose {
-  namespace ecs {
-    void        serialize(namespace_path &o, ISerializer &s);
-    void      deserialize(namespace_path &o, IDeserializer &s);
-  }
-  hash_value         hash(const namespace_path &o);
-  template<>
-  struct type_id<namespace_path> {
-    inline static hash_value VALUE = 18093028248585243773ULL;
-  };
-  void construct_defaults(      namespace_path &o); // implement me
-}
-bool operator==(const namespace_path &lhs, const namespace_path &rhs);
-bool operator!=(const namespace_path &lhs, const namespace_path &rhs);
 
 
 struct                enum_class_info;
@@ -159,7 +159,7 @@ namespace rose {
   hash_value         hash(const enum_class_info &o);
   template<>
   struct type_id<enum_class_info> {
-    inline static hash_value VALUE = 3370360874422677731ULL;
+    inline static hash_value VALUE = 15820409074394059996ULL;
   };
   void construct_defaults(      enum_class_info &o); // implement me
 }
@@ -176,7 +176,7 @@ namespace rose {
   hash_value         hash(const function_parameter_info &o);
   template<>
   struct type_id<function_parameter_info> {
-    inline static hash_value VALUE = 12916637819691711945ULL;
+    inline static hash_value VALUE = 9370255687959554376ULL;
   };
   void construct_defaults(      function_parameter_info &o); // implement me
 }
@@ -193,7 +193,7 @@ namespace rose {
   hash_value         hash(const function_info &o);
   template<>
   struct type_id<function_info> {
-    inline static hash_value VALUE = 1111435755889198206ULL;
+    inline static hash_value VALUE = 5216781949972949934ULL;
   };
   void construct_defaults(      function_info &o); // implement me
 }
@@ -210,7 +210,7 @@ namespace rose {
   hash_value         hash(const ParseContext &o);
   template<>
   struct type_id<ParseContext> {
-    inline static hash_value VALUE = 12980077085926260329ULL;
+    inline static hash_value VALUE = 4083862798227823235ULL;
   };
   void construct_defaults(      ParseContext &o); // implement me
 }
@@ -442,6 +442,46 @@ rose::hash_value       rose::hash(const Member_info_kind& o) {
 }
 
 ///////////////////////////////////////////////////////////////////
+//  struct namespace_path
+///////////////////////////////////////////////////////////////////
+bool operator==(const namespace_path &lhs, const namespace_path &rhs) {
+  return
+    rose_parser_equals(lhs.path, rhs.path) ;
+}
+
+bool operator!=(const namespace_path &lhs, const namespace_path &rhs) {
+  return
+    !rose_parser_equals(lhs.path, rhs.path) ;
+}
+
+void rose::ecs::serialize(namespace_path &o, ISerializer &s) {
+  if(s.node_begin("namespace_path", rose::hash("namespace_path"), &o)) {
+    s.key("path");
+    serialize(o.path, s, std::strlen(o.path));
+    s.node_end();
+  }
+  s.end();
+}
+
+void rose::ecs::deserialize(namespace_path &o, IDeserializer &s) {
+  //implement me
+  //construct_defaults(o);
+
+  while (s.next_key()) {
+    switch (s.hash_key()) {
+      case rose::hash("path"):
+        deserialize(o.path, s);
+        break;
+      default: s.skip_key(); break;
+    }
+  }
+}
+
+rose::hash_value rose::hash(const namespace_path &o) {
+  rose::hash_value h = rose::hash(o.path);
+  return h;
+}
+///////////////////////////////////////////////////////////////////
 //  struct member_info
 ///////////////////////////////////////////////////////////////////
 bool operator==(const member_info &lhs, const member_info &rhs) {
@@ -531,22 +571,30 @@ rose::hash_value rose::hash(const member_info &o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const struct_info &lhs, const struct_info &rhs) {
   return
-    rose_parser_equals(lhs.name, rhs.name) &&
+    rose_parser_equals(lhs.name_withns, rhs.name_withns) &&
+    rose_parser_equals(lhs.name_withoutns, rhs.name_withoutns) &&
+    rose_parser_equals(lhs.namespaces, rhs.namespaces) &&
     rose_parser_equals(lhs.global_annotations, rhs.global_annotations) &&
     rose_parser_equals(lhs.members, rhs.members) ;
 }
 
 bool operator!=(const struct_info &lhs, const struct_info &rhs) {
   return
-    !rose_parser_equals(lhs.name, rhs.name) ||
+    !rose_parser_equals(lhs.name_withns, rhs.name_withns) ||
+    !rose_parser_equals(lhs.name_withoutns, rhs.name_withoutns) ||
+    !rose_parser_equals(lhs.namespaces, rhs.namespaces) ||
     !rose_parser_equals(lhs.global_annotations, rhs.global_annotations) ||
     !rose_parser_equals(lhs.members, rhs.members) ;
 }
 
 void rose::ecs::serialize(struct_info &o, ISerializer &s) {
   if(s.node_begin("struct_info", rose::hash("struct_info"), &o)) {
-    s.key("name");
-    serialize(o.name, s, std::strlen(o.name));
+    s.key("name_withns");
+    serialize(o.name_withns, s, std::strlen(o.name_withns));
+    s.key("name_withoutns");
+    serialize(o.name_withoutns, s, std::strlen(o.name_withoutns));
+    s.key("namespaces");
+    serialize(o.namespaces, s);
     s.key("global_annotations");
     serialize(o.global_annotations, s);
     s.key("members");
@@ -562,8 +610,14 @@ void rose::ecs::deserialize(struct_info &o, IDeserializer &s) {
 
   while (s.next_key()) {
     switch (s.hash_key()) {
-      case rose::hash("name"):
-        deserialize(o.name, s);
+      case rose::hash("name_withns"):
+        deserialize(o.name_withns, s);
+        break;
+      case rose::hash("name_withoutns"):
+        deserialize(o.name_withoutns, s);
+        break;
+      case rose::hash("namespaces"):
+        deserialize(o.namespaces, s);
         break;
       case rose::hash("global_annotations"):
         deserialize(o.global_annotations, s);
@@ -577,7 +631,11 @@ void rose::ecs::deserialize(struct_info &o, IDeserializer &s) {
 }
 
 rose::hash_value rose::hash(const struct_info &o) {
-  rose::hash_value h = rose::hash(o.name);
+  rose::hash_value h = rose::hash(o.name_withns);
+  h = rose::xor64(h);
+  h ^= rose::hash(o.name_withoutns);
+  h = rose::xor64(h);
+  h ^= rose::hash(o.namespaces);
   h = rose::xor64(h);
   h ^= rose::hash(o.global_annotations);
   h = rose::xor64(h);
@@ -640,46 +698,6 @@ rose::hash_value rose::hash(const enum_info &o) {
   h ^= rose::hash(o.value);
   h = rose::xor64(h);
   h ^= rose::hash(o.value_type);
-  return h;
-}
-///////////////////////////////////////////////////////////////////
-//  struct namespace_path
-///////////////////////////////////////////////////////////////////
-bool operator==(const namespace_path &lhs, const namespace_path &rhs) {
-  return
-    rose_parser_equals(lhs.path, rhs.path) ;
-}
-
-bool operator!=(const namespace_path &lhs, const namespace_path &rhs) {
-  return
-    !rose_parser_equals(lhs.path, rhs.path) ;
-}
-
-void rose::ecs::serialize(namespace_path &o, ISerializer &s) {
-  if(s.node_begin("namespace_path", rose::hash("namespace_path"), &o)) {
-    s.key("path");
-    serialize(o.path, s, std::strlen(o.path));
-    s.node_end();
-  }
-  s.end();
-}
-
-void rose::ecs::deserialize(namespace_path &o, IDeserializer &s) {
-  //implement me
-  //construct_defaults(o);
-
-  while (s.next_key()) {
-    switch (s.hash_key()) {
-      case rose::hash("path"):
-        deserialize(o.path, s);
-        break;
-      default: s.skip_key(); break;
-    }
-  }
-}
-
-rose::hash_value rose::hash(const namespace_path &o) {
-  rose::hash_value h = rose::hash(o.path);
   return h;
 }
 ///////////////////////////////////////////////////////////////////

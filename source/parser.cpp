@@ -286,8 +286,10 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
       structi.global_annotations = global_annotation;
       global_annotation = global_annotations_t::NONE;
 
-      int s = read_in_namespaces(structi.name, namespaces, buffer);
-      buffer.sws_read_till(structi.name + s, sizeof(structi.name) - s, ";{" WHITESPACE);
+      structi.namespaces = namespaces;
+      int s = read_in_namespaces(structi.name_withns, namespaces, buffer);
+      buffer.sws_read_till(structi.name_withoutns, ";{" WHITESPACE);
+      std::strcpy(structi.name_withns + s, structi.name_withoutns);
 
       buffer.skip_ws();
 
@@ -596,7 +598,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   }
 
   for (auto & structi : c.structs) {
-    const char * sname = structi.name;
+    const char * sname = structi.name_withns;
 
     bool has_eqop = false;
     bool has_neqop = false;
@@ -605,9 +607,17 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     has_compare_ops(has_eqop, has_neqop, has_serialize, has_deserialize, c, sname);
 
     puts("");
-    if (structi.global_annotations != global_annotations_t::Imposter) {
-      printf_ttws("struct                %s;\n", structi.name);
+    for (auto & ns : structi.namespaces) {
+        printf_ttws("namespace %s {\n", ns.path);
     }
+    if (structi.global_annotations != global_annotations_t::Imposter) {
+      printf_ttws("struct                %s;\n", structi.name_withoutns);
+    }
+    for (auto & ns : structi.namespaces) {
+        (void)ns;
+        printf_ttws("}\n");
+    }
+
     printf_ttws("namespace rose {\n");
     printf_ttws("  namespace ecs {\n");
     if (!has_serialize)   printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", sname);
@@ -622,8 +632,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     printf_ttws("  void construct_defaults(      %s &o); // implement me\n", sname);
     printf_ttws("}\n");
-    if (!has_eqop) printf_ttws("bool operator==(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
-    if (!has_neqop) printf_ttws("bool operator!=(const %s &lhs, const %s &rhs);\n", structi.name, structi.name);
+    if (!has_eqop) printf_ttws("bool operator==(const %s &lhs, const %s &rhs);\n", structi.name_withns, structi.name_withns);
+    if (!has_neqop) printf_ttws("bool operator!=(const %s &lhs, const %s &rhs);\n", structi.name_withns, structi.name_withns);
     puts("");
   }
 
@@ -731,7 +741,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   }
 
   for (auto & structi : c.structs) {
-    const char * sname = structi.name;
+    const char * sname = structi.name_withns;
 
     printf_ttws("///////////////////////////////////////////////////////////////////\n");
     printf_ttws("//  struct %s\n", sname);
@@ -748,7 +758,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     has_compare_ops(has_eqop, has_neqop, has_serialize, has_deserialize, c, sname);
 
     if (!has_eqop) {
-      printf_ttws("bool operator==(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
+      printf_ttws("bool operator==(const %s &lhs, const %s &rhs) { \n", sname, sname);
       printf_ttws("  return \n");
       int left = structi.members.size() - 1;
       for (auto & member : structi.members) {
@@ -759,7 +769,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     }
 
     if (!has_neqop) {
-      printf_ttws("bool operator!=(const %s &lhs, const %s &rhs) { \n", structi.name, structi.name);
+      printf_ttws("bool operator!=(const %s &lhs, const %s &rhs) { \n", sname, sname);
       printf_ttws("  return \n");
       int left = structi.members.size() - 1;
       for (auto & member : structi.members) {
@@ -794,11 +804,11 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
             printf_ttws("    serialize(o.%s, s, std::strlen(o.%s));                      \n", mname, mname);
             break;
           case 0: //NONE
-            fprintf(stderr, "Member '%s::%s' must have either annotations @String or @Data.", structi.name, member.name);
+            fprintf(stderr, "Member '%s::%s' must have either annotations @String or @Data.", sname, member.name);
             exit(1);
             break;
           case 1 << 0 | 1 << 1: //BOTH
-            fprintf(stderr, "Member '%s::%s' can't have both annotations @String and @Data.", structi.name, member.name);
+            fprintf(stderr, "Member '%s::%s' can't have both annotations @String and @Data.", sname, member.name);
             exit(1);
             break;
           default:
