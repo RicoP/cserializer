@@ -14,36 +14,37 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    # checkout rose.parser with it's dependencies.
-    - uses: actions/checkout@v3
+    - name: checkout rose.parser
+      uses: actions/checkout@v3
       with:
         repository: RicoP/rose.parser
         path: ./rose.parser
     
-    - uses: actions/checkout@v3
+    - name: checkout roselib
+      uses: actions/checkout@v3
       with:
         repository: RicoP/roselib
         path: ./roselib
 
-    - uses: actions/checkout@v3
+    - name: checkout premake-comppp
+      uses: actions/checkout@v3
       with:
         repository: RicoP/premake-comppp
         path: ./premake-comppp
     
     - name: Setup premake
-      uses: abel0b/setup-premake@v2
+      uses: abel0b/setup-premake@v2.1
       with:
         version: "5.0.0-beta2"
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.1
 
-    - name: premake
+    - name: create solution
       working-directory: rose.parser
-      #we have to call premake explicitly because the path doesn't work fsr
-      run: ../.premake/premake5 vs2019
+      run: premake5 vs2019
 
-    - name: Build
+    - name: Build solution
       working-directory: rose.parser
       run: ./solution_compile.bat
 
@@ -58,4 +59,3 @@ jobs:
     - name: show test_json.json
       working-directory: rose.parser
       run: TYPE test/test_json.json
-      
