@@ -155,6 +155,7 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
       if (buffer.test_and_skip("*/")) {
         global_annotation = global_annotations_t::NONE;
         is_in_imposter_comment = false;
+        continue;
       }
     }
 
