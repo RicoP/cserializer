@@ -945,6 +945,10 @@ int main(int argc, char ** argv) {
   for (int i = 1; i < argc; ++i) {
     const char * arg = argv[i];
     rose::hash_value h = rose::hash(arg);
+    if (h == rose::hash("--datetime")) {
+      fprintf(stderr, "Build Time: %s \n", __DATE__ " " __TIME__);
+      continue;
+    }
     if (h == rose::hash("--help") || h == rose::hash("-H")) {
       state = rose::hash("NONE");
       printhelp();
