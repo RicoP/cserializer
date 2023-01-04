@@ -534,7 +534,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   printf_ttws("\n");
   printf_ttws("#include <rose/hash.h>\n");
   printf_ttws("#include <rose/typetraits.h>\n");
-  printf_ttws("#include <serializer/serializer.h>\n");
+  printf_ttws("#include <rose/serializer.h>\n");
   printf_ttws("\n");
   printf_ttws("///////////////////////////////////////////////////////////////////\n");
   printf_ttws("//  AUTOGEN                                                      //\n");
@@ -586,13 +586,12 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     if (enumci.enum_annotations == global_annotations_t::Flag) {
         puts("");
-        printf_ttws("inline %s operator|(const %s &a, const %s &b) { return static_cast<%s>(static_cast<%s>(a) | static_cast<%s>(b)); } \n", name, name, name, name, type, type);
-        printf_ttws("inline %s operator|=(%s &a, const %s &b) { return a = a | b; }                                                     \n", name, name, name);
-        printf_ttws("inline %s operator&(const %s &a, const %s &b) { return static_cast<%s>(static_cast<%s>(a) & static_cast<%s>(b)); } \n", name, name, name, name, type, type);
-        printf_ttws("inline %s operator&=(%s &a, const %s &b) { return a = a & b; }                                                     \n", name, name, name);
-        printf_ttws("inline %s operator^(const %s &a, const %s &b) { return static_cast<%s>(static_cast<%s>(a) ^ static_cast<%s>(b)); } \n", name, name, name, name, type, type);
-        printf_ttws("inline %s operator^=(%s &a, const %s &b) { return a = a ^ b; }                                                     \n", name, name, name);
-        printf_ttws("inline bool operator!(const %s &e) { return static_cast<%s>(e) == 0; }                                             \n", name, type);
+        printf_ttws("inline BoolConvertible<%s, %s> operator|(const %s &a, const %s &b) { return { static_cast<%s>(static_cast<%s>(a) | static_cast<%s>(b)) }; } \n", name, type, name, name, name, type, type);
+        printf_ttws("inline BoolConvertible<%s, %s> operator&(const %s &a, const %s &b) { return { static_cast<%s>(static_cast<%s>(a) & static_cast<%s>(b)) }; } \n", name, type, name, name, name, type, type);
+        printf_ttws("inline BoolConvertible<%s, %s> operator^(const %s &a, const %s &b) { return { static_cast<%s>(static_cast<%s>(a) ^ static_cast<%s>(b)) }; } \n", name, type, name, name, name, type, type);
+        printf_ttws("inline %s operator|=(%s &a, %s b) { return a = a | b; }                                                     \n", name, name, name);
+        printf_ttws("inline %s operator&=(%s &a, %s b) { return a = a & b; }                                                     \n", name, name, name);
+        printf_ttws("inline %s operator^=(%s &a, %s b) { return a = a ^ b; }                                                     \n", name, name, name);
     }
 
     puts("");
