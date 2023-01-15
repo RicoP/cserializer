@@ -533,6 +533,7 @@ void has_compare_ops(bool & has_eqop, bool & has_neqop, bool & has_serialize, bo
 void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   printf_ttws("#pragma once" ENDL);
   printf_ttws("" ENDL);
+  printf_ttws("#include <new>" ENDL);
   printf_ttws("#include <rose/hash.h>" ENDL);
   printf_ttws("#include <rose/typetraits.h>" ENDL);
   printf_ttws("#include <rose/serializer.h>" ENDL);
@@ -639,9 +640,9 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     puts("");
     printf_ttws("namespace rose::reflection {                              " ENDL);
-    printf_ttws("  template <>                                        " ENDL);
-    printf_ttws("  rose::reflection::TypeInfo get_type_info<%s>();    " ENDL, sname);
-    printf_ttws("}                                                    " ENDL);
+    printf_ttws("  template <>                                             " ENDL);
+    printf_ttws("  const rose::reflection::TypeInfo & get_type_info<%s>(); " ENDL, sname);
+    printf_ttws("}                                                         " ENDL);
   }
 
   printf_ttws("\n#ifdef IMPL_SERIALIZER" ENDL);
@@ -749,6 +750,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
   for (auto & structi : c.structs) {
     const char * sname = structi.name_withns;
+    const char * sname_nons = structi.name_withoutns;
 
     printf_ttws("///////////////////////////////////////////////////////////////////" ENDL);
     printf_ttws("//  struct %s" ENDL, sname);
@@ -881,22 +883,23 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     // type info                                                     //
     ///////////////////////////////////////////////////////////////////
 
-    printf_ttws("namespace rose::reflection {                                                                                                            " ENDL);
-    printf_ttws("  template <>                                                                                                                      " ENDL);
-    printf_ttws("  rose::reflection::TypeInfo get_type_info<%s>() {                                                                                 " ENDL, sname);
-    printf_ttws("    return {                                                                                                                       " ENDL);
-    printf_ttws("      /*             unique_id */ rose::hash(\"%s\"),                                                                              " ENDL, sname);
-    printf_ttws("      /*           member_hash */ %lluULL,                                                                                         " ENDL, (unsigned long long)rose::hash(structi));
-    printf_ttws("      /*      memory_footprint */ sizeof(%s),                                                                                      " ENDL, sname);
-    printf_ttws("      /*      memory_alignment */ 16,                                                                                              " ENDL);
-    printf_ttws("      /*                  name */ \"%s\",                                                                                          " ENDL, sname);
-    printf_ttws("      /*  fp_default_construct */ +[](void * ptr) { new (ptr) %s(); },                                                             " ENDL, sname);
-    printf_ttws("      /*   fp_default_destruct */ +[](void * ptr) { reinterpret_cast<%s*>(ptr)->~%s(); },                                          " ENDL, sname, sname);
-    printf_ttws("      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*reinterpret_cast<%s*>(ptr), s); },    " ENDL, sname);
-    printf_ttws("      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*reinterpret_cast<%s*>(ptr), d); } " ENDL, sname);
-    printf_ttws("    };                                                                                                                             " ENDL);
-    printf_ttws("  }                                                                                                                                " ENDL);
-    printf_ttws("}                                                                                                                                  " ENDL);
+    printf_ttws("namespace rose::reflection {                                                                                                                     " ENDL);
+    printf_ttws("  template <>                                                                                                                                    " ENDL);
+    printf_ttws("  const rose::reflection::TypeInfo & get_type_info<%s>() {                                                                                       " ENDL, sname);
+    printf_ttws("    static rose::reflection::TypeInfo info = {                                                                                                   " ENDL);
+    printf_ttws("      /*             unique_id */ rose::hash(\"%s\"),                                                                                            " ENDL, sname);
+    printf_ttws("      /*           member_hash */ %lluULL,                                                                                                       " ENDL, (unsigned long long)rose::hash(structi));
+    printf_ttws("      /*      memory_footprint */ sizeof(%s),                                                                                                    " ENDL, sname);
+    printf_ttws("      /*      memory_alignment */ 16,                                                                                                            " ENDL);
+    printf_ttws("      /*                  name */ \"%s\",                                                                                                        " ENDL, sname);
+    printf_ttws("      /*  fp_default_construct */ +[](void * ptr) { new (ptr) %s(); },                                                                           " ENDL, sname);
+    printf_ttws("      /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<%s*>(ptr))->~%s(); },                                          " ENDL, sname, sname_nons);
+    printf_ttws("      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<%s*>(ptr)), s); },    " ENDL, sname);
+    printf_ttws("      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<%s*>(ptr)), d); } " ENDL, sname);
+    printf_ttws("    };                                                                                                                                           " ENDL);
+    printf_ttws("    return info;                                                                                                                                 " ENDL);
+    printf_ttws("  }                                                                                                                                              " ENDL);
+    printf_ttws("}                                                                                                                                                " ENDL);
     puts("");
 
     ///////////////////////////////////////////////////////////////////
