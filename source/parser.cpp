@@ -638,7 +638,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     if (!has_neqop) printf_ttws("bool operator!=(const %s &lhs, const %s &rhs);" ENDL, structi.name_withns, structi.name_withns);
 
     puts("");
-    printf_ttws("namespace rose::world {                              " ENDL);
+    printf_ttws("namespace rose::reflection {                              " ENDL);
     printf_ttws("  template <>                                        " ENDL);
     printf_ttws("  rose::reflection::TypeInfo get_type_info<%s>();    " ENDL, sname);
     printf_ttws("}                                                    " ENDL);
@@ -881,7 +881,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     // type info                                                     //
     ///////////////////////////////////////////////////////////////////
 
-    printf_ttws("namespace rose::world {                                                                                                            " ENDL);
+    printf_ttws("namespace rose::reflection {                                                                                                            " ENDL);
     printf_ttws("  template <>                                                                                                                      " ENDL);
     printf_ttws("  rose::reflection::TypeInfo get_type_info<%s>() {                                                                                 " ENDL, sname);
     printf_ttws("    return {                                                                                                                       " ENDL);
