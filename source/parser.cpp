@@ -17,6 +17,7 @@
 #define IMPL_SERIALIZER
 #include "parser_serializer.h"
 
+#define ENDL "\n"
 #define WHITESPACE " \n\r\t"
 
 bool is_empty(const char * c) { return *c == 0; }
@@ -574,10 +575,10 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", name);
     printf_ttws("  }\n");
 
-    printf_ttws("  template<>                        \n");
-    printf_ttws("  struct type_id<%s> {              \n", name);
-    printf_ttws("    inline static hash_value VALUE = %lluULL;     \n", (unsigned long long)rose::hash(enumci));
-    printf_ttws("  };                                \n");
+    printf_ttws("  template<>                       " ENDL);
+    printf_ttws("  struct type_id<%s> {             " ENDL, name);
+    printf_ttws("    inline static hash_value VALUE = %lluULL;    " ENDL, (unsigned long long)rose::hash(enumci));
+    printf_ttws("  };                               " ENDL);
 
     printf_ttws("  hash_value         hash(const %s &o);\n", name);
     printf_ttws("  void construct_defaults(      %s &o); //implement me\n", name);
@@ -586,12 +587,12 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     if (enumci.enum_annotations == global_annotations_t::Flag) {
         puts("");
-        printf_ttws("inline BoolConvertible<%s, %s> operator|(const %s &a, const %s &b) { return { static_cast<%s>(static_cast<%s>(a) | static_cast<%s>(b)) }; } \n", name, type, name, name, name, type, type);
-        printf_ttws("inline BoolConvertible<%s, %s> operator&(const %s &a, const %s &b) { return { static_cast<%s>(static_cast<%s>(a) & static_cast<%s>(b)) }; } \n", name, type, name, name, name, type, type);
-        printf_ttws("inline BoolConvertible<%s, %s> operator^(const %s &a, const %s &b) { return { static_cast<%s>(static_cast<%s>(a) ^ static_cast<%s>(b)) }; } \n", name, type, name, name, name, type, type);
-        printf_ttws("inline %s operator|=(%s &a, %s b) { return a = a | b; }                                                     \n", name, name, name);
-        printf_ttws("inline %s operator&=(%s &a, %s b) { return a = a & b; }                                                     \n", name, name, name);
-        printf_ttws("inline %s operator^=(%s &a, %s b) { return a = a ^ b; }                                                     \n", name, name, name);
+        printf_ttws("inline BoolConvertible<%s, %s> operator|(const %s &a, const %s &b) { return { static_cast<%s>(static_cast<%s>(a) | static_cast<%s>(b)) }; }" ENDL, name, type, name, name, name, type, type);
+        printf_ttws("inline BoolConvertible<%s, %s> operator&(const %s &a, const %s &b) { return { static_cast<%s>(static_cast<%s>(a) & static_cast<%s>(b)) }; }" ENDL, name, type, name, name, name, type, type);
+        printf_ttws("inline BoolConvertible<%s, %s> operator^(const %s &a, const %s &b) { return { static_cast<%s>(static_cast<%s>(a) ^ static_cast<%s>(b)) }; }" ENDL, name, type, name, name, name, type, type);
+        printf_ttws("inline %s operator|=(%s &a, %s b) { return a = a | b; }                                                    " ENDL, name, name, name);
+        printf_ttws("inline %s operator&=(%s &a, %s b) { return a = a & b; }                                                    " ENDL, name, name, name);
+        printf_ttws("inline %s operator^=(%s &a, %s b) { return a = a ^ b; }                                                    " ENDL, name, name, name);
     }
 
     puts("");
@@ -625,10 +626,10 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("  }\n");
     printf_ttws("  hash_value         hash(const %s &o);\n", sname);
 
-    printf_ttws("  template<>                        \n");
-    printf_ttws("  struct type_id<%s> {              \n", sname);
-    printf_ttws("    inline static hash_value VALUE = %lluULL;     \n", (unsigned long long)rose::hash(structi));
-    printf_ttws("  };                                \n");
+    printf_ttws("  template<>                       " ENDL);
+    printf_ttws("  struct type_id<%s> {             " ENDL, sname);
+    printf_ttws("    inline static hash_value VALUE = %lluULL;    " ENDL, (unsigned long long)rose::hash(structi));
+    printf_ttws("  };                               " ENDL);
 
     printf_ttws("  void construct_defaults(      %s &o); // implement me\n", sname);
     printf_ttws("}\n");
@@ -705,37 +706,37 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("}\n");
 
 
-    printf_ttws("void rose::ecs::serialize(%s& o, ISerializer& s) {                   \n", ename);
-    printf_ttws("  switch (o) {                                                       \n");
+    printf_ttws("void rose::ecs::serialize(%s& o, ISerializer& s) {                  " ENDL, ename);
+    printf_ttws("  switch (o) {                                                      " ENDL);
 
     for (auto & enumi : enumci.enums) {
       const char * eval = enumi.name;
-      printf_ttws("    case %s::%s: {                                                 \n", ename, eval);
-      printf_ttws("      char str[] = \"%s\";                                         \n", eval);
-      printf_ttws("      serialize(str, s);                                           \n");
-      printf_ttws("      break;                                                       \n");
-      printf_ttws("    }                                                              \n");
+      printf_ttws("    case %s::%s: {                                                " ENDL, ename, eval);
+      printf_ttws("      char str[] = \"%s\";                                        " ENDL, eval);
+      printf_ttws("      serialize(str, s);                                          " ENDL);
+      printf_ttws("      break;                                                      " ENDL);
+      printf_ttws("    }                                                             " ENDL);
     }
 
-    printf_ttws("    default: /* unknown */ break;                                    \n");
-    printf_ttws("  }                                                                  \n");
-    printf_ttws("}                                                                    \n");
+    printf_ttws("    default: /* unknown */ break;                                   " ENDL);
+    printf_ttws("  }                                                                 " ENDL);
+    printf_ttws("}                                                                   " ENDL);
 
-    printf_ttws("void rose::ecs::deserialize(%s& o, IDeserializer& s) {               \n", ename);
-    printf_ttws("  char str[64];                                                      \n");
-    printf_ttws("  deserialize(str, s);                                               \n");
-    printf_ttws("  rose::hash_value h = rose::hash(str);                              \n");
-    printf_ttws("  switch (h) {                                                       \n");
+    printf_ttws("void rose::ecs::deserialize(%s& o, IDeserializer& s) {              " ENDL, ename);
+    printf_ttws("  char str[64];                                                     " ENDL);
+    printf_ttws("  deserialize(str, s);                                              " ENDL);
+    printf_ttws("  rose::hash_value h = rose::hash(str);                             " ENDL);
+    printf_ttws("  switch (h) {                                                      " ENDL);
     for (auto & enumi : enumci.enums) {
       const char * eval = enumi.name;
-      printf_ttws("  case rose::hash(\"%s\"): o = %s::%s; break;                      \n", eval, ename, eval);
+      printf_ttws("  case rose::hash(\"%s\"): o = %s::%s; break;                     " ENDL, eval, ename, eval);
     }
-    printf_ttws("  default: /*unknown value*/ break;                                  \n");
-    printf_ttws("  }                                                                  \n");
-    printf_ttws("}                                                                    \n");
+    printf_ttws("  default: /*unknown value*/ break;                                 " ENDL);
+    printf_ttws("  }                                                                 " ENDL);
+    printf_ttws("}                                                                   " ENDL);
 
-    printf_ttws("rose::hash_value       rose::hash(const %s& o) {            \n", ename);
-    printf_ttws("  return static_cast<rose::hash_value>(o);                  \n");
+    printf_ttws("rose::hash_value       rose::hash(const %s& o) {           " ENDL, ename);
+    printf_ttws("  return static_cast<rose::hash_value>(o);                 " ENDL);
     printf_ttws("}                                                           \n\n");
 
   }
@@ -758,8 +759,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     has_compare_ops(has_eqop, has_neqop, has_serialize, has_deserialize, c, sname);
 
     if (!has_eqop) {
-      printf_ttws("bool operator==(const %s &lhs, const %s &rhs) { \n", sname, sname);
-      printf_ttws("  return \n");
+      printf_ttws("bool operator==(const %s &lhs, const %s &rhs) {" ENDL, sname, sname);
+      printf_ttws("  return" ENDL);
       int left = structi.members.size() - 1;
       for (auto & member : structi.members) {
         printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "&&" : ";");
@@ -769,8 +770,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     }
 
     if (!has_neqop) {
-      printf_ttws("bool operator!=(const %s &lhs, const %s &rhs) { \n", sname, sname);
-      printf_ttws("  return \n");
+      printf_ttws("bool operator!=(const %s &lhs, const %s &rhs) {" ENDL, sname, sname);
+      printf_ttws("  return" ENDL);
       int left = structi.members.size() - 1;
       for (auto & member : structi.members) {
         printf_ttws("    !rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "||" : ";");
@@ -784,12 +785,12 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       // serializer                                                    //
       // TODO: skip functions that are already declared
       ///////////////////////////////////////////////////////////////////
-      printf_ttws("void rose::ecs::serialize(%s &o, ISerializer &s) {                      \n", sname);
-      printf_ttws("  if(s.node_begin(\"%s\", rose::hash(\"%s\"), &o)) {                \n", sname, sname);
+      printf_ttws("void rose::ecs::serialize(%s &o, ISerializer &s) {                     " ENDL, sname);
+      printf_ttws("  if(s.node_begin(\"%s\", rose::hash(\"%s\"), &o)) {               " ENDL, sname, sname);
 
       for (auto & member : structi.members) {
         const char * mname = member.name;
-        printf_ttws("    s.key(\"%s\");                                                \n", mname);
+        printf_ttws("    s.key(\"%s\");                                               " ENDL, mname);
         if (member.count > 1 && rose::hash(member.type) == rose::hash("char")) {
           //when type is char[n] then treat is as a string.
           int bit = 0;
@@ -798,10 +799,10 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
           switch (bit)
           {
           case 1 << 0: //DATA
-            printf_ttws("    serialize(o.%s, s);                                         \n", mname);
+            printf_ttws("    serialize(o.%s, s);                                        " ENDL, mname);
             break;
           case 1 << 1: //STRING
-            printf_ttws("    serialize(o.%s, s, std::strlen(o.%s));                      \n", mname, mname);
+            printf_ttws("    serialize(o.%s, s, std::strlen(o.%s));                     " ENDL, mname, mname);
             break;
           case 0: //NONE
             fprintf(stderr, "Member '%s::%s' must have either annotations @String or @Data.", sname, member.name);
@@ -818,12 +819,12 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
           }
         }
         else {
-          printf_ttws("    serialize(o.%s, s);                                         \n", mname);
+          printf_ttws("    serialize(o.%s, s);                                        " ENDL, mname);
         }
       }
-      printf_ttws("    s.node_end();                                                   \n");
-      printf_ttws("  }                                                                 \n");
-      printf_ttws("  s.end();                                                          \n");
+      printf_ttws("    s.node_end();                                                  " ENDL);
+      printf_ttws("  }                                                                " ENDL);
+      printf_ttws("  s.end();                                                         " ENDL);
       printf_ttws("}                                                                   \n\n");
     }
 
@@ -831,43 +832,43 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       ///////////////////////////////////////////////////////////////////
       // deserializer                                                  //
       ///////////////////////////////////////////////////////////////////
-      printf_ttws("void rose::ecs::deserialize(%s &o, IDeserializer &s) {   \n", sname);
-      printf_ttws("  //implement me                                         \n");
-      printf_ttws("  //construct_defaults(o);                               \n");
-      printf_ttws("                                                         \n");
-      printf_ttws("  while (s.next_key()) {                                 \n");
-      printf_ttws("    switch (s.hash_key()) {                              \n");
+      printf_ttws("void rose::ecs::deserialize(%s &o, IDeserializer &s) {  " ENDL, sname);
+      printf_ttws("  //implement me                                        " ENDL);
+      printf_ttws("  //construct_defaults(o);                              " ENDL);
+      printf_ttws("                                                        " ENDL);
+      printf_ttws("  while (s.next_key()) {                                " ENDL);
+      printf_ttws("    switch (s.hash_key()) {                             " ENDL);
 
       for (auto & member : structi.members) {
         const char * mname = member.name;
-        printf_ttws("      case rose::hash(\"%s\"):                         \n", mname);
-        printf_ttws("        deserialize(o.%s, s);                          \n", mname);
-        printf_ttws("        break;                                         \n");
+        printf_ttws("      case rose::hash(\"%s\"):                        " ENDL, mname);
+        printf_ttws("        deserialize(o.%s, s);                         " ENDL, mname);
+        printf_ttws("        break;                                        " ENDL);
       }
-      printf_ttws("      default: s.skip_key(); break;                      \n");
-      printf_ttws("    }                                                    \n");
-      printf_ttws("  }                                                      \n");
+      printf_ttws("      default: s.skip_key(); break;                     " ENDL);
+      printf_ttws("    }                                                   " ENDL);
+      printf_ttws("  }                                                     " ENDL);
       printf_ttws("}                                                        \n\n");
     }
 
     ///////////////////////////////////////////////////////////////////
     // hashing                                                       //
     ///////////////////////////////////////////////////////////////////
-    printf_ttws("rose::hash_value rose::hash(const %s &o) {              \n", sname);
+    printf_ttws("rose::hash_value rose::hash(const %s &o) {             " ENDL, sname);
     //TODO: compatify, remove von xor64
     //for (auto & member : structi.members) {
     for (size_t i = 0; i != structi.members.size(); ++i) {
       auto & member = structi.members[i];
       if (i == 0) {
-        printf_ttws("  rose::hash_value h = rose::hash(o.%s);  \n", member.name);
+        printf_ttws("  rose::hash_value h = rose::hash(o.%s); " ENDL, member.name);
       }
       else {
-        printf_ttws("  h = rose::xor64(h);                     \n");
-        printf_ttws("  h ^= rose::hash(o.%s);                  \n", member.name);
+        printf_ttws("  h = rose::xor64(h);                    " ENDL);
+        printf_ttws("  h ^= rose::hash(o.%s);                 " ENDL, member.name);
       }
     }
-    printf_ttws("  return h;                           \n");
-    printf_ttws("}                                     \n");
+    printf_ttws("  return h;                          " ENDL);
+    printf_ttws("}                                    " ENDL);
 
     ///////////////////////////////////////////////////////////////////
     // Construct Defaults                                            //
@@ -892,37 +893,37 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
 void printhelp() {
   puts(
-    "NAME \n"
-    "       rose.parser - generate serialization code for simple c headers. \n"
-    " \n"
-    "SYNOPSIS \n"
-    "       rose.parser [OPTION] \n"
-    " \n"
-    "BUILDDATE \n"
-    "       " __DATE__ ", " __TIME__ " \n"
-    " \n"
+    "NAME" ENDL
+    "       rose.parser - generate serialization code for simple c headers." ENDL
+    ENDL
+    "SYNOPSIS" ENDL
+    "       rose.parser [OPTION]" ENDL
+    ENDL
+    "BUILDDATE" ENDL
+    "       " __DATE__ ", " __TIME__ ENDL
+    ENDL
 
-    "DESCRIPTION \n"
-    "       -H, --help \n"
-    "              show this help. \n"
-    " \n"
-    "       -I, --includes \n"
-    "              followed by a list of headers files, that should be parsed. \n"
-    " \n"
-    "       -O, --output \n"
-    "              The output file. [default: stdout] \n"
-    " \n"
-    "       -J, --json \n"
-    "              A optional JSON file containing meta info of the header files. \n"
-    " \n"
-    "       -V, --verbose \n"
+    "DESCRIPTION" ENDL
+    "       -H, --help" ENDL
+    "              show this help." ENDL
+    ENDL
+    "       -I, --includes" ENDL
+    "              followed by a list of headers files, that should be parsed." ENDL
+    ENDL
+    "       -O, --output" ENDL
+    "              The output file. [default: stdout]" ENDL
+    ENDL
+    "       -J, --json" ENDL
+    "              A optional JSON file containing meta info of the header files." ENDL
+    ENDL
+    "       -V, --verbose" ENDL
     "              Verbose output.\n"
-    " \n"
-    "       -E, --error \n"
+    ENDL
+    "       -E, --error" ENDL
     "              Force Error.\n"
-    " \n"
-    "AUTHOR \n"
-    "       Written by Rico Possienka. \n"
+    ENDL
+    "AUTHOR" ENDL
+    "       Written by Rico Possienka." ENDL
   );
 }
 
@@ -946,7 +947,7 @@ int main(int argc, char ** argv) {
     const char * arg = argv[i];
     rose::hash_value h = rose::hash(arg);
     if (h == rose::hash("--datetime")) {
-      fprintf(stderr, "Build Time: %s \n", __DATE__ " " __TIME__);
+      fprintf(stderr, "Build Time: %s" ENDL, __DATE__ " " __TIME__);
       continue;
     }
     if (h == rose::hash("--help") || h == rose::hash("-H")) {
@@ -991,7 +992,7 @@ int main(int argc, char ** argv) {
 
     switch (state) {
     case rose::hash("INCLUDE"): input_files.push_back(arg); break;
-    default: printf("Unknown argument %s. \n", arg); exit(1); break;
+    default: printf("Unknown argument %s." ENDL, arg); exit(1); break;
     }
   }
 
