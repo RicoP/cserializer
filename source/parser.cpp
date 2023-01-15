@@ -78,7 +78,7 @@ std::vector<const char *> input_files;
 void error(const char * msg, rose::StreamBuffer & buffer) {
   char tmp[20] = "";
   buffer.sws_read_till(tmp, WHITESPACE);
-  fprintf(stderr, "%s: %s(%i) [found '%s']\n", msg, buffer.path, buffer.cursor_line, tmp);
+  fprintf(stderr, "%s: %s(%i) [found '%s']" ENDL, msg, buffer.path, buffer.cursor_line, tmp);
   exit(1);
 }
 
@@ -531,23 +531,24 @@ void has_compare_ops(bool & has_eqop, bool & has_neqop, bool & has_serialize, bo
 }
 
 void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
-  printf_ttws("#pragma once\n");
-  printf_ttws("\n");
-  printf_ttws("#include <rose/hash.h>\n");
-  printf_ttws("#include <rose/typetraits.h>\n");
-  printf_ttws("#include <rose/serializer.h>\n");
-  printf_ttws("\n");
-  printf_ttws("///////////////////////////////////////////////////////////////////\n");
-  printf_ttws("//  AUTOGEN                                                      //\n");
+  printf_ttws("#pragma once" ENDL);
+  printf_ttws("" ENDL);
+  printf_ttws("#include <rose/hash.h>" ENDL);
+  printf_ttws("#include <rose/typetraits.h>" ENDL);
+  printf_ttws("#include <rose/serializer.h>" ENDL);
+  printf_ttws("#include <rose/world.h>" ENDL);
+  printf_ttws("" ENDL);
+  printf_ttws("///////////////////////////////////////////////////////////////////" ENDL);
+  printf_ttws("//  AUTOGEN                                                      //" ENDL);
   if (argc && argv) {
-    printf_ttws("//  command:\n");
+    printf_ttws("//  command:" ENDL);
     printf_ttws("//    rose.parser");
     for (int i = 1; i < argc; ++i) {
       printf_ttws(" %s", argv[i]);
     }
-    printf_ttws("\n");
+    printf_ttws("" ENDL);
   }
-  printf_ttws("///////////////////////////////////////////////////////////////////\n");
+  printf_ttws("///////////////////////////////////////////////////////////////////" ENDL);
 
   //dump declaration
   for (auto & enumci : c.enum_classes) {
@@ -556,34 +557,34 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     puts("");
     for (auto & ns : enumci.namespaces) {
-        printf_ttws("namespace %s {\n", ns.path);
+        printf_ttws("namespace %s {" ENDL, ns.path);
     }
     if (enumci.custom_type) {
-        printf_ttws("enum class                   %s : %s;\n", enumci.name_withoutns, type);
+        printf_ttws("enum class                   %s : %s;" ENDL, enumci.name_withoutns, type);
     } else {
-        printf_ttws("enum class                   %s;\n", enumci.name_withns);
+        printf_ttws("enum class                   %s;" ENDL, enumci.name_withns);
     }
     for (auto & ns : enumci.namespaces) {
         (void)ns;
-        printf_ttws("}\n");
+        printf_ttws("}" ENDL);
     }
-    printf_ttws("const char * to_string(const %s &);\n", name);
+    printf_ttws("const char * to_string(const %s &);" ENDL, name);
 
-    printf_ttws("namespace rose {\n");
-    printf_ttws("  namespace ecs {\n");
-    printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", name);
-    printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", name);
-    printf_ttws("  }\n");
+    printf_ttws("namespace rose {" ENDL);
+    printf_ttws("  namespace ecs {" ENDL);
+    printf_ttws("    void      deserialize(%s &o, IDeserializer &s);" ENDL, name);
+    printf_ttws("    void        serialize(%s &o, ISerializer &s);" ENDL, name);
+    printf_ttws("  }" ENDL);
 
     printf_ttws("  template<>                       " ENDL);
     printf_ttws("  struct type_id<%s> {             " ENDL, name);
     printf_ttws("    inline static hash_value VALUE = %lluULL;    " ENDL, (unsigned long long)rose::hash(enumci));
     printf_ttws("  };                               " ENDL);
 
-    printf_ttws("  hash_value         hash(const %s &o);\n", name);
-    printf_ttws("  void construct_defaults(      %s &o); //implement me\n", name);
+    printf_ttws("  hash_value         hash(const %s &o);" ENDL, name);
+    printf_ttws("  void construct_defaults(      %s &o); //implement me" ENDL, name);
 
-    printf_ttws("}\n");
+    printf_ttws("}" ENDL);
 
     if (enumci.enum_annotations == global_annotations_t::Flag) {
         puts("");
@@ -609,36 +610,41 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     puts("");
     for (auto & ns : structi.namespaces) {
-        printf_ttws("namespace %s {\n", ns.path);
+        printf_ttws("namespace %s {" ENDL, ns.path);
     }
     if (structi.global_annotations != global_annotations_t::Imposter) {
-      printf_ttws("struct                %s;\n", structi.name_withoutns);
+      printf_ttws("struct                %s;" ENDL, structi.name_withoutns);
     }
     for (auto & ns : structi.namespaces) {
         (void)ns;
-        printf_ttws("}\n");
+        printf_ttws("}" ENDL);
     }
 
-    printf_ttws("namespace rose {\n");
-    printf_ttws("  namespace ecs {\n");
-    if (!has_serialize)   printf_ttws("    void        serialize(%s &o, ISerializer &s);\n", sname);
-    if (!has_deserialize) printf_ttws("    void      deserialize(%s &o, IDeserializer &s);\n", sname);
-    printf_ttws("  }\n");
-    printf_ttws("  hash_value         hash(const %s &o);\n", sname);
+    printf_ttws("namespace rose {" ENDL);
+    printf_ttws("  namespace ecs {" ENDL);
+    if (!has_serialize)   printf_ttws("    void        serialize(%s &o, ISerializer &s);" ENDL, sname);
+    if (!has_deserialize) printf_ttws("    void      deserialize(%s &o, IDeserializer &s);" ENDL, sname);
+    printf_ttws("  }" ENDL);
+    printf_ttws("  hash_value         hash(const %s &o);" ENDL, sname);
 
     printf_ttws("  template<>                       " ENDL);
     printf_ttws("  struct type_id<%s> {             " ENDL, sname);
     printf_ttws("    inline static hash_value VALUE = %lluULL;    " ENDL, (unsigned long long)rose::hash(structi));
     printf_ttws("  };                               " ENDL);
 
-    printf_ttws("  void construct_defaults(      %s &o); // implement me\n", sname);
-    printf_ttws("}\n");
-    if (!has_eqop) printf_ttws("bool operator==(const %s &lhs, const %s &rhs);\n", structi.name_withns, structi.name_withns);
-    if (!has_neqop) printf_ttws("bool operator!=(const %s &lhs, const %s &rhs);\n", structi.name_withns, structi.name_withns);
+    printf_ttws("  void construct_defaults(      %s &o); // implement me" ENDL, sname);
+    printf_ttws("}" ENDL);
+    if (!has_eqop) printf_ttws("bool operator==(const %s &lhs, const %s &rhs);" ENDL, structi.name_withns, structi.name_withns);
+    if (!has_neqop) printf_ttws("bool operator!=(const %s &lhs, const %s &rhs);" ENDL, structi.name_withns, structi.name_withns);
+
     puts("");
+    printf_ttws("namespace rose::world {                              " ENDL);
+    printf_ttws("  template <>                                        " ENDL);
+    printf_ttws("  rose::reflection::TypeInfo get_type_info<%s>();    " ENDL, sname);
+    printf_ttws("}                                                    " ENDL);
   }
 
-  printf_ttws("\n#ifdef IMPL_SERIALIZER\n");
+  printf_ttws("\n#ifdef IMPL_SERIALIZER" ENDL);
 
   puts(R"MLS(
     #ifndef IMPL_SERIALIZER_UTIL
@@ -695,15 +701,15 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   //dump implementation
   for (auto & enumci : c.enum_classes) {
     const char * ename = enumci.name_withns;
-    printf_ttws("const char * to_string(const %s & e) {\n", ename);
-    printf_ttws("    switch(e) {\n");
+    printf_ttws("const char * to_string(const %s & e) {" ENDL, ename);
+    printf_ttws("    switch(e) {" ENDL);
     for (auto & enumi : enumci.enums) {
       const char * eval = enumi.name;
-      printf_ttws("        case %s::%s: return \"%s\";\n", ename, eval, eval);
+      printf_ttws("        case %s::%s: return \"%s\";" ENDL, ename, eval, eval);
     }
-    printf_ttws("        default: return \"<UNKNOWN>\";\n");
-    printf_ttws("    }\n");
-    printf_ttws("}\n");
+    printf_ttws("        default: return \"<UNKNOWN>\";" ENDL);
+    printf_ttws("    }" ENDL);
+    printf_ttws("}" ENDL);
 
 
     printf_ttws("void rose::ecs::serialize(%s& o, ISerializer& s) {                  " ENDL, ename);
@@ -737,16 +743,16 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     printf_ttws("rose::hash_value       rose::hash(const %s& o) {           " ENDL, ename);
     printf_ttws("  return static_cast<rose::hash_value>(o);                 " ENDL);
-    printf_ttws("}                                                           \n\n");
+    printf_ttws("}                                                           \n" ENDL);
 
   }
 
   for (auto & structi : c.structs) {
     const char * sname = structi.name_withns;
 
-    printf_ttws("///////////////////////////////////////////////////////////////////\n");
-    printf_ttws("//  struct %s\n", sname);
-    printf_ttws("///////////////////////////////////////////////////////////////////\n");
+    printf_ttws("///////////////////////////////////////////////////////////////////" ENDL);
+    printf_ttws("//  struct %s" ENDL, sname);
+    printf_ttws("///////////////////////////////////////////////////////////////////" ENDL);
 
     ///////////////////////////////////////////////////////////////////
     // == and != operator                                            //
@@ -763,10 +769,10 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       printf_ttws("  return" ENDL);
       int left = structi.members.size() - 1;
       for (auto & member : structi.members) {
-        printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "&&" : ";");
+        printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s) %s" ENDL, member.name, member.name, left ? "&&" : ";");
         --left;
       }
-      printf_ttws("} \n\n");
+      printf_ttws("} \n" ENDL);
     }
 
     if (!has_neqop) {
@@ -774,10 +780,10 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       printf_ttws("  return" ENDL);
       int left = structi.members.size() - 1;
       for (auto & member : structi.members) {
-        printf_ttws("    !rose_parser_equals(lhs.%s, rhs.%s) %s\n", member.name, member.name, left ? "||" : ";");
+        printf_ttws("    !rose_parser_equals(lhs.%s, rhs.%s) %s" ENDL, member.name, member.name, left ? "||" : ";");
         --left;
       }
-      printf_ttws("} \n\n");
+      printf_ttws("} \n" ENDL);
     }
 
     if (!has_serialize) {
@@ -825,7 +831,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       printf_ttws("    s.node_end();                                                  " ENDL);
       printf_ttws("  }                                                                " ENDL);
       printf_ttws("  s.end();                                                         " ENDL);
-      printf_ttws("}                                                                   \n\n");
+      printf_ttws("}                                                                   \n" ENDL);
     }
 
     if (!has_deserialize) {
@@ -848,7 +854,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       printf_ttws("      default: s.skip_key(); break;                     " ENDL);
       printf_ttws("    }                                                   " ENDL);
       printf_ttws("  }                                                     " ENDL);
-      printf_ttws("}                                                        \n\n");
+      printf_ttws("}                                                        \n" ENDL);
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -869,6 +875,29 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     }
     printf_ttws("  return h;                          " ENDL);
     printf_ttws("}                                    " ENDL);
+    puts("");
+
+    ///////////////////////////////////////////////////////////////////
+    // type info                                                     //
+    ///////////////////////////////////////////////////////////////////
+
+    printf_ttws("namespace rose::world {                                                                                                            " ENDL);
+    printf_ttws("  template <>                                                                                                                      " ENDL);
+    printf_ttws("  rose::reflection::TypeInfo get_type_info<%s>() {                                                                                 " ENDL, sname);
+    printf_ttws("    return {                                                                                                                       " ENDL);
+    printf_ttws("      /*             unique_id */ rose::hash(\"%s\"),                                                                              " ENDL, sname);
+    printf_ttws("      /*           member_hash */ %lluULL,                                                                                         " ENDL, (unsigned long long)rose::hash(structi));
+    printf_ttws("      /*      memory_footprint */ sizeof(%s),                                                                                      " ENDL, sname);
+    printf_ttws("      /*      memory_alignment */ 16,                                                                                              " ENDL);
+    printf_ttws("      /*                  name */ \"%s\",                                                                                          " ENDL, sname);
+    printf_ttws("      /*  fp_default_construct */ +[](void * ptr) { new (ptr) %s(); },                                                             " ENDL, sname);
+    printf_ttws("      /*   fp_default_destruct */ +[](void * ptr) { reinterpret_cast<%s*>(ptr)->~%s(); },                                          " ENDL, sname, sname);
+    printf_ttws("      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*reinterpret_cast<%s*>(ptr), s); },    " ENDL, sname);
+    printf_ttws("      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*reinterpret_cast<%s*>(ptr), d); } " ENDL, sname);
+    printf_ttws("    };                                                                                                                             " ENDL);
+    printf_ttws("  }                                                                                                                                " ENDL);
+    printf_ttws("}                                                                                                                                  " ENDL);
+    puts("");
 
     ///////////////////////////////////////////////////////////////////
     // Construct Defaults                                            //
@@ -888,7 +917,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   }
 
   //end
-  printf_ttws("\n#endif\n");
+  printf_ttws("\n#endif" ENDL);
 }
 
 void printhelp() {
@@ -917,10 +946,10 @@ void printhelp() {
     "              A optional JSON file containing meta info of the header files." ENDL
     ENDL
     "       -V, --verbose" ENDL
-    "              Verbose output.\n"
+    "              Verbose output." ENDL
     ENDL
     "       -E, --error" ENDL
-    "              Force Error.\n"
+    "              Force Error." ENDL
     ENDL
     "AUTHOR" ENDL
     "       Written by Rico Possienka." ENDL
@@ -1000,7 +1029,7 @@ int main(int argc, char ** argv) {
 
   for (auto path : input_files) {
     rose::StreamBuffer buffer;
-    if (verbose) fprintf(stderr, "Parsing File %s\n", path);
+    if (verbose) fprintf(stderr, "Parsing File %s" ENDL, path);
     buffer.load(path);
     parse(c, buffer);
     buffer.unload();
