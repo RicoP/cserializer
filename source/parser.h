@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <rose/attributes.h>
+#include <rose/hash.h>
 
 //@Flag 
 enum class member_annotations_t {
@@ -62,6 +63,7 @@ struct struct_info {
   std::vector<namespace_path> namespaces;
   global_annotations_t global_annotations = global_annotations_t::NONE;
   std::vector<member_info> members;
+  rose::hash_value cached_member_hash = 0;
 };
 
 struct enum_info {

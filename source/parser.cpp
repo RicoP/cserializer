@@ -370,6 +370,7 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
                     // We don't care about assigned values for functions
                     // can be 0 or default or delete
                     c = buffer.skip_till_any(";");
+                    buffer.skip(1);
                 } else {
                     skip_function_body();
                 }
@@ -637,6 +638,16 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   for (auto & structi : c.structs) {
     const char * sname = structi.name_withns;
 
+    {
+      auto struct_no_functions = structi;
+      auto new_end = std::stable_partition(
+          struct_no_functions.members.begin(),
+          struct_no_functions.members.end(),
+          [](const auto & member) { return member.kind == Member_info_kind::Field; });
+      struct_no_functions.members.erase(new_end, struct_no_functions.members.end());
+      structi.cached_member_hash = rose::hash(struct_no_functions);
+    }
+
     bool has_eqop = false;
     bool has_neqop = false;
     bool has_serialize = false;
@@ -664,7 +675,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     printf_ttws("  template<>                       " ENDL);
     printf_ttws("  struct type_id<%s> {             " ENDL, sname);
-    printf_ttws("    inline static hash_value VALUE = %lluULL;    " ENDL, (unsigned long long)rose::hash(structi));
+    printf_ttws("    inline static hash_value VALUE = %lluULL;    " ENDL, structi.cached_member_hash);
     printf_ttws("  };                               " ENDL);
 
     printf_ttws("  void construct_defaults(      %s &o); // implement me" ENDL, sname);
@@ -802,15 +813,20 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     if (!has_eqop) {
       printf_ttws("bool operator==(const %s &lhs, const %s &rhs) {" ENDL, sname, sname);
-      printf_ttws("  return" ENDL);
-      int left = structi.members.size() - 1;
+      fputs("  return" ENDL, stdout);
+      bool first = true;
       for (auto & member : structi.members) {
-        if (member.kind == Member_info_kind::Field) {
-          printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s) %s" ENDL, member.name, member.name, left ? "&&" : ";");
+        if (member.kind != Member_info_kind::Field)
+          continue;
+
+        if (first) {
+          first = false;
+        } else  {
+          printf_ttws(" &&" ENDL, stdout);
         }
-        --left;
+        printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s)", member.name, member.name);
       }
-      printf_ttws("} \n" ENDL);
+      printf_ttws(";" ENDL "} " ENDL ENDL);
     }
 
     if (!has_neqop) {
@@ -822,12 +838,13 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     if (!has_serialize) {
       ///////////////////////////////////////////////////////////////////
       // serializer                                                    //
-      // TODO: skip functions that are already declared
       ///////////////////////////////////////////////////////////////////
       printf_ttws("void rose::ecs::serialize(%s &o, ISerializer &s) {                     " ENDL, sname);
       printf_ttws("  if(s.node_begin(\"%s\", rose::hash(\"%s\"), &o)) {               " ENDL, sname, sname);
 
       for (auto & member : structi.members) {
+        if (member.kind != Member_info_kind::Field)
+          continue;
         const char * mname = member.name;
         printf_ttws("    s.key(\"%s\");                                               " ENDL, mname);
         if (member.count > 1 && rose::hash(member.type) == rose::hash("char")) {
@@ -879,6 +896,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       printf_ttws("    switch (s.hash_key()) {                             " ENDL);
 
       for (auto & member : structi.members) {
+        if (member.kind != Member_info_kind::Field)
+          continue;
         const char * mname = member.name;
         printf_ttws("      case rose::hash(\"%s\"):                        " ENDL, mname);
         printf_ttws("        deserialize(o.%s, s);                         " ENDL, mname);
@@ -896,9 +915,12 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("rose::hash_value rose::hash(const %s &o) {             " ENDL, sname);
     //TODO: compatify, remove von xor64
     //for (auto & member : structi.members) {
-    for (size_t i = 0; i != structi.members.size(); ++i) {
-      auto & member = structi.members[i];
-      if (i == 0) {
+    bool first = true;
+    for (auto & member : structi.members) {
+      if (member.kind != Member_info_kind::Field)
+        continue;
+      if (first) {
+        first = false;
         printf_ttws("  rose::hash_value h = rose::hash(o.%s); " ENDL, member.name);
       }
       else {
@@ -919,7 +941,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("  const rose::reflection::TypeInfo & get_type_info<%s>() {                                                                                       " ENDL, sname);
     printf_ttws("    static rose::reflection::TypeInfo info = {                                                                                                   " ENDL);
     printf_ttws("      /*             unique_id */ rose::hash(\"%s\"),                                                                                            " ENDL, sname);
-    printf_ttws("      /*           member_hash */ %lluULL,                                                                                                       " ENDL, (unsigned long long)rose::hash(structi));
+    printf_ttws("      /*           member_hash */ %lluULL,                                                                                                       " ENDL, (unsigned long long)structi.cached_member_hash);
     printf_ttws("      /*      memory_footprint */ sizeof(%s),                                                                                                    " ENDL, sname);
     printf_ttws("      /*      memory_alignment */ 16,                                                                                                            " ENDL);
     printf_ttws("      /*                  name */ \"%s\",                                                                                                        " ENDL, sname);

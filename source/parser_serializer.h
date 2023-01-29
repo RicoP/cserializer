@@ -92,7 +92,7 @@ namespace rose {
   hash_value         hash(const namespace_path &o);
   template<>
   struct type_id<namespace_path> {
-    inline static hash_value VALUE = 12258869517490701093ULL;
+    inline static hash_value VALUE = 8542564194394352110ULL;
   };
   void construct_defaults(      namespace_path &o); // implement me
 }
@@ -113,7 +113,7 @@ namespace rose {
   hash_value         hash(const member_info &o);
   template<>
   struct type_id<member_info> {
-    inline static hash_value VALUE = 11323069267460255306ULL;
+    inline static hash_value VALUE = 15846956767883234746ULL;
   };
   void construct_defaults(      member_info &o); // implement me
 }
@@ -134,7 +134,7 @@ namespace rose {
   hash_value         hash(const struct_info &o);
   template<>
   struct type_id<struct_info> {
-    inline static hash_value VALUE = 2652356125487541418ULL;
+    inline static hash_value VALUE = 4161450941863272169ULL;
   };
   void construct_defaults(      struct_info &o); // implement me
 }
@@ -155,7 +155,7 @@ namespace rose {
   hash_value         hash(const enum_info &o);
   template<>
   struct type_id<enum_info> {
-    inline static hash_value VALUE = 9578114829779115887ULL;
+    inline static hash_value VALUE = 3824958980157671856ULL;
   };
   void construct_defaults(      enum_info &o); // implement me
 }
@@ -176,7 +176,7 @@ namespace rose {
   hash_value         hash(const enum_class_info &o);
   template<>
   struct type_id<enum_class_info> {
-    inline static hash_value VALUE = 15820409074394059996ULL;
+    inline static hash_value VALUE = 290734068996897571ULL;
   };
   void construct_defaults(      enum_class_info &o); // implement me
 }
@@ -197,7 +197,7 @@ namespace rose {
   hash_value         hash(const function_parameter_info &o);
   template<>
   struct type_id<function_parameter_info> {
-    inline static hash_value VALUE = 9370255687959554376ULL;
+    inline static hash_value VALUE = 13017164391568233122ULL;
   };
   void construct_defaults(      function_parameter_info &o); // implement me
 }
@@ -218,7 +218,7 @@ namespace rose {
   hash_value         hash(const function_info &o);
   template<>
   struct type_id<function_info> {
-    inline static hash_value VALUE = 5216781949972949934ULL;
+    inline static hash_value VALUE = 1593436985904474167ULL;
   };
   void construct_defaults(      function_info &o); // implement me
 }
@@ -239,7 +239,7 @@ namespace rose {
   hash_value         hash(const ParseContext &o);
   template<>
   struct type_id<ParseContext> {
-    inline static hash_value VALUE = 4083862798227823235ULL;
+    inline static hash_value VALUE = 12319669978200787059ULL;
   };
   void construct_defaults(      ParseContext &o); // implement me
 }
@@ -493,7 +493,7 @@ rose::hash_value       rose::hash(const Member_info_kind& o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const namespace_path &lhs, const namespace_path &rhs) {
   return
-    rose_parser_equals(lhs.path, rhs.path) ;
+    rose_parser_equals(lhs.path, rhs.path);
 }
 
 bool operator!=(const namespace_path &lhs, const namespace_path &rhs) {
@@ -533,7 +533,7 @@ namespace rose::reflection {
   const rose::reflection::TypeInfo & get_type_info<namespace_path>() {
     static rose::reflection::TypeInfo info = {
       /*             unique_id */ rose::hash("namespace_path"),
-      /*           member_hash */ 12258869517490701093ULL,
+      /*           member_hash */ 8542564194394352110ULL,
       /*      memory_footprint */ sizeof(namespace_path),
       /*      memory_alignment */ 16,
       /*                  name */ "namespace_path",
@@ -556,7 +556,7 @@ bool operator==(const member_info &lhs, const member_info &rhs) {
     rose_parser_equals(lhs.name, rhs.name) &&
     rose_parser_equals(lhs.default_value, rhs.default_value) &&
     rose_parser_equals(lhs.count, rhs.count) &&
-    rose_parser_equals(lhs.annotations, rhs.annotations) ;
+    rose_parser_equals(lhs.annotations, rhs.annotations);
 }
 
 bool operator!=(const member_info &lhs, const member_info &rhs) {
@@ -631,7 +631,7 @@ namespace rose::reflection {
   const rose::reflection::TypeInfo & get_type_info<member_info>() {
     static rose::reflection::TypeInfo info = {
       /*             unique_id */ rose::hash("member_info"),
-      /*           member_hash */ 11323069267460255306ULL,
+      /*           member_hash */ 15846956767883234746ULL,
       /*      memory_footprint */ sizeof(member_info),
       /*      memory_alignment */ 16,
       /*                  name */ "member_info",
@@ -653,7 +653,8 @@ bool operator==(const struct_info &lhs, const struct_info &rhs) {
     rose_parser_equals(lhs.name_withoutns, rhs.name_withoutns) &&
     rose_parser_equals(lhs.namespaces, rhs.namespaces) &&
     rose_parser_equals(lhs.global_annotations, rhs.global_annotations) &&
-    rose_parser_equals(lhs.members, rhs.members) ;
+    rose_parser_equals(lhs.members, rhs.members) &&
+    rose_parser_equals(lhs.cached_member_hash, rhs.cached_member_hash);
 }
 
 bool operator!=(const struct_info &lhs, const struct_info &rhs) {
@@ -672,6 +673,8 @@ void rose::ecs::serialize(struct_info &o, ISerializer &s) {
     serialize(o.global_annotations, s);
     s.key("members");
     serialize(o.members, s);
+    s.key("cached_member_hash");
+    serialize(o.cached_member_hash, s);
     s.node_end();
   }
   s.end();
@@ -698,6 +701,9 @@ void rose::ecs::deserialize(struct_info &o, IDeserializer &s) {
       case rose::hash("members"):
         deserialize(o.members, s);
         break;
+      case rose::hash("cached_member_hash"):
+        deserialize(o.cached_member_hash, s);
+        break;
       default: s.skip_key(); break;
     }
   }
@@ -713,6 +719,8 @@ rose::hash_value rose::hash(const struct_info &o) {
   h ^= rose::hash(o.global_annotations);
   h = rose::xor64(h);
   h ^= rose::hash(o.members);
+  h = rose::xor64(h);
+  h ^= rose::hash(o.cached_member_hash);
   return h;
 }
 
@@ -721,7 +729,7 @@ namespace rose::reflection {
   const rose::reflection::TypeInfo & get_type_info<struct_info>() {
     static rose::reflection::TypeInfo info = {
       /*             unique_id */ rose::hash("struct_info"),
-      /*           member_hash */ 2652356125487541418ULL,
+      /*           member_hash */ 4161450941863272169ULL,
       /*      memory_footprint */ sizeof(struct_info),
       /*      memory_alignment */ 16,
       /*                  name */ "struct_info",
@@ -741,7 +749,7 @@ bool operator==(const enum_info &lhs, const enum_info &rhs) {
   return
     rose_parser_equals(lhs.name, rhs.name) &&
     rose_parser_equals(lhs.value, rhs.value) &&
-    rose_parser_equals(lhs.value_type, rhs.value_type) ;
+    rose_parser_equals(lhs.value_type, rhs.value_type);
 }
 
 bool operator!=(const enum_info &lhs, const enum_info &rhs) {
@@ -795,7 +803,7 @@ namespace rose::reflection {
   const rose::reflection::TypeInfo & get_type_info<enum_info>() {
     static rose::reflection::TypeInfo info = {
       /*             unique_id */ rose::hash("enum_info"),
-      /*           member_hash */ 9578114829779115887ULL,
+      /*           member_hash */ 3824958980157671856ULL,
       /*      memory_footprint */ sizeof(enum_info),
       /*      memory_alignment */ 16,
       /*                  name */ "enum_info",
@@ -820,7 +828,7 @@ bool operator==(const enum_class_info &lhs, const enum_class_info &rhs) {
     rose_parser_equals(lhs.enums, rhs.enums) &&
     rose_parser_equals(lhs.namespaces, rhs.namespaces) &&
     rose_parser_equals(lhs.default_value, rhs.default_value) &&
-    rose_parser_equals(lhs.enum_annotations, rhs.enum_annotations) ;
+    rose_parser_equals(lhs.enum_annotations, rhs.enum_annotations);
 }
 
 bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs) {
@@ -909,7 +917,7 @@ namespace rose::reflection {
   const rose::reflection::TypeInfo & get_type_info<enum_class_info>() {
     static rose::reflection::TypeInfo info = {
       /*             unique_id */ rose::hash("enum_class_info"),
-      /*           member_hash */ 15820409074394059996ULL,
+      /*           member_hash */ 290734068996897571ULL,
       /*      memory_footprint */ sizeof(enum_class_info),
       /*      memory_alignment */ 16,
       /*                  name */ "enum_class_info",
@@ -930,7 +938,7 @@ bool operator==(const function_parameter_info &lhs, const function_parameter_inf
     rose_parser_equals(lhs.name, rhs.name) &&
     rose_parser_equals(lhs.type, rhs.type) &&
     rose_parser_equals(lhs.modifier, rhs.modifier) &&
-    rose_parser_equals(lhs.is_const, rhs.is_const) ;
+    rose_parser_equals(lhs.is_const, rhs.is_const);
 }
 
 bool operator!=(const function_parameter_info &lhs, const function_parameter_info &rhs) {
@@ -991,7 +999,7 @@ namespace rose::reflection {
   const rose::reflection::TypeInfo & get_type_info<function_parameter_info>() {
     static rose::reflection::TypeInfo info = {
       /*             unique_id */ rose::hash("function_parameter_info"),
-      /*           member_hash */ 9370255687959554376ULL,
+      /*           member_hash */ 13017164391568233122ULL,
       /*      memory_footprint */ sizeof(function_parameter_info),
       /*      memory_alignment */ 16,
       /*                  name */ "function_parameter_info",
@@ -1011,7 +1019,7 @@ bool operator==(const function_info &lhs, const function_info &rhs) {
   return
     rose_parser_equals(lhs.name, rhs.name) &&
     rose_parser_equals(lhs.type, rhs.type) &&
-    rose_parser_equals(lhs.parameters, rhs.parameters) ;
+    rose_parser_equals(lhs.parameters, rhs.parameters);
 }
 
 bool operator!=(const function_info &lhs, const function_info &rhs) {
@@ -1065,7 +1073,7 @@ namespace rose::reflection {
   const rose::reflection::TypeInfo & get_type_info<function_info>() {
     static rose::reflection::TypeInfo info = {
       /*             unique_id */ rose::hash("function_info"),
-      /*           member_hash */ 5216781949972949934ULL,
+      /*           member_hash */ 1593436985904474167ULL,
       /*      memory_footprint */ sizeof(function_info),
       /*      memory_alignment */ 16,
       /*                  name */ "function_info",
@@ -1085,7 +1093,7 @@ bool operator==(const ParseContext &lhs, const ParseContext &rhs) {
   return
     rose_parser_equals(lhs.enum_classes, rhs.enum_classes) &&
     rose_parser_equals(lhs.functions, rhs.functions) &&
-    rose_parser_equals(lhs.structs, rhs.structs) ;
+    rose_parser_equals(lhs.structs, rhs.structs);
 }
 
 bool operator!=(const ParseContext &lhs, const ParseContext &rhs) {
@@ -1139,7 +1147,7 @@ namespace rose::reflection {
   const rose::reflection::TypeInfo & get_type_info<ParseContext>() {
     static rose::reflection::TypeInfo info = {
       /*             unique_id */ rose::hash("ParseContext"),
-      /*           member_hash */ 4083862798227823235ULL,
+      /*           member_hash */ 12319669978200787059ULL,
       /*      memory_footprint */ sizeof(ParseContext),
       /*      memory_alignment */ 16,
       /*                  name */ "ParseContext",
