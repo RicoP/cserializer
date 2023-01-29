@@ -565,6 +565,17 @@ void has_compare_ops(bool & has_eqop, bool & has_neqop, bool & has_serialize, bo
   }
 }
 
+rose::hash_value filtered_struct_hash(struct_info structi) {
+  auto struct_no_functions = structi;
+  auto new_end = std::stable_partition(
+    struct_no_functions.members.begin(), struct_no_functions.members.end(),
+    [](const auto & member) {
+        return member.kind == Member_info_kind::Field;
+    });
+  struct_no_functions.members.erase(new_end, struct_no_functions.members.end());
+  return rose::hash(struct_no_functions);
+}
+
 void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   printf_ttws("#pragma once" ENDL);
   printf_ttws("" ENDL);
@@ -638,16 +649,6 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
   for (auto & structi : c.structs) {
     const char * sname = structi.name_withns;
 
-    {
-      auto struct_no_functions = structi;
-      auto new_end = std::stable_partition(
-          struct_no_functions.members.begin(),
-          struct_no_functions.members.end(),
-          [](const auto & member) { return member.kind == Member_info_kind::Field; });
-      struct_no_functions.members.erase(new_end, struct_no_functions.members.end());
-      structi.cached_member_hash = rose::hash(struct_no_functions);
-    }
-
     bool has_eqop = false;
     bool has_neqop = false;
     bool has_serialize = false;
@@ -675,7 +676,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     printf_ttws("  template<>                       " ENDL);
     printf_ttws("  struct type_id<%s> {             " ENDL, sname);
-    printf_ttws("    inline static hash_value VALUE = %lluULL;    " ENDL, structi.cached_member_hash);
+    printf_ttws("    inline static hash_value VALUE = %lluULL;    " ENDL, (unsigned long long)filtered_struct_hash(structi));
     printf_ttws("  };                               " ENDL);
 
     printf_ttws("  void construct_defaults(      %s &o); // implement me" ENDL, sname);
@@ -941,7 +942,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("  const rose::reflection::TypeInfo & get_type_info<%s>() {                                                                                       " ENDL, sname);
     printf_ttws("    static rose::reflection::TypeInfo info = {                                                                                                   " ENDL);
     printf_ttws("      /*             unique_id */ rose::hash(\"%s\"),                                                                                            " ENDL, sname);
-    printf_ttws("      /*           member_hash */ %lluULL,                                                                                                       " ENDL, (unsigned long long)structi.cached_member_hash);
+    printf_ttws("      /*           member_hash */ %lluULL,                                                                                                       " ENDL, (unsigned long long)filtered_struct_hash(structi));
     printf_ttws("      /*      memory_footprint */ sizeof(%s),                                                                                                    " ENDL, sname);
     printf_ttws("      /*      memory_alignment */ 16,                                                                                                            " ENDL);
     printf_ttws("      /*                  name */ \"%s\",                                                                                                        " ENDL, sname);
