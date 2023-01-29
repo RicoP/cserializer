@@ -30,7 +30,9 @@ enum class global_annotations_t {
 enum class Member_info_kind {
 	NONE= 0,
 	Field,
-	Function
+	Function,
+	Constructor,
+	Destructor,
 };
 
 struct namespace_path {

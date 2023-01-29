@@ -20,7 +20,15 @@
 #define ENDL "\n"
 #define WHITESPACE " \n\r\t"
 
-bool is_empty(const char * c) { return *c == 0; }
+inline bool is_empty(const char * c) { return *c == 0; }
+inline bool is_equal(const char * a, const char * b) {
+  for(;;) {
+    if (*a != *b) return false;
+    if (*a == 0) return true;
+    ++a;
+    ++b;
+  }
+}
 
 bool is_valid_operator(const char * op) {
   //https://www.ibm.com/docs/en/zos/2.1.0?topic=only-overloading-operators
@@ -119,6 +127,18 @@ int read_in_namespaces(char (&buffer)[N], const std::vector<namespace_path> & na
 }
 
 void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
+  auto skip_function_body = [&buffer]() {
+    int depth = 0;
+    do {
+      //TODO: deal with {} in comments
+      buffer.skip_till_any("{}");
+      char c = buffer.get();
+      depth += c == '{' ? 1 : -1;
+      if (c == 0) break;
+      assert(depth >= 0);
+    } while (depth);
+  };
+
   char tmp[64] = "";
   global_annotations_t global_annotation = global_annotations_t::NONE;
   bool is_in_imposter_comment = false;
@@ -307,52 +327,73 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
             JsonDeserializer jsond(annotation_s);
             rose::ecs::deserialize(annotation, jsond);
           }
-
-          char type[64];
-          buffer.sws_read_till(type, WHITESPACE);
-
-        new_member:
-          member_info & memberi = annotation == member_annotations_t::Ignore
-            ? ignored_member //fake member we just write to but immediately discard
-            : structi.members.emplace_back(); //otherwise create new member
-
-          memberi.count = 1;
-          memberi.kind = Member_info_kind::Field;
-          memberi.annotations = annotation;
-          copy(memberi.type, type);
-          buffer.sws_read_till(memberi.name, "([;," WHITESPACE);
-          c = buffer.sws_get();
-
-          if (c == '(') {
-            //function
-            memberi.kind = Member_info_kind::Function;
-            //skip for now. we don't really care.
-            buffer.skip_till_any(")");
-            buffer.skip(1);
-            if (buffer.sws_peek() == '{') {
-              error("can't deal with inline functions right now.", buffer);
-            }
-            c = buffer.sws_get();
+          if (buffer.test_annotation(annotation_s)) {
+            error("No support for double annotations yet.", buffer);
+          }
+          if (buffer.skip_comment()) {
+            ; // we skiped the comment
           }
 
-          if (c == '[') {
-            buffer.sws_read_till(tmp, "]");
-            memberi.count = atoi(tmp);
-            buffer.skip(1);
-            c = buffer.sws_get();
-          }
+          member_info memberi;
+          buffer.sws_read_till(memberi.type, "(" WHITESPACE);
 
-          if (c == ',') goto new_member; //new member, same type and annotation
-          if (c == '=') {
-            buffer.sws_read_till(memberi.default_value, ";");
-            c = buffer.get();
-          }
+          for (;;) {
+              memberi.count = 1;
+              memberi.kind = Member_info_kind::Field;
+              memberi.annotations = annotation;
+              buffer.sws_read_till(memberi.name, "([;," WHITESPACE);
+              c = buffer.sws_get();
 
-          if (c != ';') error("Expected ';'", buffer);
+              bool member_chain = false;
 
-          if (memberi.kind == Member_info_kind::Function) {
-            //get rid of function member because we don't want to deal with it right now.
-            structi.members.pop_back();
+              if (c == '(') {
+
+                if (is_empty(memberi.name)) {
+                    char * constrcutor_name = memberi.type;
+                    // Empty name means we have a constrcutor / destructor
+                    memberi.kind = Member_info_kind::Constructor;
+                    if (constrcutor_name[0] == '~') {
+                        memberi.kind = Member_info_kind::Destructor;
+                        constrcutor_name++;
+                    }
+                    if (!is_equal(constrcutor_name, structi.name_withoutns)) {
+                        // Sanity check
+                        error("Constructor / Destructor must have same name", buffer);
+                    }
+                } else {
+                    // function
+                    memberi.kind = Member_info_kind::Function;
+                }
+
+                c = buffer.skip_till_any(";{(=");
+                if (c == '=') {
+                    // We don't care about assigned values for functions
+                    // can be 0 or default or delete
+                    c = buffer.skip_till_any(";");
+                } else {
+                    skip_function_body();
+                }
+              } else {
+                  if (c == '[') {
+                    buffer.sws_read_till(tmp, "]");
+                    memberi.count = atoi(tmp);
+                    buffer.skip(1);
+                    c = buffer.sws_get();
+                  }
+
+                  member_chain = c == ','; //new member with same type and annotations
+                  if (c == '=') {
+                    buffer.sws_read_till(memberi.default_value, ";");
+                    c = buffer.sws_get();
+                  }
+              }
+
+              if (annotation != member_annotations_t::Ignore) {
+                structi.members.push_back(memberi);
+              }
+              
+              if (member_chain) continue;
+              else break;
           }
 
           if (buffer.sws_peek() == '}') {
@@ -421,16 +462,9 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
         assert(buffer.peek() == ')');
         buffer.skip(1);
         if (buffer.test_and_skip(";")) { /* empty function body */ }
-        else if (buffer.test_and_skip("{")) {
-          //skip body
-          int depth = 1;
-          while (depth) {
-            //TODO: deal with {} in comments
-            buffer.skip_till_any("{}");
-            char c = buffer.get();
-            depth += c == '{' ? 1 : -1;
-            if (c == 0) break;
-          }
+        //else if (buffer.test_and_skip("{")) {
+        else if (buffer.peek() == '{') {
+          skip_function_body();
         }
         else error("expected either ';' or '{'.", buffer);
       }
@@ -771,7 +805,9 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       printf_ttws("  return" ENDL);
       int left = structi.members.size() - 1;
       for (auto & member : structi.members) {
-        printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s) %s" ENDL, member.name, member.name, left ? "&&" : ";");
+        if (member.kind == Member_info_kind::Field) {
+          printf_ttws("    rose_parser_equals(lhs.%s, rhs.%s) %s" ENDL, member.name, member.name, left ? "&&" : ";");
+        }
         --left;
       }
       printf_ttws("} \n" ENDL);
@@ -779,12 +815,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
 
     if (!has_neqop) {
       printf_ttws("bool operator!=(const %s &lhs, const %s &rhs) {" ENDL, sname, sname);
-      printf_ttws("  return" ENDL);
-      int left = structi.members.size() - 1;
-      for (auto & member : structi.members) {
-        printf_ttws("    !rose_parser_equals(lhs.%s, rhs.%s) %s" ENDL, member.name, member.name, left ? "||" : ";");
-        --left;
-      }
+      printf_ttws("  return !(lhs == rhs); " ENDL);
       printf_ttws("} \n" ENDL);
     }
 
