@@ -1,8 +1,10 @@
 #pragma once
 
+#include <new>
 #include <rose/hash.h>
 #include <rose/typetraits.h>
-#include <serializer/serializer.h>
+#include <rose/serializer.h>
+#include <rose/world.h>
 
 ///////////////////////////////////////////////////////////////////
 //  AUTOGEN                                                      //
@@ -19,7 +21,7 @@ namespace rose {
   }
   template<>
   struct type_id<enum_test> {
-    inline static hash_value VALUE = 5040772477107589634ULL;
+    inline static hash_value VALUE = 3750049738734855819ULL;
   };
   hash_value         hash(const enum_test &o);
   void construct_defaults(      enum_test &o); //implement me
@@ -35,14 +37,18 @@ namespace rose {
   }
   template<>
   struct type_id<enum_test2> {
-    inline static hash_value VALUE = 9236210457033881375ULL;
+    inline static hash_value VALUE = 6180207015737975161ULL;
   };
   hash_value         hash(const enum_test2 &o);
   void construct_defaults(      enum_test2 &o); //implement me
 }
 
 
+namespace rose {
+namespace ecs {
 enum class                   rose::ecs::Direction;
+}
+}
 const char * to_string(const rose::ecs::Direction &);
 namespace rose {
   namespace ecs {
@@ -51,7 +57,7 @@ namespace rose {
   }
   template<>
   struct type_id<rose::ecs::Direction> {
-    inline static hash_value VALUE = 1886528734137778031ULL;
+    inline static hash_value VALUE = 1368919226037249928ULL;
   };
   hash_value         hash(const rose::ecs::Direction &o);
   void construct_defaults(      rose::ecs::Direction &o); //implement me
@@ -67,13 +73,17 @@ namespace rose {
   hash_value         hash(const EngineSettings &o);
   template<>
   struct type_id<EngineSettings> {
-    inline static hash_value VALUE = 10086401970102489070ULL;
+    inline static hash_value VALUE = 13646434887555963980ULL;
   };
   void construct_defaults(      EngineSettings &o); // implement me
 }
 bool operator==(const EngineSettings &lhs, const EngineSettings &rhs);
 bool operator!=(const EngineSettings &lhs, const EngineSettings &rhs);
 
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<EngineSettings>();
+}
 
 namespace rose {
   namespace ecs {
@@ -82,11 +92,15 @@ namespace rose {
   hash_value         hash(const vector3 &o);
   template<>
   struct type_id<vector3> {
-    inline static hash_value VALUE = 8723484739212616572ULL;
+    inline static hash_value VALUE = 16507566352740728694ULL;
   };
   void construct_defaults(      vector3 &o); // implement me
 }
 
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<vector3>();
+}
 
 struct                Camera;
 namespace rose {
@@ -97,13 +111,17 @@ namespace rose {
   hash_value         hash(const Camera &o);
   template<>
   struct type_id<Camera> {
-    inline static hash_value VALUE = 12979130266863026692ULL;
+    inline static hash_value VALUE = 672670417521322271ULL;
   };
   void construct_defaults(      Camera &o); // implement me
 }
 bool operator==(const Camera &lhs, const Camera &rhs);
 bool operator!=(const Camera &lhs, const Camera &rhs);
 
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<Camera>();
+}
 
 struct                Transform;
 namespace rose {
@@ -114,13 +132,17 @@ namespace rose {
   hash_value         hash(const Transform &o);
   template<>
   struct type_id<Transform> {
-    inline static hash_value VALUE = 3361076748424456090ULL;
+    inline static hash_value VALUE = 3800033226513290641ULL;
   };
   void construct_defaults(      Transform &o); // implement me
 }
 bool operator==(const Transform &lhs, const Transform &rhs);
 bool operator!=(const Transform &lhs, const Transform &rhs);
 
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<Transform>();
+}
 
 struct                Scene1;
 namespace rose {
@@ -131,15 +153,23 @@ namespace rose {
   hash_value         hash(const Scene1 &o);
   template<>
   struct type_id<Scene1> {
-    inline static hash_value VALUE = 14889867641241886570ULL;
+    inline static hash_value VALUE = 2121423674593636709ULL;
   };
   void construct_defaults(      Scene1 &o); // implement me
 }
 bool operator==(const Scene1 &lhs, const Scene1 &rhs);
 bool operator!=(const Scene1 &lhs, const Scene1 &rhs);
 
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<Scene1>();
+}
 
-struct                rose::ecs::Button;
+namespace rose {
+namespace ecs {
+struct                Button;
+}
+}
 namespace rose {
   namespace ecs {
     void        serialize(rose::ecs::Button &o, ISerializer &s);
@@ -148,13 +178,17 @@ namespace rose {
   hash_value         hash(const rose::ecs::Button &o);
   template<>
   struct type_id<rose::ecs::Button> {
-    inline static hash_value VALUE = 11256285081531271822ULL;
+    inline static hash_value VALUE = 5983034150845617149ULL;
   };
   void construct_defaults(      rose::ecs::Button &o); // implement me
 }
 bool operator==(const rose::ecs::Button &lhs, const rose::ecs::Button &rhs);
 bool operator!=(const rose::ecs::Button &lhs, const rose::ecs::Button &rhs);
 
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<rose::ecs::Button>();
+}
 
 #ifdef IMPL_SERIALIZER
 
@@ -397,12 +431,11 @@ rose::hash_value       rose::hash(const rose::ecs::Direction& o) {
 ///////////////////////////////////////////////////////////////////
 bool operator==(const EngineSettings &lhs, const EngineSettings &rhs) {
   return
-    rose_parser_equals(lhs.raytracer, rhs.raytracer) ;
+    rose_parser_equals(lhs.raytracer, rhs.raytracer);
 }
 
 bool operator!=(const EngineSettings &lhs, const EngineSettings &rhs) {
-  return
-    !rose_parser_equals(lhs.raytracer, rhs.raytracer) ;
+  return !(lhs == rhs);
 }
 
 void rose::ecs::serialize(EngineSettings &o, ISerializer &s) {
@@ -432,6 +465,25 @@ rose::hash_value rose::hash(const EngineSettings &o) {
   rose::hash_value h = rose::hash(o.raytracer);
   return h;
 }
+
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<EngineSettings>() {
+    static rose::reflection::TypeInfo info = {
+      /*             unique_id */ rose::hash("EngineSettings"),
+      /*           member_hash */ 13646434887555963980ULL,
+      /*      memory_footprint */ sizeof(EngineSettings),
+      /*      memory_alignment */ 16,
+      /*                  name */ "EngineSettings",
+      /*  fp_default_construct */ +[](void * ptr) { new (ptr) EngineSettings(); },
+      /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<EngineSettings*>(ptr))->~EngineSettings(); },
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<EngineSettings*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<EngineSettings*>(ptr)), d); }
+    };
+    return info;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////
 //  struct vector3
 ///////////////////////////////////////////////////////////////////
@@ -463,6 +515,25 @@ rose::hash_value rose::hash(const vector3 &o) {
   h ^= rose::hash(o.z);
   return h;
 }
+
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<vector3>() {
+    static rose::reflection::TypeInfo info = {
+      /*             unique_id */ rose::hash("vector3"),
+      /*           member_hash */ 16507566352740728694ULL,
+      /*      memory_footprint */ sizeof(vector3),
+      /*      memory_alignment */ 16,
+      /*                  name */ "vector3",
+      /*  fp_default_construct */ +[](void * ptr) { new (ptr) vector3(); },
+      /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<vector3*>(ptr))->~vector3(); },
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<vector3*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<vector3*>(ptr)), d); }
+    };
+    return info;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////
 //  struct Camera
 ///////////////////////////////////////////////////////////////////
@@ -470,14 +541,11 @@ bool operator==(const Camera &lhs, const Camera &rhs) {
   return
     rose_parser_equals(lhs.x, rhs.x) &&
     rose_parser_equals(lhs.y, rhs.y) &&
-    rose_parser_equals(lhs.z, rhs.z) ;
+    rose_parser_equals(lhs.z, rhs.z);
 }
 
 bool operator!=(const Camera &lhs, const Camera &rhs) {
-  return
-    !rose_parser_equals(lhs.x, rhs.x) ||
-    !rose_parser_equals(lhs.y, rhs.y) ||
-    !rose_parser_equals(lhs.z, rhs.z) ;
+  return !(lhs == rhs);
 }
 
 void rose::ecs::serialize(Camera &o, ISerializer &s) {
@@ -521,6 +589,25 @@ rose::hash_value rose::hash(const Camera &o) {
   h ^= rose::hash(o.z);
   return h;
 }
+
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<Camera>() {
+    static rose::reflection::TypeInfo info = {
+      /*             unique_id */ rose::hash("Camera"),
+      /*           member_hash */ 672670417521322271ULL,
+      /*      memory_footprint */ sizeof(Camera),
+      /*      memory_alignment */ 16,
+      /*                  name */ "Camera",
+      /*  fp_default_construct */ +[](void * ptr) { new (ptr) Camera(); },
+      /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<Camera*>(ptr))->~Camera(); },
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<Camera*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<Camera*>(ptr)), d); }
+    };
+    return info;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////
 //  struct Transform
 ///////////////////////////////////////////////////////////////////
@@ -528,14 +615,11 @@ bool operator==(const Transform &lhs, const Transform &rhs) {
   return
     rose_parser_equals(lhs.name, rhs.name) &&
     rose_parser_equals(lhs.camera, rhs.camera) &&
-    rose_parser_equals(lhs.position, rhs.position) ;
+    rose_parser_equals(lhs.position, rhs.position);
 }
 
 bool operator!=(const Transform &lhs, const Transform &rhs) {
-  return
-    !rose_parser_equals(lhs.name, rhs.name) ||
-    !rose_parser_equals(lhs.camera, rhs.camera) ||
-    !rose_parser_equals(lhs.position, rhs.position) ;
+  return !(lhs == rhs);
 }
 
 void rose::ecs::serialize(Transform &o, ISerializer &s) {
@@ -579,17 +663,35 @@ rose::hash_value rose::hash(const Transform &o) {
   h ^= rose::hash(o.position);
   return h;
 }
+
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<Transform>() {
+    static rose::reflection::TypeInfo info = {
+      /*             unique_id */ rose::hash("Transform"),
+      /*           member_hash */ 3800033226513290641ULL,
+      /*      memory_footprint */ sizeof(Transform),
+      /*      memory_alignment */ 16,
+      /*                  name */ "Transform",
+      /*  fp_default_construct */ +[](void * ptr) { new (ptr) Transform(); },
+      /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<Transform*>(ptr))->~Transform(); },
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<Transform*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<Transform*>(ptr)), d); }
+    };
+    return info;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////
 //  struct Scene1
 ///////////////////////////////////////////////////////////////////
 bool operator==(const Scene1 &lhs, const Scene1 &rhs) {
   return
-    rose_parser_equals(lhs.cameras, rhs.cameras) ;
+    rose_parser_equals(lhs.cameras, rhs.cameras);
 }
 
 bool operator!=(const Scene1 &lhs, const Scene1 &rhs) {
-  return
-    !rose_parser_equals(lhs.cameras, rhs.cameras) ;
+  return !(lhs == rhs);
 }
 
 void rose::ecs::serialize(Scene1 &o, ISerializer &s) {
@@ -619,19 +721,36 @@ rose::hash_value rose::hash(const Scene1 &o) {
   rose::hash_value h = rose::hash(o.cameras);
   return h;
 }
+
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<Scene1>() {
+    static rose::reflection::TypeInfo info = {
+      /*             unique_id */ rose::hash("Scene1"),
+      /*           member_hash */ 2121423674593636709ULL,
+      /*      memory_footprint */ sizeof(Scene1),
+      /*      memory_alignment */ 16,
+      /*                  name */ "Scene1",
+      /*  fp_default_construct */ +[](void * ptr) { new (ptr) Scene1(); },
+      /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<Scene1*>(ptr))->~Scene1(); },
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<Scene1*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<Scene1*>(ptr)), d); }
+    };
+    return info;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////
 //  struct rose::ecs::Button
 ///////////////////////////////////////////////////////////////////
 bool operator==(const rose::ecs::Button &lhs, const rose::ecs::Button &rhs) {
   return
     rose_parser_equals(lhs.dir, rhs.dir) &&
-    rose_parser_equals(lhs.pos, rhs.pos) ;
+    rose_parser_equals(lhs.pos, rhs.pos);
 }
 
 bool operator!=(const rose::ecs::Button &lhs, const rose::ecs::Button &rhs) {
-  return
-    !rose_parser_equals(lhs.dir, rhs.dir) ||
-    !rose_parser_equals(lhs.pos, rhs.pos) ;
+  return !(lhs == rhs);
 }
 
 void rose::ecs::serialize(rose::ecs::Button &o, ISerializer &s) {
@@ -668,5 +787,24 @@ rose::hash_value rose::hash(const rose::ecs::Button &o) {
   h ^= rose::hash(o.pos);
   return h;
 }
+
+namespace rose::reflection {
+  template <>
+  const rose::reflection::TypeInfo & get_type_info<rose::ecs::Button>() {
+    static rose::reflection::TypeInfo info = {
+      /*             unique_id */ rose::hash("rose::ecs::Button"),
+      /*           member_hash */ 5983034150845617149ULL,
+      /*      memory_footprint */ sizeof(rose::ecs::Button),
+      /*      memory_alignment */ 16,
+      /*                  name */ "rose::ecs::Button",
+      /*  fp_default_construct */ +[](void * ptr) { new (ptr) rose::ecs::Button(); },
+      /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<rose::ecs::Button*>(ptr))->~Button(); },
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<rose::ecs::Button*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<rose::ecs::Button*>(ptr)), d); }
+    };
+    return info;
+  }
+}
+
 
 #endif

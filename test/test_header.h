@@ -51,6 +51,17 @@ struct Transform {
 
 	//@Ignore this will not be serialized
 	vector3 interpolated_position;
+
+	//inline function
+	int foo() { return 0; }
+
+	//inline constructor
+	Transform() {
+	    position = vector3 {0,0,0};
+	}
+
+	//inline destructor
+	~Transform() = default;
 };
 
 struct Scene1 {

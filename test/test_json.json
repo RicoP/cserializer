@@ -1,6 +1,7 @@
 {
   "enum_classes" : [{
-      "name" : "enum_test", 
+      "name_withns" : "enum_test", 
+      "name_withoutns" : "enum_test", 
       "type" : "long long ", 
       "custom_type" : true, 
       "enums" : [{
@@ -28,6 +29,7 @@
           "value" : "-1\r\n", 
           "value_type" : "Set"
         }], 
+      "namespaces" : [], 
       "default_value" : {
         "name" : "NONE", 
         "value" : "0", 
@@ -35,7 +37,8 @@
       }, 
       "enum_annotations" : "NONE"
     }, {
-      "name" : "enum_test2", 
+      "name_withns" : "enum_test2", 
+      "name_withoutns" : "enum_test2", 
       "type" : "int", 
       "custom_type" : false, 
       "enums" : [{
@@ -63,6 +66,7 @@
           "value" : "0", 
           "value_type" : "Increment"
         }], 
+      "namespaces" : [], 
       "default_value" : {
         "name" : "NONE", 
         "value" : "0", 
@@ -70,7 +74,8 @@
       }, 
       "enum_annotations" : "NONE"
     }, {
-      "name" : "rose::ecs::Direction", 
+      "name_withns" : "rose::ecs::Direction", 
+      "name_withoutns" : "Direction", 
       "type" : "int", 
       "custom_type" : false, 
       "enums" : [{
@@ -93,6 +98,11 @@
           "name" : "right", 
           "value" : "0", 
           "value_type" : "Increment"
+        }], 
+      "namespaces" : [{
+          "path" : "rose"
+        }, {
+          "path" : "ecs"
         }], 
       "default_value" : {
         "name" : "NONE", 
@@ -196,9 +206,12 @@
         }]
     }], 
   "structs" : [{
-      "name" : "EngineSettings", 
+      "name_withns" : "EngineSettings", 
+      "name_withoutns" : "EngineSettings", 
+      "namespaces" : [], 
       "global_annotations" : "NONE", 
       "members" : [{
+          "kind" : "Field", 
           "type" : "bool", 
           "name" : "raytracer", 
           "default_value" : "", 
@@ -206,21 +219,26 @@
           "annotations" : "NONE"
         }]
     }, {
-      "name" : "vector3", 
+      "name_withns" : "vector3", 
+      "name_withoutns" : "vector3", 
+      "namespaces" : [], 
       "global_annotations" : "Imposter", 
       "members" : [{
+          "kind" : "Field", 
           "type" : "float", 
           "name" : "x", 
           "default_value" : "", 
           "count" : 1, 
           "annotations" : "NONE"
         }, {
+          "kind" : "Field", 
           "type" : "float", 
           "name" : "y", 
           "default_value" : "", 
           "count" : 1, 
           "annotations" : "NONE"
         }, {
+          "kind" : "Field", 
           "type" : "float", 
           "name" : "z", 
           "default_value" : "", 
@@ -228,21 +246,26 @@
           "annotations" : "NONE"
         }]
     }, {
-      "name" : "Camera", 
+      "name_withns" : "Camera", 
+      "name_withoutns" : "Camera", 
+      "namespaces" : [], 
       "global_annotations" : "NONE", 
       "members" : [{
+          "kind" : "Field", 
           "type" : "int", 
           "name" : "x", 
           "default_value" : "", 
           "count" : 1, 
           "annotations" : "NONE"
         }, {
+          "kind" : "Field", 
           "type" : "int", 
           "name" : "y", 
           "default_value" : "", 
           "count" : 1, 
           "annotations" : "NONE"
         }, {
+          "kind" : "Field", 
           "type" : "int", 
           "name" : "z", 
           "default_value" : "", 
@@ -250,31 +273,60 @@
           "annotations" : "NONE"
         }]
     }, {
-      "name" : "Transform", 
+      "name_withns" : "Transform", 
+      "name_withoutns" : "Transform", 
+      "namespaces" : [], 
       "global_annotations" : "NONE", 
       "members" : [{
+          "kind" : "Field", 
           "type" : "char", 
           "name" : "name", 
           "default_value" : "\"Hello\"", 
           "count" : 64, 
           "annotations" : "String"
         }, {
+          "kind" : "Field", 
           "type" : "Camera", 
           "name" : "camera", 
           "default_value" : "", 
           "count" : 1, 
           "annotations" : "NONE"
         }, {
+          "kind" : "Field", 
           "type" : "vector3", 
           "name" : "position", 
           "default_value" : "", 
           "count" : 1, 
           "annotations" : "NONE"
+        }, {
+          "kind" : "Function", 
+          "type" : "int", 
+          "name" : "foo", 
+          "default_value" : "", 
+          "count" : 1, 
+          "annotations" : "NONE"
+        }, {
+          "kind" : "Constructor", 
+          "type" : "Transform", 
+          "name" : "", 
+          "default_value" : "", 
+          "count" : 1, 
+          "annotations" : "NONE"
+        }, {
+          "kind" : "Destructor", 
+          "type" : "~Transform", 
+          "name" : "", 
+          "default_value" : "", 
+          "count" : 1, 
+          "annotations" : "NONE"
         }]
     }, {
-      "name" : "Scene1", 
+      "name_withns" : "Scene1", 
+      "name_withoutns" : "Scene1", 
+      "namespaces" : [], 
       "global_annotations" : "NONE", 
       "members" : [{
+          "kind" : "Field", 
           "type" : "Camera", 
           "name" : "cameras", 
           "default_value" : "", 
@@ -282,15 +334,23 @@
           "annotations" : "NONE"
         }]
     }, {
-      "name" : "rose::ecs::Button", 
+      "name_withns" : "rose::ecs::Button", 
+      "name_withoutns" : "Button", 
+      "namespaces" : [{
+          "path" : "rose"
+        }, {
+          "path" : "ecs"
+        }], 
       "global_annotations" : "NONE", 
       "members" : [{
+          "kind" : "Field", 
           "type" : "Direction", 
           "name" : "dir", 
           "default_value" : "Direction::up", 
           "count" : 1, 
           "annotations" : "NONE"
         }, {
+          "kind" : "Field", 
           "type" : "float", 
           "name" : "pos", 
           "default_value" : "", 
