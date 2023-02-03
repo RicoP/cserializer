@@ -3,7 +3,6 @@
 ///////////////////////////////////////////////////////////////////
 #pragma once
 #include <serializer/serializer.h>
-#include <rose/ecs.h>
 #include <cstring>
 
 struct EngineSettings {

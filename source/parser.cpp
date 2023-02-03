@@ -163,7 +163,7 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
     if (has_annotation) {
       quotify(annotation_s, buffer);
       JsonDeserializer jsond(annotation_s);
-      rose::ecs::deserialize(global_annotation, jsond);
+      rose::deserialize(global_annotation, jsond);
 
       if (global_annotation == global_annotations_t::Imposter) {
         bool ok = buffer.test_and_skip("/*");
@@ -325,7 +325,7 @@ void parse(ParseContext & ctx, rose::StreamBuffer & buffer) {
           if (buffer.test_annotation(annotation_s)) {
             quotify(annotation_s, buffer);
             JsonDeserializer jsond(annotation_s);
-            rose::ecs::deserialize(annotation, jsond);
+            rose::deserialize(annotation, jsond);
           }
           if (buffer.test_annotation(annotation_s)) {
             error("No support for double annotations yet.", buffer);
@@ -618,10 +618,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("const char * to_string(const %s &);" ENDL, name);
 
     printf_ttws("namespace rose {" ENDL);
-    printf_ttws("  namespace ecs {" ENDL);
-    printf_ttws("    void      deserialize(%s &o, IDeserializer &s);" ENDL, name);
-    printf_ttws("    void        serialize(%s &o, ISerializer &s);" ENDL, name);
-    printf_ttws("  }" ENDL);
+    printf_ttws("  void      deserialize(%s &o, IDeserializer &s);" ENDL, name);
+    printf_ttws("  void        serialize(%s &o, ISerializer &s);" ENDL, name);
 
     printf_ttws("  template<>                       " ENDL);
     printf_ttws("  struct type_id<%s> {             " ENDL, name);
@@ -653,7 +651,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     bool has_neqop = false;
     bool has_serialize = false;
     bool has_deserialize = false;
-    has_compare_ops(has_eqop, has_neqop, has_serialize, has_deserialize, c, sname);
+    has_compare_ops(has_eqop, has_neqop, has_serialize, has_deserialize, c, structi.name_withoutns);
 
     puts("");
     for (auto & ns : structi.namespaces) {
@@ -668,10 +666,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     }
 
     printf_ttws("namespace rose {" ENDL);
-    printf_ttws("  namespace ecs {" ENDL);
     if (!has_serialize)   printf_ttws("    void        serialize(%s &o, ISerializer &s);" ENDL, sname);
     if (!has_deserialize) printf_ttws("    void      deserialize(%s &o, IDeserializer &s);" ENDL, sname);
-    printf_ttws("  }" ENDL);
     printf_ttws("  hash_value         hash(const %s &o);" ENDL, sname);
 
     printf_ttws("  template<>                       " ENDL);
@@ -759,7 +755,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("}" ENDL);
 
 
-    printf_ttws("void rose::ecs::serialize(%s& o, ISerializer& s) {                  " ENDL, ename);
+    printf_ttws("void rose::serialize(%s& o, ISerializer& s) {                  " ENDL, ename);
     printf_ttws("  switch (o) {                                                      " ENDL);
 
     for (auto & enumi : enumci.enums) {
@@ -775,7 +771,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("  }                                                                 " ENDL);
     printf_ttws("}                                                                   " ENDL);
 
-    printf_ttws("void rose::ecs::deserialize(%s& o, IDeserializer& s) {              " ENDL, ename);
+    printf_ttws("void rose::deserialize(%s& o, IDeserializer& s) {              " ENDL, ename);
     printf_ttws("  char str[64];                                                     " ENDL);
     printf_ttws("  deserialize(str, s);                                              " ENDL);
     printf_ttws("  rose::hash_value h = rose::hash(str);                             " ENDL);
@@ -840,7 +836,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       ///////////////////////////////////////////////////////////////////
       // serializer                                                    //
       ///////////////////////////////////////////////////////////////////
-      printf_ttws("void rose::ecs::serialize(%s &o, ISerializer &s) {                     " ENDL, sname);
+      printf_ttws("void rose::serialize(%s &o, ISerializer &s) {                     " ENDL, sname);
       printf_ttws("  if(s.node_begin(\"%s\", rose::hash(\"%s\"), &o)) {               " ENDL, sname, sname);
 
       for (auto & member : structi.members) {
@@ -889,7 +885,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
       ///////////////////////////////////////////////////////////////////
       // deserializer                                                  //
       ///////////////////////////////////////////////////////////////////
-      printf_ttws("void rose::ecs::deserialize(%s &o, IDeserializer &s) {  " ENDL, sname);
+      printf_ttws("void rose::deserialize(%s &o, IDeserializer &s) {  " ENDL, sname);
       printf_ttws("  //implement me                                        " ENDL);
       printf_ttws("  //construct_defaults(o);                              " ENDL);
       printf_ttws("                                                        " ENDL);
@@ -948,8 +944,8 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("      /*                  name */ \"%s\",                                                                                                        " ENDL, sname);
     printf_ttws("      /*  fp_default_construct */ +[](void * ptr) { new (ptr) %s(); },                                                                           " ENDL, sname);
     printf_ttws("      /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<%s*>(ptr))->~%s(); },                                          " ENDL, sname, sname_nons);
-    printf_ttws("      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<%s*>(ptr)), s); },    " ENDL, sname);
-    printf_ttws("      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<%s*>(ptr)), d); } " ENDL, sname);
+    printf_ttws("      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::serialize(*std::launder(reinterpret_cast<%s*>(ptr)), s); },    " ENDL, sname);
+    printf_ttws("      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::deserialize(*std::launder(reinterpret_cast<%s*>(ptr)), d); } " ENDL, sname);
     printf_ttws("    };                                                                                                                                           " ENDL);
     printf_ttws("    return info;                                                                                                                                 " ENDL);
     printf_ttws("  }                                                                                                                                              " ENDL);
@@ -1104,7 +1100,7 @@ int main(int argc, char ** argv) {
     FILE * f = fopen(json_path, "w");
     assert(f);
     JsonSerializer jsons(f);
-    rose::ecs::serialize(c, jsons);
+    rose::serialize(c, jsons);
     fclose(f);
   }
 

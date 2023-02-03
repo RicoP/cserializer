@@ -15,10 +15,8 @@
 enum class                   member_annotations_t;
 const char * to_string(const member_annotations_t &);
 namespace rose {
-  namespace ecs {
-    void      deserialize(member_annotations_t &o, IDeserializer &s);
-    void        serialize(member_annotations_t &o, ISerializer &s);
-  }
+  void      deserialize(member_annotations_t &o, IDeserializer &s);
+  void        serialize(member_annotations_t &o, ISerializer &s);
   template<>
   struct type_id<member_annotations_t> {
     inline static hash_value VALUE = 17628469563951837410ULL;
@@ -38,10 +36,8 @@ inline member_annotations_t operator^=(member_annotations_t &a, member_annotatio
 enum class                   value_type_t;
 const char * to_string(const value_type_t &);
 namespace rose {
-  namespace ecs {
-    void      deserialize(value_type_t &o, IDeserializer &s);
-    void        serialize(value_type_t &o, ISerializer &s);
-  }
+  void      deserialize(value_type_t &o, IDeserializer &s);
+  void        serialize(value_type_t &o, ISerializer &s);
   template<>
   struct type_id<value_type_t> {
     inline static hash_value VALUE = 16616308554880477217ULL;
@@ -54,10 +50,8 @@ namespace rose {
 enum class                   global_annotations_t;
 const char * to_string(const global_annotations_t &);
 namespace rose {
-  namespace ecs {
-    void      deserialize(global_annotations_t &o, IDeserializer &s);
-    void        serialize(global_annotations_t &o, ISerializer &s);
-  }
+  void      deserialize(global_annotations_t &o, IDeserializer &s);
+  void        serialize(global_annotations_t &o, ISerializer &s);
   template<>
   struct type_id<global_annotations_t> {
     inline static hash_value VALUE = 11019223828604062051ULL;
@@ -70,10 +64,8 @@ namespace rose {
 enum class                   Member_info_kind;
 const char * to_string(const Member_info_kind &);
 namespace rose {
-  namespace ecs {
-    void      deserialize(Member_info_kind &o, IDeserializer &s);
-    void        serialize(Member_info_kind &o, ISerializer &s);
-  }
+  void      deserialize(Member_info_kind &o, IDeserializer &s);
+  void        serialize(Member_info_kind &o, ISerializer &s);
   template<>
   struct type_id<Member_info_kind> {
     inline static hash_value VALUE = 13482820562995944286ULL;
@@ -85,10 +77,8 @@ namespace rose {
 
 struct                namespace_path;
 namespace rose {
-  namespace ecs {
     void        serialize(namespace_path &o, ISerializer &s);
     void      deserialize(namespace_path &o, IDeserializer &s);
-  }
   hash_value         hash(const namespace_path &o);
   template<>
   struct type_id<namespace_path> {
@@ -106,10 +96,8 @@ namespace rose::reflection {
 
 struct                member_info;
 namespace rose {
-  namespace ecs {
     void        serialize(member_info &o, ISerializer &s);
     void      deserialize(member_info &o, IDeserializer &s);
-  }
   hash_value         hash(const member_info &o);
   template<>
   struct type_id<member_info> {
@@ -127,10 +115,8 @@ namespace rose::reflection {
 
 struct                struct_info;
 namespace rose {
-  namespace ecs {
     void        serialize(struct_info &o, ISerializer &s);
     void      deserialize(struct_info &o, IDeserializer &s);
-  }
   hash_value         hash(const struct_info &o);
   template<>
   struct type_id<struct_info> {
@@ -148,10 +134,8 @@ namespace rose::reflection {
 
 struct                enum_info;
 namespace rose {
-  namespace ecs {
     void        serialize(enum_info &o, ISerializer &s);
     void      deserialize(enum_info &o, IDeserializer &s);
-  }
   hash_value         hash(const enum_info &o);
   template<>
   struct type_id<enum_info> {
@@ -169,10 +153,8 @@ namespace rose::reflection {
 
 struct                enum_class_info;
 namespace rose {
-  namespace ecs {
     void        serialize(enum_class_info &o, ISerializer &s);
     void      deserialize(enum_class_info &o, IDeserializer &s);
-  }
   hash_value         hash(const enum_class_info &o);
   template<>
   struct type_id<enum_class_info> {
@@ -190,10 +172,8 @@ namespace rose::reflection {
 
 struct                function_parameter_info;
 namespace rose {
-  namespace ecs {
     void        serialize(function_parameter_info &o, ISerializer &s);
     void      deserialize(function_parameter_info &o, IDeserializer &s);
-  }
   hash_value         hash(const function_parameter_info &o);
   template<>
   struct type_id<function_parameter_info> {
@@ -211,10 +191,8 @@ namespace rose::reflection {
 
 struct                function_info;
 namespace rose {
-  namespace ecs {
     void        serialize(function_info &o, ISerializer &s);
     void      deserialize(function_info &o, IDeserializer &s);
-  }
   hash_value         hash(const function_info &o);
   template<>
   struct type_id<function_info> {
@@ -232,10 +210,8 @@ namespace rose::reflection {
 
 struct                ParseContext;
 namespace rose {
-  namespace ecs {
     void        serialize(ParseContext &o, ISerializer &s);
     void      deserialize(ParseContext &o, IDeserializer &s);
-  }
   hash_value         hash(const ParseContext &o);
   template<>
   struct type_id<ParseContext> {
@@ -311,7 +287,7 @@ const char * to_string(const member_annotations_t & e) {
         default: return "<UNKNOWN>";
     }
 }
-void rose::ecs::serialize(member_annotations_t& o, ISerializer& s) {
+void rose::serialize(member_annotations_t& o, ISerializer& s) {
   switch (o) {
     case member_annotations_t::NONE: {
       char str[] = "NONE";
@@ -336,7 +312,7 @@ void rose::ecs::serialize(member_annotations_t& o, ISerializer& s) {
     default: /* unknown */ break;
   }
 }
-void rose::ecs::deserialize(member_annotations_t& o, IDeserializer& s) {
+void rose::deserialize(member_annotations_t& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
   rose::hash_value h = rose::hash(str);
@@ -359,7 +335,7 @@ const char * to_string(const value_type_t & e) {
         default: return "<UNKNOWN>";
     }
 }
-void rose::ecs::serialize(value_type_t& o, ISerializer& s) {
+void rose::serialize(value_type_t& o, ISerializer& s) {
   switch (o) {
     case value_type_t::Increment: {
       char str[] = "Increment";
@@ -374,7 +350,7 @@ void rose::ecs::serialize(value_type_t& o, ISerializer& s) {
     default: /* unknown */ break;
   }
 }
-void rose::ecs::deserialize(value_type_t& o, IDeserializer& s) {
+void rose::deserialize(value_type_t& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
   rose::hash_value h = rose::hash(str);
@@ -396,7 +372,7 @@ const char * to_string(const global_annotations_t & e) {
         default: return "<UNKNOWN>";
     }
 }
-void rose::ecs::serialize(global_annotations_t& o, ISerializer& s) {
+void rose::serialize(global_annotations_t& o, ISerializer& s) {
   switch (o) {
     case global_annotations_t::NONE: {
       char str[] = "NONE";
@@ -416,7 +392,7 @@ void rose::ecs::serialize(global_annotations_t& o, ISerializer& s) {
     default: /* unknown */ break;
   }
 }
-void rose::ecs::deserialize(global_annotations_t& o, IDeserializer& s) {
+void rose::deserialize(global_annotations_t& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
   rose::hash_value h = rose::hash(str);
@@ -441,7 +417,7 @@ const char * to_string(const Member_info_kind & e) {
         default: return "<UNKNOWN>";
     }
 }
-void rose::ecs::serialize(Member_info_kind& o, ISerializer& s) {
+void rose::serialize(Member_info_kind& o, ISerializer& s) {
   switch (o) {
     case Member_info_kind::NONE: {
       char str[] = "NONE";
@@ -471,7 +447,7 @@ void rose::ecs::serialize(Member_info_kind& o, ISerializer& s) {
     default: /* unknown */ break;
   }
 }
-void rose::ecs::deserialize(Member_info_kind& o, IDeserializer& s) {
+void rose::deserialize(Member_info_kind& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
   rose::hash_value h = rose::hash(str);
@@ -500,7 +476,7 @@ bool operator!=(const namespace_path &lhs, const namespace_path &rhs) {
   return !(lhs == rhs);
 }
 
-void rose::ecs::serialize(namespace_path &o, ISerializer &s) {
+void rose::serialize(namespace_path &o, ISerializer &s) {
   if(s.node_begin("namespace_path", rose::hash("namespace_path"), &o)) {
     s.key("path");
     serialize(o.path, s, std::strlen(o.path));
@@ -509,7 +485,7 @@ void rose::ecs::serialize(namespace_path &o, ISerializer &s) {
   s.end();
 }
 
-void rose::ecs::deserialize(namespace_path &o, IDeserializer &s) {
+void rose::deserialize(namespace_path &o, IDeserializer &s) {
   //implement me
   //construct_defaults(o);
 
@@ -539,8 +515,8 @@ namespace rose::reflection {
       /*                  name */ "namespace_path",
       /*  fp_default_construct */ +[](void * ptr) { new (ptr) namespace_path(); },
       /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<namespace_path*>(ptr))->~namespace_path(); },
-      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<namespace_path*>(ptr)), s); },
-      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<namespace_path*>(ptr)), d); }
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::serialize(*std::launder(reinterpret_cast<namespace_path*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::deserialize(*std::launder(reinterpret_cast<namespace_path*>(ptr)), d); }
     };
     return info;
   }
@@ -563,7 +539,7 @@ bool operator!=(const member_info &lhs, const member_info &rhs) {
   return !(lhs == rhs);
 }
 
-void rose::ecs::serialize(member_info &o, ISerializer &s) {
+void rose::serialize(member_info &o, ISerializer &s) {
   if(s.node_begin("member_info", rose::hash("member_info"), &o)) {
     s.key("kind");
     serialize(o.kind, s);
@@ -582,7 +558,7 @@ void rose::ecs::serialize(member_info &o, ISerializer &s) {
   s.end();
 }
 
-void rose::ecs::deserialize(member_info &o, IDeserializer &s) {
+void rose::deserialize(member_info &o, IDeserializer &s) {
   //implement me
   //construct_defaults(o);
 
@@ -637,8 +613,8 @@ namespace rose::reflection {
       /*                  name */ "member_info",
       /*  fp_default_construct */ +[](void * ptr) { new (ptr) member_info(); },
       /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<member_info*>(ptr))->~member_info(); },
-      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<member_info*>(ptr)), s); },
-      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<member_info*>(ptr)), d); }
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::serialize(*std::launder(reinterpret_cast<member_info*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::deserialize(*std::launder(reinterpret_cast<member_info*>(ptr)), d); }
     };
     return info;
   }
@@ -660,7 +636,7 @@ bool operator!=(const struct_info &lhs, const struct_info &rhs) {
   return !(lhs == rhs);
 }
 
-void rose::ecs::serialize(struct_info &o, ISerializer &s) {
+void rose::serialize(struct_info &o, ISerializer &s) {
   if(s.node_begin("struct_info", rose::hash("struct_info"), &o)) {
     s.key("name_withns");
     serialize(o.name_withns, s, std::strlen(o.name_withns));
@@ -677,7 +653,7 @@ void rose::ecs::serialize(struct_info &o, ISerializer &s) {
   s.end();
 }
 
-void rose::ecs::deserialize(struct_info &o, IDeserializer &s) {
+void rose::deserialize(struct_info &o, IDeserializer &s) {
   //implement me
   //construct_defaults(o);
 
@@ -727,8 +703,8 @@ namespace rose::reflection {
       /*                  name */ "struct_info",
       /*  fp_default_construct */ +[](void * ptr) { new (ptr) struct_info(); },
       /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<struct_info*>(ptr))->~struct_info(); },
-      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<struct_info*>(ptr)), s); },
-      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<struct_info*>(ptr)), d); }
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::serialize(*std::launder(reinterpret_cast<struct_info*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::deserialize(*std::launder(reinterpret_cast<struct_info*>(ptr)), d); }
     };
     return info;
   }
@@ -748,7 +724,7 @@ bool operator!=(const enum_info &lhs, const enum_info &rhs) {
   return !(lhs == rhs);
 }
 
-void rose::ecs::serialize(enum_info &o, ISerializer &s) {
+void rose::serialize(enum_info &o, ISerializer &s) {
   if(s.node_begin("enum_info", rose::hash("enum_info"), &o)) {
     s.key("name");
     serialize(o.name, s, std::strlen(o.name));
@@ -761,7 +737,7 @@ void rose::ecs::serialize(enum_info &o, ISerializer &s) {
   s.end();
 }
 
-void rose::ecs::deserialize(enum_info &o, IDeserializer &s) {
+void rose::deserialize(enum_info &o, IDeserializer &s) {
   //implement me
   //construct_defaults(o);
 
@@ -801,8 +777,8 @@ namespace rose::reflection {
       /*                  name */ "enum_info",
       /*  fp_default_construct */ +[](void * ptr) { new (ptr) enum_info(); },
       /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<enum_info*>(ptr))->~enum_info(); },
-      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<enum_info*>(ptr)), s); },
-      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<enum_info*>(ptr)), d); }
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::serialize(*std::launder(reinterpret_cast<enum_info*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::deserialize(*std::launder(reinterpret_cast<enum_info*>(ptr)), d); }
     };
     return info;
   }
@@ -827,7 +803,7 @@ bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs) {
   return !(lhs == rhs);
 }
 
-void rose::ecs::serialize(enum_class_info &o, ISerializer &s) {
+void rose::serialize(enum_class_info &o, ISerializer &s) {
   if(s.node_begin("enum_class_info", rose::hash("enum_class_info"), &o)) {
     s.key("name_withns");
     serialize(o.name_withns, s, std::strlen(o.name_withns));
@@ -850,7 +826,7 @@ void rose::ecs::serialize(enum_class_info &o, ISerializer &s) {
   s.end();
 }
 
-void rose::ecs::deserialize(enum_class_info &o, IDeserializer &s) {
+void rose::deserialize(enum_class_info &o, IDeserializer &s) {
   //implement me
   //construct_defaults(o);
 
@@ -915,8 +891,8 @@ namespace rose::reflection {
       /*                  name */ "enum_class_info",
       /*  fp_default_construct */ +[](void * ptr) { new (ptr) enum_class_info(); },
       /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<enum_class_info*>(ptr))->~enum_class_info(); },
-      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<enum_class_info*>(ptr)), s); },
-      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<enum_class_info*>(ptr)), d); }
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::serialize(*std::launder(reinterpret_cast<enum_class_info*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::deserialize(*std::launder(reinterpret_cast<enum_class_info*>(ptr)), d); }
     };
     return info;
   }
@@ -937,7 +913,7 @@ bool operator!=(const function_parameter_info &lhs, const function_parameter_inf
   return !(lhs == rhs);
 }
 
-void rose::ecs::serialize(function_parameter_info &o, ISerializer &s) {
+void rose::serialize(function_parameter_info &o, ISerializer &s) {
   if(s.node_begin("function_parameter_info", rose::hash("function_parameter_info"), &o)) {
     s.key("name");
     serialize(o.name, s, std::strlen(o.name));
@@ -952,7 +928,7 @@ void rose::ecs::serialize(function_parameter_info &o, ISerializer &s) {
   s.end();
 }
 
-void rose::ecs::deserialize(function_parameter_info &o, IDeserializer &s) {
+void rose::deserialize(function_parameter_info &o, IDeserializer &s) {
   //implement me
   //construct_defaults(o);
 
@@ -997,8 +973,8 @@ namespace rose::reflection {
       /*                  name */ "function_parameter_info",
       /*  fp_default_construct */ +[](void * ptr) { new (ptr) function_parameter_info(); },
       /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<function_parameter_info*>(ptr))->~function_parameter_info(); },
-      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<function_parameter_info*>(ptr)), s); },
-      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<function_parameter_info*>(ptr)), d); }
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::serialize(*std::launder(reinterpret_cast<function_parameter_info*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::deserialize(*std::launder(reinterpret_cast<function_parameter_info*>(ptr)), d); }
     };
     return info;
   }
@@ -1018,7 +994,7 @@ bool operator!=(const function_info &lhs, const function_info &rhs) {
   return !(lhs == rhs);
 }
 
-void rose::ecs::serialize(function_info &o, ISerializer &s) {
+void rose::serialize(function_info &o, ISerializer &s) {
   if(s.node_begin("function_info", rose::hash("function_info"), &o)) {
     s.key("name");
     serialize(o.name, s, std::strlen(o.name));
@@ -1031,7 +1007,7 @@ void rose::ecs::serialize(function_info &o, ISerializer &s) {
   s.end();
 }
 
-void rose::ecs::deserialize(function_info &o, IDeserializer &s) {
+void rose::deserialize(function_info &o, IDeserializer &s) {
   //implement me
   //construct_defaults(o);
 
@@ -1071,8 +1047,8 @@ namespace rose::reflection {
       /*                  name */ "function_info",
       /*  fp_default_construct */ +[](void * ptr) { new (ptr) function_info(); },
       /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<function_info*>(ptr))->~function_info(); },
-      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<function_info*>(ptr)), s); },
-      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<function_info*>(ptr)), d); }
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::serialize(*std::launder(reinterpret_cast<function_info*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::deserialize(*std::launder(reinterpret_cast<function_info*>(ptr)), d); }
     };
     return info;
   }
@@ -1092,7 +1068,7 @@ bool operator!=(const ParseContext &lhs, const ParseContext &rhs) {
   return !(lhs == rhs);
 }
 
-void rose::ecs::serialize(ParseContext &o, ISerializer &s) {
+void rose::serialize(ParseContext &o, ISerializer &s) {
   if(s.node_begin("ParseContext", rose::hash("ParseContext"), &o)) {
     s.key("enum_classes");
     serialize(o.enum_classes, s);
@@ -1105,7 +1081,7 @@ void rose::ecs::serialize(ParseContext &o, ISerializer &s) {
   s.end();
 }
 
-void rose::ecs::deserialize(ParseContext &o, IDeserializer &s) {
+void rose::deserialize(ParseContext &o, IDeserializer &s) {
   //implement me
   //construct_defaults(o);
 
@@ -1145,8 +1121,8 @@ namespace rose::reflection {
       /*                  name */ "ParseContext",
       /*  fp_default_construct */ +[](void * ptr) { new (ptr) ParseContext(); },
       /*   fp_default_destruct */ +[](void * ptr) { std::launder(reinterpret_cast<ParseContext*>(ptr))->~ParseContext(); },
-      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::ecs::serialize(*std::launder(reinterpret_cast<ParseContext*>(ptr)), s); },
-      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::ecs::deserialize(*std::launder(reinterpret_cast<ParseContext*>(ptr)), d); }
+      /*          fp_serialize */ +[](void * ptr, ISerializer & s) { ::rose::serialize(*std::launder(reinterpret_cast<ParseContext*>(ptr)), s); },
+      /*        fp_deserialize */ +[](void * ptr, IDeserializer & d) { ::rose::deserialize(*std::launder(reinterpret_cast<ParseContext*>(ptr)), d); }
     };
     return info;
   }

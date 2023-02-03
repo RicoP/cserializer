@@ -29,7 +29,6 @@ bool operator!=(vector3 lhs, vector3 rhs) {
 }
 
 namespace rose {
-  namespace ecs {
     void serialize(vector3 & o, ISerializer & s) {
       if (s.node_begin("vector3", rose::hash("vector3"), &o)) {
         s.key("x");
@@ -42,7 +41,6 @@ namespace rose {
       }
       s.end();
     }
-  }
 }
 
 
