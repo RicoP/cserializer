@@ -25,12 +25,14 @@ namespace rose {
   void construct_defaults(      member_annotations_t &o); //implement me
 }
 
+/*
 inline BoolConvertible<member_annotations_t, int> operator|(const member_annotations_t &a, const member_annotations_t &b) { return { static_cast<member_annotations_t>(static_cast<int>(a) | static_cast<int>(b)) }; }
 inline BoolConvertible<member_annotations_t, int> operator&(const member_annotations_t &a, const member_annotations_t &b) { return { static_cast<member_annotations_t>(static_cast<int>(a) & static_cast<int>(b)) }; }
 inline BoolConvertible<member_annotations_t, int> operator^(const member_annotations_t &a, const member_annotations_t &b) { return { static_cast<member_annotations_t>(static_cast<int>(a) ^ static_cast<int>(b)) }; }
 inline member_annotations_t operator|=(member_annotations_t &a, member_annotations_t b) { return a = a | b; }
 inline member_annotations_t operator&=(member_annotations_t &a, member_annotations_t b) { return a = a & b; }
 inline member_annotations_t operator^=(member_annotations_t &a, member_annotations_t b) { return a = a ^ b; }
+*/
 
 
 enum class                   value_type_t;
