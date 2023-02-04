@@ -731,7 +731,7 @@ template<class T>
 hash_value rose_parser_hash(const std::vector<T>& v) {
   hash_value h = 0;
   for (const auto& o : v) {
-    h ^= rose_parser_hashrose_parser_hash(o);
+    h ^= rose_parser_hash(o);
     h = xor64(h);
   }
   return h;
