@@ -4,8 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/../roselib/include/",
-                "${workspaceFolder}/../premake-comppp/include/"
+                "${workspaceFolder}/../rose/rose.dependencies/roselib/include/",
+                "${workspaceFolder}/../rose/rose.dependencies/premake-comppp/include/"
             ],
             "defines": [
                 "_DEBUG",
