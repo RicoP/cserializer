@@ -16,7 +16,7 @@ workspace "rose.parser"
       4018, -- '<': signed/unsigned mismatch
       4201, -- nonstandard extension used: nameless struct/union
       4244, -- conversion from 'int' to 'float', possible loss of data
-      4245, -- conversion from 'int' to 'rose::hash_value', signed/unsigned mismatch
+      4245, -- conversion from 'int' to 'RHash', signed/unsigned mismatch
       4267, -- conversion from 'size_t' to 'int', possible loss of data
       4456, -- declaration of 'X' hides previous local declaration
       4458, -- declaration of 'X' hides class member

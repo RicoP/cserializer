@@ -21,9 +21,9 @@ namespace rose {
   }
   template<>
   struct type_id<enum_test> {
-    inline static hash_value VALUE = 3750049738734855819ULL;
+    inline static RHash VALUE = 3750049738734855819ULL;
   };
-  hash_value         hash(const enum_test &o);
+  RHash         hash(const enum_test &o);
   void construct_defaults(      enum_test &o); //implement me
 }
 
@@ -37,9 +37,9 @@ namespace rose {
   }
   template<>
   struct type_id<enum_test2> {
-    inline static hash_value VALUE = 6180207015737975161ULL;
+    inline static RHash VALUE = 6180207015737975161ULL;
   };
-  hash_value         hash(const enum_test2 &o);
+  RHash         hash(const enum_test2 &o);
   void construct_defaults(      enum_test2 &o); //implement me
 }
 
@@ -57,9 +57,9 @@ namespace rose {
   }
   template<>
   struct type_id<rose::ecs::Direction> {
-    inline static hash_value VALUE = 1368919226037249928ULL;
+    inline static RHash VALUE = 1368919226037249928ULL;
   };
-  hash_value         hash(const rose::ecs::Direction &o);
+  RHash         hash(const rose::ecs::Direction &o);
   void construct_defaults(      rose::ecs::Direction &o); //implement me
 }
 
@@ -70,10 +70,10 @@ namespace rose {
     void        serialize(EngineSettings &o, ISerializer &s);
     void      deserialize(EngineSettings &o, IDeserializer &s);
   }
-  hash_value         hash(const EngineSettings &o);
+  RHash         hash(const EngineSettings &o);
   template<>
   struct type_id<EngineSettings> {
-    inline static hash_value VALUE = 13646434887555963980ULL;
+    inline static RHash VALUE = 13646434887555963980ULL;
   };
   void construct_defaults(      EngineSettings &o); // implement me
 }
@@ -89,10 +89,10 @@ namespace rose {
   namespace ecs {
     void      deserialize(vector3 &o, IDeserializer &s);
   }
-  hash_value         hash(const vector3 &o);
+  RHash         hash(const vector3 &o);
   template<>
   struct type_id<vector3> {
-    inline static hash_value VALUE = 16507566352740728694ULL;
+    inline static RHash VALUE = 16507566352740728694ULL;
   };
   void construct_defaults(      vector3 &o); // implement me
 }
@@ -108,10 +108,10 @@ namespace rose {
     void        serialize(Camera &o, ISerializer &s);
     void      deserialize(Camera &o, IDeserializer &s);
   }
-  hash_value         hash(const Camera &o);
+  RHash         hash(const Camera &o);
   template<>
   struct type_id<Camera> {
-    inline static hash_value VALUE = 672670417521322271ULL;
+    inline static RHash VALUE = 672670417521322271ULL;
   };
   void construct_defaults(      Camera &o); // implement me
 }
@@ -129,10 +129,10 @@ namespace rose {
     void        serialize(Transform &o, ISerializer &s);
     void      deserialize(Transform &o, IDeserializer &s);
   }
-  hash_value         hash(const Transform &o);
+  RHash         hash(const Transform &o);
   template<>
   struct type_id<Transform> {
-    inline static hash_value VALUE = 3800033226513290641ULL;
+    inline static RHash VALUE = 3800033226513290641ULL;
   };
   void construct_defaults(      Transform &o); // implement me
 }
@@ -150,10 +150,10 @@ namespace rose {
     void        serialize(Scene1 &o, ISerializer &s);
     void      deserialize(Scene1 &o, IDeserializer &s);
   }
-  hash_value         hash(const Scene1 &o);
+  RHash         hash(const Scene1 &o);
   template<>
   struct type_id<Scene1> {
-    inline static hash_value VALUE = 2121423674593636709ULL;
+    inline static RHash VALUE = 2121423674593636709ULL;
   };
   void construct_defaults(      Scene1 &o); // implement me
 }
@@ -175,10 +175,10 @@ namespace rose {
     void        serialize(rose::ecs::Button &o, ISerializer &s);
     void      deserialize(rose::ecs::Button &o, IDeserializer &s);
   }
-  hash_value         hash(const rose::ecs::Button &o);
+  RHash         hash(const rose::ecs::Button &o);
   template<>
   struct type_id<rose::ecs::Button> {
-    inline static hash_value VALUE = 5983034150845617149ULL;
+    inline static RHash VALUE = 5983034150845617149ULL;
   };
   void construct_defaults(      rose::ecs::Button &o); // implement me
 }
@@ -290,7 +290,7 @@ void rose::ecs::serialize(enum_test& o, ISerializer& s) {
 void rose::ecs::deserialize(enum_test& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
-  rose::hash_value h = rose::hash(str);
+  RHash h = rose::hash(str);
   switch (h) {
   case rose::hash("NONE"): o = enum_test::NONE; break;
   case rose::hash("ONE"): o = enum_test::ONE; break;
@@ -301,8 +301,8 @@ void rose::ecs::deserialize(enum_test& o, IDeserializer& s) {
   default: /*unknown value*/ break;
   }
 }
-rose::hash_value       rose::hash(const enum_test& o) {
-  return static_cast<rose::hash_value>(o);
+RHash       rose::hash(const enum_test& o) {
+  return static_cast<RHash>(o);
 }
 
 const char * to_string(const enum_test2 & e) {
@@ -354,7 +354,7 @@ void rose::ecs::serialize(enum_test2& o, ISerializer& s) {
 void rose::ecs::deserialize(enum_test2& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
-  rose::hash_value h = rose::hash(str);
+  RHash h = rose::hash(str);
   switch (h) {
   case rose::hash("NONE"): o = enum_test2::NONE; break;
   case rose::hash("ONE"): o = enum_test2::ONE; break;
@@ -365,8 +365,8 @@ void rose::ecs::deserialize(enum_test2& o, IDeserializer& s) {
   default: /*unknown value*/ break;
   }
 }
-rose::hash_value       rose::hash(const enum_test2& o) {
-  return static_cast<rose::hash_value>(o);
+RHash       rose::hash(const enum_test2& o) {
+  return static_cast<RHash>(o);
 }
 
 const char * to_string(const rose::ecs::Direction & e) {
@@ -412,7 +412,7 @@ void rose::ecs::serialize(rose::ecs::Direction& o, ISerializer& s) {
 void rose::ecs::deserialize(rose::ecs::Direction& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
-  rose::hash_value h = rose::hash(str);
+  RHash h = rose::hash(str);
   switch (h) {
   case rose::hash("NONE"): o = rose::ecs::Direction::NONE; break;
   case rose::hash("up"): o = rose::ecs::Direction::up; break;
@@ -422,8 +422,8 @@ void rose::ecs::deserialize(rose::ecs::Direction& o, IDeserializer& s) {
   default: /*unknown value*/ break;
   }
 }
-rose::hash_value       rose::hash(const rose::ecs::Direction& o) {
-  return static_cast<rose::hash_value>(o);
+RHash       rose::hash(const rose::ecs::Direction& o) {
+  return static_cast<RHash>(o);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -461,8 +461,8 @@ void rose::ecs::deserialize(EngineSettings &o, IDeserializer &s) {
   }
 }
 
-rose::hash_value rose::hash(const EngineSettings &o) {
-  rose::hash_value h = rose::hash(o.raytracer);
+RHash rose::hash(const EngineSettings &o) {
+  RHash h = rose::hash(o.raytracer);
   return h;
 }
 
@@ -507,8 +507,8 @@ void rose::ecs::deserialize(vector3 &o, IDeserializer &s) {
   }
 }
 
-rose::hash_value rose::hash(const vector3 &o) {
-  rose::hash_value h = rose::hash(o.x);
+RHash rose::hash(const vector3 &o) {
+  RHash h = rose::hash(o.x);
   h = rose::xor64(h);
   h ^= rose::hash(o.y);
   h = rose::xor64(h);
@@ -581,8 +581,8 @@ void rose::ecs::deserialize(Camera &o, IDeserializer &s) {
   }
 }
 
-rose::hash_value rose::hash(const Camera &o) {
-  rose::hash_value h = rose::hash(o.x);
+RHash rose::hash(const Camera &o) {
+  RHash h = rose::hash(o.x);
   h = rose::xor64(h);
   h ^= rose::hash(o.y);
   h = rose::xor64(h);
@@ -655,8 +655,8 @@ void rose::ecs::deserialize(Transform &o, IDeserializer &s) {
   }
 }
 
-rose::hash_value rose::hash(const Transform &o) {
-  rose::hash_value h = rose::hash(o.name);
+RHash rose::hash(const Transform &o) {
+  RHash h = rose::hash(o.name);
   h = rose::xor64(h);
   h ^= rose::hash(o.camera);
   h = rose::xor64(h);
@@ -717,8 +717,8 @@ void rose::ecs::deserialize(Scene1 &o, IDeserializer &s) {
   }
 }
 
-rose::hash_value rose::hash(const Scene1 &o) {
-  rose::hash_value h = rose::hash(o.cameras);
+RHash rose::hash(const Scene1 &o) {
+  RHash h = rose::hash(o.cameras);
   return h;
 }
 
@@ -781,8 +781,8 @@ void rose::ecs::deserialize(rose::ecs::Button &o, IDeserializer &s) {
   }
 }
 
-rose::hash_value rose::hash(const rose::ecs::Button &o) {
-  rose::hash_value h = rose::hash(o.dir);
+RHash rose::hash(const rose::ecs::Button &o) {
+  RHash h = rose::hash(o.dir);
   h = rose::xor64(h);
   h ^= rose::hash(o.pos);
   return h;

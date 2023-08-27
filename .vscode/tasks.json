@@ -10,8 +10,8 @@
                 "/nologo",
                 "/std:c++17",
                 "/Isource",
-                "/I../roselib/include/",
-                "/I../premake-comppp/include/",
+                "/I../rose/rose.dependencies/roselib/include/",
+                "/I../rose/rose.dependencies/premake-comppp/include/",
                 "/Fe${workspaceFolder}\\.build\\rose.parser.exe",
                 "${workspaceFolder}\\source\\parser.cpp"
             ],

@@ -25,7 +25,7 @@ namespace rose {
 inline const char * to_string(const member_annotations_t & e);
 inline void serialize(member_annotations_t& o, ISerializer& s);
 inline void deserialize(member_annotations_t& o, IDeserializer& s);
-inline hash_value       hash(const member_annotations_t& o);
+inline RHash       hash(const member_annotations_t& o);
 } //namespace rose
 
 ///////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ namespace rose {
 inline const char * to_string(const value_type_t & e);
 inline void serialize(value_type_t& o, ISerializer& s);
 inline void deserialize(value_type_t& o, IDeserializer& s);
-inline hash_value       hash(const value_type_t& o);
+inline RHash       hash(const value_type_t& o);
 } //namespace rose
 
 ///////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ namespace rose {
 inline const char * to_string(const global_annotations_t & e);
 inline void serialize(global_annotations_t& o, ISerializer& s);
 inline void deserialize(global_annotations_t& o, IDeserializer& s);
-inline hash_value       hash(const global_annotations_t& o);
+inline RHash       hash(const global_annotations_t& o);
 } //namespace rose
 
 ///////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ namespace rose {
 inline const char * to_string(const Member_info_kind & e);
 inline void serialize(Member_info_kind& o, ISerializer& s);
 inline void deserialize(Member_info_kind& o, IDeserializer& s);
-inline hash_value       hash(const Member_info_kind& o);
+inline RHash       hash(const Member_info_kind& o);
 } //namespace rose
 
 ///////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ inline bool operator==(const namespace_path &lhs, const namespace_path &rhs) { r
 inline bool operator!=(const namespace_path &lhs, const namespace_path &rhs) { return !equals(lhs, rhs); }
 inline void serialize(namespace_path &o, ISerializer &s);
 inline void deserialize(namespace_path &o, IDeserializer &s);
-inline hash_value hash(const namespace_path &o);
+inline RHash hash(const namespace_path &o);
 
 template <>
 struct type_id<namespace_path>;
@@ -85,7 +85,7 @@ inline bool operator==(const member_info &lhs, const member_info &rhs) { return 
 inline bool operator!=(const member_info &lhs, const member_info &rhs) { return !equals(lhs, rhs); }
 inline void serialize(member_info &o, ISerializer &s);
 inline void deserialize(member_info &o, IDeserializer &s);
-inline hash_value hash(const member_info &o);
+inline RHash hash(const member_info &o);
 
 template <>
 struct type_id<member_info>;
@@ -103,7 +103,7 @@ inline bool operator==(const struct_info &lhs, const struct_info &rhs) { return 
 inline bool operator!=(const struct_info &lhs, const struct_info &rhs) { return !equals(lhs, rhs); }
 inline void serialize(struct_info &o, ISerializer &s);
 inline void deserialize(struct_info &o, IDeserializer &s);
-inline hash_value hash(const struct_info &o);
+inline RHash hash(const struct_info &o);
 
 template <>
 struct type_id<struct_info>;
@@ -121,7 +121,7 @@ inline bool operator==(const enum_info &lhs, const enum_info &rhs) { return equa
 inline bool operator!=(const enum_info &lhs, const enum_info &rhs) { return !equals(lhs, rhs); }
 inline void serialize(enum_info &o, ISerializer &s);
 inline void deserialize(enum_info &o, IDeserializer &s);
-inline hash_value hash(const enum_info &o);
+inline RHash hash(const enum_info &o);
 
 template <>
 struct type_id<enum_info>;
@@ -139,7 +139,7 @@ inline bool operator==(const enum_class_info &lhs, const enum_class_info &rhs) {
 inline bool operator!=(const enum_class_info &lhs, const enum_class_info &rhs) { return !equals(lhs, rhs); }
 inline void serialize(enum_class_info &o, ISerializer &s);
 inline void deserialize(enum_class_info &o, IDeserializer &s);
-inline hash_value hash(const enum_class_info &o);
+inline RHash hash(const enum_class_info &o);
 
 template <>
 struct type_id<enum_class_info>;
@@ -157,7 +157,7 @@ inline bool operator==(const function_parameter_info &lhs, const function_parame
 inline bool operator!=(const function_parameter_info &lhs, const function_parameter_info &rhs) { return !equals(lhs, rhs); }
 inline void serialize(function_parameter_info &o, ISerializer &s);
 inline void deserialize(function_parameter_info &o, IDeserializer &s);
-inline hash_value hash(const function_parameter_info &o);
+inline RHash hash(const function_parameter_info &o);
 
 template <>
 struct type_id<function_parameter_info>;
@@ -175,7 +175,7 @@ inline bool operator==(const function_info &lhs, const function_info &rhs) { ret
 inline bool operator!=(const function_info &lhs, const function_info &rhs) { return !equals(lhs, rhs); }
 inline void serialize(function_info &o, ISerializer &s);
 inline void deserialize(function_info &o, IDeserializer &s);
-inline hash_value hash(const function_info &o);
+inline RHash hash(const function_info &o);
 
 template <>
 struct type_id<function_info>;
@@ -193,7 +193,7 @@ inline bool operator==(const ParseContext &lhs, const ParseContext &rhs) { retur
 inline bool operator!=(const ParseContext &lhs, const ParseContext &rhs) { return !equals(lhs, rhs); }
 inline void serialize(ParseContext &o, ISerializer &s);
 inline void deserialize(ParseContext &o, IDeserializer &s);
-inline hash_value hash(const ParseContext &o);
+inline RHash hash(const ParseContext &o);
 
 template <>
 struct type_id<ParseContext>;
@@ -243,11 +243,11 @@ bool rose_parser_equals(const std::vector<T> &lhs, const std::vector<T> &rhs) {
 }
 
 template<class T>
-hash_value rose_parser_hash(const T & value) { return hash(value); }
+RHash rose_parser_hash(const T & value) { return hash(value); }
 
 template<class T>
-hash_value rose_parser_hash(const std::vector<T>& v) {
-  hash_value h = 0;
+RHash rose_parser_hash(const std::vector<T>& v) {
+  RHash h = 0;
   for (const auto& o : v) {
     h ^= rose_parser_hash(o);
     h = xor64(h);
@@ -298,7 +298,7 @@ inline void rose::serialize(member_annotations_t& o, ISerializer& s) {
 inline void rose::deserialize(member_annotations_t& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
-  rose::hash_value h = rose::hash(str);
+  RHash h = rose::hash(str);
   switch (h) {
   case rose::hash("NONE"): o = member_annotations_t::NONE; break;
   case rose::hash("Ignore"): o = member_annotations_t::Ignore; break;
@@ -307,8 +307,8 @@ inline void rose::deserialize(member_annotations_t& o, IDeserializer& s) {
   default: /*unknown value*/ break;
   }
 }
-inline rose::hash_value rose::hash(const member_annotations_t& o) {
-  return static_cast<rose::hash_value>(o);
+inline RHash rose::hash(const member_annotations_t& o) {
+  return static_cast<RHash>(o);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -339,15 +339,15 @@ inline void rose::serialize(value_type_t& o, ISerializer& s) {
 inline void rose::deserialize(value_type_t& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
-  rose::hash_value h = rose::hash(str);
+  RHash h = rose::hash(str);
   switch (h) {
   case rose::hash("Increment"): o = value_type_t::Increment; break;
   case rose::hash("Set"): o = value_type_t::Set; break;
   default: /*unknown value*/ break;
   }
 }
-inline rose::hash_value rose::hash(const value_type_t& o) {
-  return static_cast<rose::hash_value>(o);
+inline RHash rose::hash(const value_type_t& o) {
+  return static_cast<RHash>(o);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -384,7 +384,7 @@ inline void rose::serialize(global_annotations_t& o, ISerializer& s) {
 inline void rose::deserialize(global_annotations_t& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
-  rose::hash_value h = rose::hash(str);
+  RHash h = rose::hash(str);
   switch (h) {
   case rose::hash("NONE"): o = global_annotations_t::NONE; break;
   case rose::hash("Flag"): o = global_annotations_t::Flag; break;
@@ -392,8 +392,8 @@ inline void rose::deserialize(global_annotations_t& o, IDeserializer& s) {
   default: /*unknown value*/ break;
   }
 }
-inline rose::hash_value rose::hash(const global_annotations_t& o) {
-  return static_cast<rose::hash_value>(o);
+inline RHash rose::hash(const global_annotations_t& o) {
+  return static_cast<RHash>(o);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -442,7 +442,7 @@ inline void rose::serialize(Member_info_kind& o, ISerializer& s) {
 inline void rose::deserialize(Member_info_kind& o, IDeserializer& s) {
   char str[64];
   deserialize(str, s);
-  rose::hash_value h = rose::hash(str);
+  RHash h = rose::hash(str);
   switch (h) {
   case rose::hash("NONE"): o = Member_info_kind::NONE; break;
   case rose::hash("Field"): o = Member_info_kind::Field; break;
@@ -452,8 +452,8 @@ inline void rose::deserialize(Member_info_kind& o, IDeserializer& s) {
   default: /*unknown value*/ break;
   }
 }
-inline rose::hash_value rose::hash(const Member_info_kind& o) {
-  return static_cast<rose::hash_value>(o);
+inline RHash rose::hash(const Member_info_kind& o) {
+  return static_cast<RHash>(o);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -484,15 +484,15 @@ inline void rose::deserialize(namespace_path &o, IDeserializer &s) {
   }
 }
 
-inline rose::hash_value rose::hash(const namespace_path &o) {
-  rose::hash_value h = 0;
+inline RHash rose::hash(const namespace_path &o) {
+  RHash h = 0;
   h ^= rose::rose_parser_hash(o.path);
   return h;
 }
 
 template <>
 struct rose::type_id<namespace_path> {
-    inline static rose::hash_value VALUE = 12258869517490701093ULL;
+    inline static RHash VALUE = 12258869517490701093ULL;
 };
 
 template <>
@@ -569,8 +569,8 @@ inline void rose::deserialize(member_info &o, IDeserializer &s) {
   }
 }
 
-inline rose::hash_value rose::hash(const member_info &o) {
-  rose::hash_value h = 0;
+inline RHash rose::hash(const member_info &o) {
+  RHash h = 0;
   h ^= rose::rose_parser_hash(o.kind);
   h = rose::xor64(h);
   h ^= rose::rose_parser_hash(o.type);
@@ -587,7 +587,7 @@ inline rose::hash_value rose::hash(const member_info &o) {
 
 template <>
 struct rose::type_id<member_info> {
-    inline static rose::hash_value VALUE = 11323069267460255306ULL;
+    inline static RHash VALUE = 11323069267460255306ULL;
 };
 
 template <>
@@ -658,8 +658,8 @@ inline void rose::deserialize(struct_info &o, IDeserializer &s) {
   }
 }
 
-inline rose::hash_value rose::hash(const struct_info &o) {
-  rose::hash_value h = 0;
+inline RHash rose::hash(const struct_info &o) {
+  RHash h = 0;
   h ^= rose::rose_parser_hash(o.name_withns);
   h = rose::xor64(h);
   h ^= rose::rose_parser_hash(o.name_withoutns);
@@ -674,7 +674,7 @@ inline rose::hash_value rose::hash(const struct_info &o) {
 
 template <>
 struct rose::type_id<struct_info> {
-    inline static rose::hash_value VALUE = 2652356125487541418ULL;
+    inline static RHash VALUE = 2652356125487541418ULL;
 };
 
 template <>
@@ -733,8 +733,8 @@ inline void rose::deserialize(enum_info &o, IDeserializer &s) {
   }
 }
 
-inline rose::hash_value rose::hash(const enum_info &o) {
-  rose::hash_value h = 0;
+inline RHash rose::hash(const enum_info &o) {
+  RHash h = 0;
   h ^= rose::rose_parser_hash(o.name);
   h = rose::xor64(h);
   h ^= rose::rose_parser_hash(o.value);
@@ -745,7 +745,7 @@ inline rose::hash_value rose::hash(const enum_info &o) {
 
 template <>
 struct rose::type_id<enum_info> {
-    inline static rose::hash_value VALUE = 9578114829779115887ULL;
+    inline static RHash VALUE = 9578114829779115887ULL;
 };
 
 template <>
@@ -834,8 +834,8 @@ inline void rose::deserialize(enum_class_info &o, IDeserializer &s) {
   }
 }
 
-inline rose::hash_value rose::hash(const enum_class_info &o) {
-  rose::hash_value h = 0;
+inline RHash rose::hash(const enum_class_info &o) {
+  RHash h = 0;
   h ^= rose::rose_parser_hash(o.name_withns);
   h = rose::xor64(h);
   h ^= rose::rose_parser_hash(o.name_withoutns);
@@ -856,7 +856,7 @@ inline rose::hash_value rose::hash(const enum_class_info &o) {
 
 template <>
 struct rose::type_id<enum_class_info> {
-    inline static rose::hash_value VALUE = 15820409074394059996ULL;
+    inline static RHash VALUE = 15820409074394059996ULL;
 };
 
 template <>
@@ -921,8 +921,8 @@ inline void rose::deserialize(function_parameter_info &o, IDeserializer &s) {
   }
 }
 
-inline rose::hash_value rose::hash(const function_parameter_info &o) {
-  rose::hash_value h = 0;
+inline RHash rose::hash(const function_parameter_info &o) {
+  RHash h = 0;
   h ^= rose::rose_parser_hash(o.name);
   h = rose::xor64(h);
   h ^= rose::rose_parser_hash(o.type);
@@ -935,7 +935,7 @@ inline rose::hash_value rose::hash(const function_parameter_info &o) {
 
 template <>
 struct rose::type_id<function_parameter_info> {
-    inline static rose::hash_value VALUE = 9370255687959554376ULL;
+    inline static RHash VALUE = 9370255687959554376ULL;
 };
 
 template <>
@@ -994,8 +994,8 @@ inline void rose::deserialize(function_info &o, IDeserializer &s) {
   }
 }
 
-inline rose::hash_value rose::hash(const function_info &o) {
-  rose::hash_value h = 0;
+inline RHash rose::hash(const function_info &o) {
+  RHash h = 0;
   h ^= rose::rose_parser_hash(o.name);
   h = rose::xor64(h);
   h ^= rose::rose_parser_hash(o.type);
@@ -1006,7 +1006,7 @@ inline rose::hash_value rose::hash(const function_info &o) {
 
 template <>
 struct rose::type_id<function_info> {
-    inline static rose::hash_value VALUE = 5216781949972949934ULL;
+    inline static RHash VALUE = 5216781949972949934ULL;
 };
 
 template <>
@@ -1065,8 +1065,8 @@ inline void rose::deserialize(ParseContext &o, IDeserializer &s) {
   }
 }
 
-inline rose::hash_value rose::hash(const ParseContext &o) {
-  rose::hash_value h = 0;
+inline RHash rose::hash(const ParseContext &o) {
+  RHash h = 0;
   h ^= rose::rose_parser_hash(o.enum_classes);
   h = rose::xor64(h);
   h ^= rose::rose_parser_hash(o.functions);
@@ -1077,7 +1077,7 @@ inline rose::hash_value rose::hash(const ParseContext &o) {
 
 template <>
 struct rose::type_id<ParseContext> {
-    inline static rose::hash_value VALUE = 4083862798227823235ULL;
+    inline static RHash VALUE = 4083862798227823235ULL;
 };
 
 template <>

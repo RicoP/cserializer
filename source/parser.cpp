@@ -486,7 +486,7 @@ void printf_ttws(const char * f, Args... args) {
 
   size_t spaces = 0;
 
-  rose::hash_value state = rose::hash("COPY");
+  RHash state = rose::hash("COPY");
 
   for (size_t i = 0; i != sizeof(buffer); ++i) {
     char c = *pfrom;
@@ -534,7 +534,7 @@ void printf_ttws(const char * f, Args... args) {
 }
 
 void has_compare_ops(bool & has_eqop, bool & has_neqop, bool & has_serialize, bool & has_deserialize, ParseContext & c, const char * sname) {
-  rose::hash_value shash = rose::hash(sname);
+  RHash shash = rose::hash(sname);
   has_eqop = false;
   has_neqop = false;
   has_serialize = false;
@@ -577,7 +577,7 @@ void has_compare_ops(bool & has_eqop, bool & has_neqop, bool & has_serialize, bo
   }
 }
 
-rose::hash_value filtered_struct_hash(struct_info structi) {
+RHash filtered_struct_hash(struct_info structi) {
   auto struct_no_functions = structi;
   auto new_end = std::stable_partition(
     struct_no_functions.members.begin(), struct_no_functions.members.end(),
@@ -633,7 +633,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     printf_ttws("inline const char * to_string(const %s & e);" ENDL, ename);
     printf_ttws("inline void serialize(%s& o, ISerializer& s); " ENDL, ename);
     printf_ttws("inline void deserialize(%s& o, IDeserializer& s); " ENDL, ename);
-    printf_ttws("inline hash_value       hash(const %s& o); " ENDL, ename);
+    printf_ttws("inline RHash       hash(const %s& o); " ENDL, ename);
     printf_ttws("} //namespace rose \n" ENDL);
   }
 
@@ -666,7 +666,7 @@ void dump_cpp(ParseContext & c, int argc = 0, char ** argv = nullptr) {
     if (!has_deserialize) {
       printf_ttws("inline void deserialize(%s &o, IDeserializer &s);  " ENDL, sname);
     }
-    printf_ttws("inline hash_value hash(const %s &o);" ENDL, sname);
+    printf_ttws("inline RHash hash(const %s &o);" ENDL, sname);
     puts("");
 
     ///////////////////////////////////////////////////////////////////
@@ -725,11 +725,11 @@ bool rose_parser_equals(const std::vector<T> &lhs, const std::vector<T> &rhs) {
 }
 
 template<class T>
-hash_value rose_parser_hash(const T & value) { return hash(value); }
+RHash rose_parser_hash(const T & value) { return hash(value); }
 
 template<class T>
-hash_value rose_parser_hash(const std::vector<T>& v) {
-  hash_value h = 0;
+RHash rose_parser_hash(const std::vector<T>& v) {
+  RHash h = 0;
   for (const auto& o : v) {
     h ^= rose_parser_hash(o);
     h = xor64(h);
@@ -778,7 +778,7 @@ hash_value rose_parser_hash(const std::vector<T>& v) {
     printf_ttws("inline void rose::deserialize(%s& o, IDeserializer& s) {            " ENDL, ename);
     printf_ttws("  char str[64];                                                     " ENDL);
     printf_ttws("  deserialize(str, s);                                              " ENDL);
-    printf_ttws("  rose::hash_value h = rose::hash(str);                             " ENDL);
+    printf_ttws("  RHash h = rose::hash(str);                             " ENDL);
     printf_ttws("  switch (h) {                                                      " ENDL);
     for (auto & enumi : enumci.enums) {
       const char * eval = enumi.name;
@@ -788,8 +788,8 @@ hash_value rose_parser_hash(const std::vector<T>& v) {
     printf_ttws("  }                                                                 " ENDL);
     printf_ttws("}                                                                   " ENDL);
 
-    printf_ttws("inline rose::hash_value rose::hash(const %s& o) {          " ENDL, ename);
-    printf_ttws("  return static_cast<rose::hash_value>(o);                 " ENDL);
+    printf_ttws("inline RHash rose::hash(const %s& o) {          " ENDL, ename);
+    printf_ttws("  return static_cast<RHash>(o);                 " ENDL);
     printf_ttws("}                                                  \n" ENDL);
   }
 
@@ -905,8 +905,8 @@ hash_value rose_parser_hash(const std::vector<T>& v) {
     ///////////////////////////////////////////////////////////////////
     // hashing                                                       //
     ///////////////////////////////////////////////////////////////////
-    printf_ttws("inline rose::hash_value rose::hash(const %s &o) {             " ENDL, sname);
-    printf_ttws("  rose::hash_value h = 0; " ENDL);
+    printf_ttws("inline RHash rose::hash(const %s &o) {             " ENDL, sname);
+    printf_ttws("  RHash h = 0; " ENDL);
     bool first = true;
     for (std::size_t i = 0; i != structi.members.size(); ++i) {
       auto & member = structi.members[i];
@@ -927,7 +927,7 @@ hash_value rose_parser_hash(const std::vector<T>& v) {
     
     printf_ttws("template <>                                           " ENDL);
     printf_ttws("struct rose::type_id<%s> {                            " ENDL, sname);
-    printf_ttws("    inline static rose::hash_value VALUE = %lluULL;   " ENDL, (unsigned long long)filtered_struct_hash(structi));    
+    printf_ttws("    inline static RHash VALUE = %lluULL;   " ENDL, (unsigned long long)filtered_struct_hash(structi));    
     printf_ttws("};                                                    " ENDL);
     printf_ttws(ENDL);
 
@@ -994,7 +994,7 @@ int main(int argc, char ** argv) {
     exit(1);
   }
 
-  rose::hash_value state = rose::hash("NONE");
+  RHash state = rose::hash("NONE");
 
   char tmp_path[260];
   char dst_path[260];
@@ -1006,7 +1006,7 @@ int main(int argc, char ** argv) {
 
   for (int i = 1; i < argc; ++i) {
     const char * arg = argv[i];
-    rose::hash_value h = rose::hash(arg);
+    RHash h = rose::hash(arg);
     if (h == rose::hash("--datetime")) {
       fprintf(stderr, "Build Time: %s" ENDL, __DATE__ " " __TIME__);
       continue;
